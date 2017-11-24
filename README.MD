@@ -1,0 +1,8 @@
+##Biological Heritage National Science Challenge eDNA Virtual Hub Project
+
+Goal of this pilot project is to produce a working example of a visualization system used to geographically display eDNA data from New Zealand. The display is, by default, a scalable grid of NZ, with samples falling into bins based on their latitude/longitude. The bins display as a heat map based on abundance. This will toggle between a sample view (where each sample contributes a count of one to the heat map), and a species view (where the heat map is made by summing abundances of all species). These heat map visualizations can be sub-selected by search functions of the metadata. Ultimately, it should be possible to sub-select any combination of metadata, but for the pilot this can just be some simple examples (e.g. elevation, basic environment type). This may also include some broad taxonomic divisions selectable as clickboxes (e.g. bacteria/archaea/animals/plants/fungi/protists). The species view should have a toggle between normalizing the heat-map to the number of samples from that grid bin, or not.  
+
+Clicking on a grid point (or hovering) brings up a list of all samples present in that grid point (or that fit the search criteria). In addition, perhaps as an active window alongside the map view, summary metrics of samples, either from clicking a grid point or sub-selecting the data, compared to all the data will be displayed. This is using the metric displays being developed by Andrew Dopheide (Biological Heritage National Science Challenge/Landcare Research).  
+
+For the pilot this is will be done from datasheets supplied, although ultimately the underlying data will come from a database being developed by us.  
+
