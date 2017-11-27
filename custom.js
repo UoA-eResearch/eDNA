@@ -33,6 +33,14 @@ function getFilterData() {
   for (var i in window.results.data) {
     var e = window.results.data[i];
     var species = e[""];
+    var hasEntries = false;
+    for (var k in e) {
+      if (e[k] > 0) {
+        hasEntries = true;
+        break;
+      }
+    }
+    if (!hasEntries) continue;
     var j = 0;
     while (j != -1) {
       j = species.indexOf(";", j+1);
@@ -63,7 +71,9 @@ function handleResults(results, meta) {
     data: getFilterData(),
     tags: true,
   });
+  $("#filter").val(window.location.hash.replace("#", "").split(",")).trigger('change');
   $("#filter").change(function() {
+    window.location.hash = $(this).val();
     var filters = $(this).select2('data');
     console.log(filters);
     var latlngs = getLatlngs(filters);
