@@ -71,7 +71,6 @@ function handleResults(results, meta) {
     data: getFilterData(),
     tags: true,
   });
-  $("#filter").val(window.location.hash.replace("#", "").split(",")).trigger('change');
   $("#filter").change(function() {
     window.location.hash = $(this).val();
     var filters = $(this).select2('data');
@@ -83,12 +82,13 @@ function handleResults(results, meta) {
       var w = latlngs[i][2];
       if (w > maxWeight) maxWeight = w;
     }
-    window.heat.setOptions({"max": maxWeight});
+    window.heat.setOptions({"max": maxWeight * 1.5});
     window.heat.setLatLngs(latlngs);
   });
   window.heat = L.heatLayer(getLatlngs(), {
     "maxZoom": 6,
   }).addTo(map);
+  $("#filter").val(window.location.hash.replace("#", "").split(",")).trigger('change');
 }
 
 var map = L.map('map').setView([-41.235726,172.5118422], 6);
