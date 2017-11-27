@@ -18,7 +18,29 @@ function getLatlngs(filters) {
     for (var k in e) {
       if (k != "") {
         var site = window.meta[k];
-        if (matchingFilter && e[k] > 0) {
+        var siteMetaMatch = false;
+        for (var j in filters) {
+          var f = filters[j].id;
+          var ltIndex = f.indexOf("<");
+          var gtIndex = f.indexOf(">");
+          if (ltIndex > 0) {
+            var left = f.substring(0, ltIndex).trim();
+            var right = f.substring(ltIndex+1).trim();
+            if (site[left] < right) {
+              siteMetaMatch = true;
+              break;
+            }
+          }
+          if (gtIndex > 0) {
+            var left = f.substring(0, gtIndex).trim();
+            var right = f.substring(gtIndex+1).trim();
+            if (site[left] > right) {
+              siteMetaMatch = true;
+              break;
+            }
+          }
+        }
+        if ((matchingFilter || siteMetaMatch) && e[k] > 0) {
           points.push([site.y, site.x, e[k]])
         }
       }
@@ -55,6 +77,10 @@ function getFilterData() {
   for (var k in window.meta['ABT']) {
     data[k] = true;
   }
+  var hashComponents = window.location.hash.replace("#", "").split(",");
+  for (var i in hashComponents) {
+    data[hashComponents[i]] = true;
+  }
   var keys = Object.keys(data);
   return keys;
 }
@@ -72,7 +98,7 @@ function handleResults(results, meta) {
     placeholder: 'Type to filter',
     multiple: true,
     data: getFilterData(),
-    tags: true,
+    tags: true
   });
   $("#filter").change(function() {
     window.location.hash = $(this).val();
