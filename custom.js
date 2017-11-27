@@ -52,6 +52,9 @@ function getFilterData() {
       data[subS] = true;
     }
   }
+  for (var k in window.meta['ABT']) {
+    data[k] = true;
+  }
   var keys = Object.keys(data);
   return keys;
 }
@@ -92,13 +95,11 @@ function handleResults(results, meta) {
 }
 
 var map = L.map('map').setView([-41.235726,172.5118422], 6);
-L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-  maxZoom: 18,
-  attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-    '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-    'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-  id: 'mapbox.streets',
-  minZoom: 6,
+var CartoDB_DarkMatter = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
+	attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+	subdomains: 'abcd',
+	maxZoom: 19,
+	minZoom: 6,
 }).addTo(map);
 var bounds = map.getBounds();
 bounds._northEast.lat += 10;
