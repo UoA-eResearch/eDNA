@@ -1,3 +1,53 @@
+function getLatlngs(filters) {
+  var points = [];
+  for (var i in window.results.data) {
+    var e = window.results.data[i];
+    var species = e[""];
+    var matchingFilter = false;
+    if (filters && filters.length) {
+      for (var j in filters) {
+        var f = filters[j].id;
+        if (species.startsWith(f)) {
+          matchingFilter = true;
+          break;
+        }
+      }
+    } else {
+      matchingFilter = true;
+    }
+    for (var k in e) {
+      if (k != "") {
+        var site = window.meta[k];
+        if (matchingFilter && e[k] > 0) {
+          points.push([site.y, site.x, e[k]])
+        }
+      }
+    }
+  }
+  $("#numberResults").text(points.length);
+  return points;
+}
+
+function getFilterData() {
+  var data = {};
+  for (var i in window.results.data) {
+    var e = window.results.data[i];
+    var species = e[""];
+    var j = 0;
+    while (j != -1) {
+      j = species.indexOf(";", j+1);
+      if (j == -1) {
+        var subS = species;
+      } else {
+        var subS = species.substring(0, j);
+      }
+      data[subS] = true;
+    }
+  }
+  var keys = Object.keys(data);
+  return keys;
+}
+
 function handleResults(results, meta) {
   window.results = results;
   var metaDict = {};
@@ -7,19 +57,26 @@ function handleResults(results, meta) {
     metaDict[site['site'].toUpperCase()] = reprojected;
   }
   window.meta = metaDict;
-  var points = [];
-  for (var i in results.data) {
-    var e = results.data[i];
-    var species = e[""];
-    for (var k in e) {
-      if (k != "") {
-        var site = metaDict[k];
-        points.push([site.y, site.x, e[k]])
-      }
+  $("#filter").select2({
+    placeholder: 'Type to filter',
+    multiple: true,
+    data: getFilterData(),
+    tags: true,
+  });
+  $("#filter").change(function() {
+    var filters = $(this).select2('data');
+    console.log(filters);
+    var latlngs = getLatlngs(filters);
+    console.log(latlngs);
+    var maxWeight = 0;
+    for (var i in latlngs) {
+      var w = latlngs[i][2];
+      if (w > maxWeight) maxWeight = w;
     }
-  }
-  console.log(points.length + " points");
-  window.heat = L.heatLayer(points, {
+    window.heat.setOptions({"max": maxWeight});
+    window.heat.setLatLngs(latlngs);
+  });
+  window.heat = L.heatLayer(getLatlngs(), {
     "maxZoom": 6,
   }).addTo(map);
 }
