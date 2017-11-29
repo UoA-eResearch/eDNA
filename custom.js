@@ -1,46 +1,46 @@
+function checkFragment(f, species, site) {
+  var ampIndex = f.indexOf("&");
+  var ltIndex = f.indexOf("<");
+  var gtIndex = f.indexOf(">");
+  if (ampIndex > 0) {
+    var left = f.substring(0, ampIndex).trim();
+    var right = f.substring(ampIndex+1).trim();
+    return checkFragment(left, species, site) && checkFragment(right, species, site);
+  } else if (ltIndex > 0) {
+    var left = f.substring(0, ltIndex).trim();
+    var right = f.substring(ltIndex+1).trim();
+    if (site[left] < right) {
+      return true;
+    }
+  } else if (gtIndex > 0) {
+    var left = f.substring(0, gtIndex).trim();
+    var right = f.substring(gtIndex+1).trim();
+    if (site[left] > right) {
+      return true;
+    }
+  } else {
+    return species.startsWith(f);
+  }
+  return false;
+}
+
 function getLatlngs(filters) {
   var points = [];
   for (var i in window.results.data) {
     var e = window.results.data[i];
     var species = e[""];
-    var matchingFilter = false;
-    if (filters && filters.length) {
-      for (var j in filters) {
-        var f = filters[j].id;
-        if (species.startsWith(f)) {
-          matchingFilter = true;
-          break;
-        }
-      }
-    } else {
-      matchingFilter = true;
-    }
     for (var k in e) {
       if (k != "") {
         var site = window.meta[k];
         var siteMetaMatch = false;
+        var match = false;
+        if (!filters) match = true;
         for (var j in filters) {
           var f = filters[j].id;
-          var ltIndex = f.indexOf("<");
-          var gtIndex = f.indexOf(">");
-          if (ltIndex > 0) {
-            var left = f.substring(0, ltIndex).trim();
-            var right = f.substring(ltIndex+1).trim();
-            if (site[left] < right) {
-              siteMetaMatch = true;
-              break;
-            }
-          }
-          if (gtIndex > 0) {
-            var left = f.substring(0, gtIndex).trim();
-            var right = f.substring(gtIndex+1).trim();
-            if (site[left] > right) {
-              siteMetaMatch = true;
-              break;
-            }
-          }
+          match = checkFragment(f, species, site);
+          if (match) break;
         }
-        if ((matchingFilter || siteMetaMatch) && e[k] > 0) {
+        if (match && e[k] > 0) {
           points.push([site.y, site.x, e[k]])
         }
       }
@@ -98,7 +98,7 @@ function handleResults(results, meta) {
     placeholder: 'Type to filter',
     multiple: true,
     data: getFilterData(),
-    tags: true
+    tags: true,
   });
   $("#filter").change(function() {
     window.location.hash = $(this).val();
@@ -117,7 +117,9 @@ function handleResults(results, meta) {
   window.heat = L.heatLayer(getLatlngs(), {
     "maxZoom": 6,
   }).addTo(map);
-  $("#filter").val(window.location.hash.replace("#", "").split(",")).trigger('change');
+  if (window.location.hash.length) {
+    $("#filter").val(window.location.hash.replace("#", "").split(",")).trigger('change');
+  }
 }
 
 var map = L.map('map').setView([-41.235726,172.5118422], 6);
