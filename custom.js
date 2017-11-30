@@ -24,8 +24,9 @@ function checkFragment(f, species, site) {
   return false;
 }
 
-function getLatlngs(filters) {
-  var points = [];
+function getSiteWeights(filters) {
+  var sites = {};
+  n_points = 0;
   for (var i in window.results.data) {
     var e = window.results.data[i];
     var species = e[""];
@@ -34,20 +35,22 @@ function getLatlngs(filters) {
         var site = window.meta[k];
         var siteMetaMatch = false;
         var match = false;
-        if (!filters) match = true;
+        if (filters.length == 0) match = true;
         for (var j in filters) {
           var f = filters[j].id;
           match = checkFragment(f, species, site);
           if (match) break;
         }
         if (match && e[k] > 0) {
-          points.push([site.y, site.x, e[k]])
+          if (!sites[k]) sites[k] = 0;
+          sites[k] += e[k];
+          n_points++;
         }
       }
     }
   }
-  $("#numberResults").text(points.length);
-  return points;
+  $("#numberResults").text(n_points);
+  return sites;
 }
 
 function getFilterData() {
@@ -104,22 +107,46 @@ function handleResults(results, meta) {
     window.location.hash = $(this).val();
     var filters = $(this).select2('data');
     console.log(filters);
-    var latlngs = getLatlngs(filters);
-    console.log(latlngs);
+    var siteWeights = getSiteWeights(filters);
+    console.log(siteWeights);
     var maxWeight = 0;
-    for (var i in latlngs) {
-      var w = latlngs[i][2];
+    for (var site in siteWeights) {
+      var w = siteWeights[site]
       if (w > maxWeight) maxWeight = w;
     }
-    window.heat.setOptions({"max": maxWeight * 1.5});
-    window.heat.setLatLngs(latlngs);
+    if (mode == "grid") {
+      for (var i in window.circles) {
+        map.removeLayer(window.circles[i]);
+      }
+      for (var site in siteWeights) {
+        var siteMeta = window.meta[site];
+        var w = siteWeights[site];
+        var i = w / maxWeight * colors.length;
+        var color = colors[Math.floor(i)];
+        var circle = L.circle([siteMeta.y, siteMeta.x], {
+          stroke: false,
+          fill: true,
+          fillColor: color,
+          fillOpacity: 1,
+          radius: 5000
+        }).addTo(map);
+        window.circles.push(circle);
+      }
+    } else {
+      var latlngs = [];
+      for (var site in siteWeights) {
+        var siteMeta = window.meta[site];
+        latlngs.push([siteMeta.y, siteMeta.x, siteWeights[site]]);
+      }
+      if (!window.heat) window.heat = L.heatLayer(latlngs).addTo(map);
+      window.heat.setOptions({"max": maxWeight * 1.5, "maxZoom": 6});
+      window.heat.setLatLngs(latlngs);
+    }
   });
-  window.heat = L.heatLayer(getLatlngs(), {
-    "maxZoom": 6,
-  }).addTo(map);
   if (window.location.hash.length) {
-    $("#filter").val(window.location.hash.replace("#", "").split(",")).trigger('change');
+    $("#filter").val(window.location.hash.replace("#", "").split(","));
   }
+  $("#filter").trigger('change');
 }
 
 var map = L.map('map').setView([-41.235726,172.5118422], 6);
@@ -136,6 +163,28 @@ bounds._southWest.lat -= 10;
 bounds._southWest.lng -= 10;
 map.setMaxBounds(bounds);
 proj4.defs("EPSG:2193", "+proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 +x_0=1600000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+var params = new URLSearchParams(window.location.search);
+var mode = params.get("mode");
+if (mode == "grid") {
+  var colors = ['#fee8c8','#fdd49e','#fdbb84','#fc8d59','#ef6548','#d7301f','#b30000','#7f0000'];
+  window.circles = [];
+  var shape = new L.PatternCircle({
+      x: 5,
+      y: 5,
+      radius: 5,
+      fill: true
+  });
+  var pattern = new L.Pattern({width:10, height:10});
+  pattern.addShape(shape);
+  pattern.addTo(map);
+  var customLayer = L.geoJson(null, {
+    style: {
+      stroke: false,
+      fillPattern: pattern,
+    }
+  });
+  var nz = omnivore.kml('nz-coastlines-and-islands-polygons-topo-1500k.kml', null, customLayer).addTo(map);
+}
 Papa.parse("Gavin_water_data_2010.csv", {
   download: true,
   header: true,
