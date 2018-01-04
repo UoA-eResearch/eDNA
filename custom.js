@@ -33,7 +33,6 @@ function getSiteWeights(filters) {
     for (var k in e) {
       if (k != "") {
         var site = window.meta[k];
-        var siteMetaMatch = false;
         var match = false;
         if (filters.length == 0) match = true;
         for (var j in filters) {
@@ -106,6 +105,42 @@ function handleResults(results, meta) {
     window.location.hash = encodeURIComponent($(this).val());
     var filters = $(this).select2('data');
     console.log(filters);
+    if (mode == "pie") {
+      for (var i in window.circles) {
+        map.removeLayer(window.circles[i]);
+      }
+      window.circles = [];
+      for (var site in window.meta) {
+        var siteValues = [];
+        var siteLabels = [];
+        var siteMeta = window.meta[site];
+        for (var i in window.results.data) {
+          var e = window.results.data[i];
+          var species = e[""];
+          var match = false;
+          if (filters.length == 0) match = true;
+          for (var j in filters) {
+            var f = filters[j].id;
+            match = checkFragment(f, species, site);
+            if (match) break;
+          }
+          if (match && e[site] > 0) {
+            siteValues.push(e[site]);
+            siteLabels.push(species);
+          }
+        }
+        if (siteValues.length) {
+          var chart = L.minichart([siteMeta.y, siteMeta.x], {
+            type: "pie",
+            data: siteValues,
+            labels: siteLabels,
+            width: map.getZoom() * 2
+          }).addTo(map);
+          window.circles.push(chart);
+        }
+      }
+      return;
+    }
     var siteWeights = getSiteWeights(filters);
     console.log(siteWeights);
     var maxWeight = 0;
@@ -164,9 +199,9 @@ map.setMaxBounds(bounds);
 proj4.defs("EPSG:2193", "+proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 +x_0=1600000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
 var params = new URLSearchParams(window.location.search);
 var mode = params.get("mode");
+window.circles = [];
 if (mode == "grid") {
   var colors = ['#fee8c8','#fdd49e','#fdbb84','#fc8d59','#ef6548','#d7301f','#b30000','#7f0000'];
-  window.circles = [];
   var shape = new L.PatternCircle({
       x: 5,
       y: 5,
@@ -183,6 +218,15 @@ if (mode == "grid") {
     }
   });
   var nz = omnivore.kml('nz-coastlines-and-islands-polygons-topo-1500k.kml', null, customLayer).addTo(map);
+}
+if (mode == "pie") {
+  map.on('zoomend', function() {
+    for (var i in window.circles) {
+      window.circles[i].setOptions({
+        width: map.getZoom() * 2
+      });
+    }
+  });
 }
 var hashComponents = decodeURIComponent(window.location.hash.replace("#", "")).split(",");
 Papa.parse("Gavin_water_data_2010.csv", {
