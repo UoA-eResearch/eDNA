@@ -80,7 +80,6 @@ function getFilterData() {
   for (var k in window.meta['ABT']) {
     data[k] = true;
   }
-  var hashComponents = window.location.hash.replace("#", "").split(",");
   for (var i in hashComponents) {
     data[hashComponents[i]] = true;
   }
@@ -104,7 +103,7 @@ function handleResults(results, meta) {
     tags: true,
   });
   $("#filter").change(function() {
-    window.location.hash = $(this).val();
+    window.location.hash = encodeURIComponent($(this).val());
     var filters = $(this).select2('data');
     console.log(filters);
     var siteWeights = getSiteWeights(filters);
@@ -143,8 +142,8 @@ function handleResults(results, meta) {
       window.heat.setLatLngs(latlngs);
     }
   });
-  if (window.location.hash.length) {
-    $("#filter").val(window.location.hash.replace("#", "").split(","));
+  if (hashComponents[0].length) {
+    $("#filter").val(hashComponents);
   }
   $("#filter").trigger('change');
 }
@@ -185,6 +184,7 @@ if (mode == "grid") {
   });
   var nz = omnivore.kml('nz-coastlines-and-islands-polygons-topo-1500k.kml', null, customLayer).addTo(map);
 }
+var hashComponents = decodeURIComponent(window.location.hash.replace("#", "")).split(",");
 Papa.parse("Gavin_water_data_2010.csv", {
   download: true,
   header: true,
