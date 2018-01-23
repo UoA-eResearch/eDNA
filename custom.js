@@ -229,12 +229,12 @@ if (mode == "pie") {
   });
 }
 var hashComponents = decodeURIComponent(window.location.hash.replace("#", "")).split(",");
-Papa.parse("Gavin_water_data_2010.csv", {
+Papa.parse("Gavin_water_data_2010.tsv", {
   download: true,
   header: true,
   dynamicTyping: true,
   complete: function(results) {
-    Papa.parse("Gavin_water_data_2010_metadata.csv", {
+    Papa.parse("Gavin_water_data_2010_metadata.tsv", {
       download: true,
       header: true,
       dynamicTyping: true,
