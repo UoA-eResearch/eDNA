@@ -1,3 +1,10 @@
+function round(x, dp) {
+  var factor = Math.pow(10, dp);
+  var tmp = x * factor;
+  tmp = Math.round(tmp);
+  return tmp / factor;
+}
+
 function checkFragment(f, species, site) {
   var ampIndex = f.indexOf("&");
   var ltIndex = f.indexOf("<");
@@ -77,14 +84,32 @@ function getFilterData() {
     }
   }
   var options = [];
-  for (var k in window.meta['ABT']) {
-    data[k] = 1;
+  var metaStats = {};
+  for (var site in window.meta) {
+    for (var measure in window.meta[site]) {
+      var val = window.meta[site][measure];
+      if (!metaStats[measure]) {
+        metaStats[measure] = {"min": Infinity, "max": -Infinity, "sum": 0, "n": 0};
+      }
+      if (val < metaStats[measure].min) {
+        metaStats[measure].min = val;
+      }
+      if (val > metaStats[measure].max) {
+        metaStats[measure].max = val;
+      }
+      metaStats[measure].n++;
+      metaStats[measure].sum += val;
+    }
   }
   for (var i in hashComponents) {
     data[hashComponents[i]] = 1;
   }
   for (var k in data) {
     options.push({"id": k, "text": k, "title": "Number of points: " + data[k]});
+  }
+  for (var k in metaStats) {
+    var mean = round(metaStats[k].sum / metaStats[k].n, 2);
+    options.push({"id": k, "text": k, "title": "Range: " + round(metaStats[k].min, 2) + " - " + round(metaStats[k].max, 2) + ". Mean: " + mean});
   }
   return options;
 }
