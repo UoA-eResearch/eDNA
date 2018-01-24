@@ -129,6 +129,20 @@ function handleResults(results, meta) {
     multiple: true,
     data: getFilterData(),
     tags: true,
+    createTag: function (params) {
+      console.log(params);
+      var term = $.trim(params.term);
+
+      if (term === '') {
+        return null;
+      }
+
+      return {
+        id: term,
+        text: term,
+        newTag: true // add additional parameters
+      }
+    }
   });
   $("#filter").change(function() {
     window.location.hash = encodeURIComponent($(this).val());
