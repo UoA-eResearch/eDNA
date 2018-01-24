@@ -102,7 +102,8 @@ function getFilterData() {
     }
   }
   for (var i in hashComponents) {
-    data[hashComponents[i]] = 1;
+    var k = hashComponents[i];
+    options.push({"id": k, "text": k});
   }
   for (var k in data) {
     options.push({"id": k, "text": k, "title": "Number of points: " + data[k]});
