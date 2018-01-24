@@ -57,14 +57,13 @@ function getFilterData() {
   for (var i in window.results.data) {
     var e = window.results.data[i];
     var species = e[""];
-    var hasEntries = false;
+    var n_sites = 0;
     for (var k in e) {
       if (e[k] > 0) {
-        hasEntries = true;
-        break;
+        n_sites++;
       }
     }
-    if (!hasEntries) continue;
+    if (!n_sites) continue;
     var j = 0;
     while (j != -1) {
       j = species.indexOf(";", j+1);
@@ -73,17 +72,21 @@ function getFilterData() {
       } else {
         var subS = species.substring(0, j);
       }
-      data[subS] = true;
+      if (!data[subS]) data[subS] = 0;
+      data[subS] += n_sites;
     }
   }
+  var options = [];
   for (var k in window.meta['ABT']) {
-    data[k] = true;
+    data[k] = 1;
   }
   for (var i in hashComponents) {
-    data[hashComponents[i]] = true;
+    data[hashComponents[i]] = 1;
   }
-  var keys = Object.keys(data);
-  return keys;
+  for (var k in data) {
+    options.push({"id": k, "text": k, "title": "Number of points: " + data[k]});
+  }
+  return options;
 }
 
 function handleResults(results, meta) {
