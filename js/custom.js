@@ -365,7 +365,7 @@ function DrawGrid(grid) {
         var gridCell = gridCells[cell];
         var weightedCount = gridCells[cell].count/maxCount;
         var weightedValue = gridCells[cell].value/maxValue;
-        var popupContent = "Occurences: " + gridCell.count + " \nAmount: " + gridCell.value;
+        var popupContent = "Microorganism Occurences: " + gridCell.count + " \n Microorganism Amount: " + gridCell.value;
 
         var cellPolygon = {
             "type": "Feature",
@@ -513,9 +513,9 @@ var baseMaps = {
     "Base": tileLayer,
 };
 var overlays = {
-    "Grid Values": gridValueLayerGroup,
-    "Grid Counts": gridCountLayerGroup,
-    "Heat": heatLayerGroup,
+    "Grid: Values": gridValueLayerGroup,
+    "Grid: Counts": gridCountLayerGroup,
+    "Heat: Values": heatLayerGroup,
 };
 var layerMenu = L.control.layers(
     baseMaps,
@@ -527,6 +527,7 @@ var layerMenu = L.control.layers(
         "collapsed": false,
     }).addTo(map);
 
+/*using control range slider
 var slider = L.control.range({
     position: 'bottomleft',
     min: 0,
@@ -545,6 +546,30 @@ slider.on('input change', function(e) {
 });
 
 map.addControl(slider);
+*/
+
+//using leaflet-slider
+var slider = L.control.slider(function(value) {
+  detailLevel = value;
+    $("#filter").trigger('change');
+},
+{id: slider,
+  min: 1,
+  max: 100,
+  value: 10,
+  logo: 'Grid',
+ orientation: 'horiztonal',
+ position: 'bottomleft',
+});
+
+slider.addTo(map);
+
+//Warrick test: Adding sidebar for Andrew's Visualization
+var sidebar = L.control.sidebar('sidebar', {
+    position: 'left'
+});
+
+map.addControl(sidebar);
 
 // Nick's grid & pie mode.
 /*
