@@ -365,7 +365,7 @@ function DrawGrid(grid) {
         var gridCell = gridCells[cell];
         var weightedCount = gridCells[cell].count/maxCount;
         var weightedValue = gridCells[cell].value/maxValue;
-        var popupContent = "Microorganism Occurences: " + gridCell.count + " \n Microorganism Amount: " + gridCell.value;
+        var popupContent = "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br><strong>Microorganism Amount: </strong>" + gridCell.value;
 
         var cellPolygon = {
             "type": "Feature",
@@ -565,11 +565,7 @@ var slider = L.control.slider(function(value) {
 slider.addTo(map);
 
 //Warrick test: Adding sidebar for Andrew's Visualization
-var sidebar = L.control.sidebar('sidebar', {
-    position: 'left'
-});
-
-map.addControl(sidebar);
+var sidebar = L.control.sidebar('sidebar').addTo(map);
 
 // Nick's grid & pie mode.
 /*
