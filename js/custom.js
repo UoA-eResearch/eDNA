@@ -184,6 +184,7 @@ function getFilterData() {
 function handleResults(results, meta) {
     //creates global var results
     window.results = results;
+    console.log(meta);
     //loops through meta data passed in.
     var metaDict = {};
     for (var i in meta.data) {
@@ -565,7 +566,7 @@ var slider = L.control.slider(function(value) {
 slider.addTo(map);
 
 //Warrick test: Adding sidebar for Andrew's Visualization
-var sidebar = L.control.sidebar('sidebar').addTo(map);
+//var sidebar = L.control.sidebar('sidebar').addTo(map);
 
 // Nick's grid & pie mode.
 /*
