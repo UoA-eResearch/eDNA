@@ -43,6 +43,10 @@ function getSiteWeights(filters) {
     ClearGrid(grid);
     var cellSiteDict = MakeGridIndex(grid);
 
+    //test
+    console.log(grid);
+    console.log(cellSiteDict);
+
     //loop through parsed global result data.
     for (var i in window.results.data) {
         //e = contains species name + the bacteria's counts for all sites.
@@ -80,8 +84,29 @@ function getSiteWeights(filters) {
 
                     //Warrick: Add to the corresponding grid as well.
                     var cellIndex = cellSiteDict[k];
-                    grid.cells[cellIndex].count++;
-                    grid.cells[cellIndex].value += e[k];
+
+                    //The grid for making the geojson.
+                    var organismCell = grid.cells[cellIndex];
+                    organismCell.count++;
+                    organismCell.value += e[k];
+
+                    //TEST: cell-species-metrics
+                    //organismCell[e] = A species of bacteria within a grid.
+                    //I.e. Evaluating If the grid contains the bacteria in the current grid or not.
+                    //if grid doesn't contain value of the bacteria then increment and sum value.
+                    var speciesInGrid = organismCell.speciesDict;
+                    if (speciesInGrid[species] == null) {
+                        speciesInGrid[species] = {
+                            count: 1,
+                            value: e[k],
+                        };
+                    }
+                    else {
+                        speciesInGrid[species].count++;
+                        speciesInGrid[species].value+=e[k]
+                    }
+
+                    //console.log(organismCell[e]);
 
                     //increment the n_points which is the total amount of sites the bacteria is found at.
                     n_points++;
@@ -90,6 +115,9 @@ function getSiteWeights(filters) {
         }
     }
     $("#numberResults").text(n_points);
+
+    //Testing the grid has correct values.
+    console.log(grid);
 
     //warrick: integrating filtered results with grid view.
     DrawGrid(grid);
@@ -290,6 +318,7 @@ function MakeGrid(map, detailLevel) {
                 coordinates: cell,
                 count: 0,
                 value: 0,
+                speciesDict: {},
             };
             gridCells.push(cell);
             start = [start[0] + lngOffset, start[1]];

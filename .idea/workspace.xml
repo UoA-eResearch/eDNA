@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/js/custom.js" line="316" />
+    <bookmark url="file://$PROJECT_DIR$/js/custom.js" line="45" />
+    <bookmark url="file://$PROJECT_DIR$/js/custom.js" line="118" />
+    <bookmark url="file://$PROJECT_DIR$/js/custom.js" line="92" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="741e3d97-1beb-4139-b340-d5a165a0e343" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/js/custom.js" afterPath="$PROJECT_DIR$/js/custom.js" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -30,18 +36,17 @@
       <file leaf-file-name="custom.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/custom.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="263">
-              <caret line="83" column="44" lean-forward="false" selection-start-line="83" selection-start-column="44" selection-end-line="83" selection-end-column="44" />
+            <state relative-caret-position="334">
+              <caret line="105" column="37" lean-forward="false" selection-start-line="105" selection-start-column="37" selection-end-line="105" selection-end-column="37" />
               <folding>
+                <element signature="n#!!block;n#round#0" expanded="false" />
+                <element signature="n#!!block;n#checkFragment#0" expanded="false" />
                 <element signature="n#!!block;n#getFilterData#0" expanded="false" />
                 <element signature="n#!!block;n#handleResults#0" expanded="false" />
-                <element signature="n#!!block;n#CellValueStyle#0" expanded="false" />
-                <element signature="n#!!block;n#CellCountStyle#0" expanded="false" />
-                <element signature="n#!!block;n#GetGridValues#0" expanded="false" />
-                <element signature="n#!!block;n#GetOpacity#0" expanded="false" />
-                <element signature="n#!!block;n#GetColor#0" expanded="false" />
-                <marker date="1521065784955" expanded="true" signature="16298:16304" ph="©" />
-                <marker date="1521065784955" expanded="true" signature="16372:16378" ph="©" />
+                <element signature="n#!!block;n#ClearGrid#0" expanded="false" />
+                <element signature="n#!!block;n#DrawGrid#0" expanded="false" />
+                <marker date="1521159939376" expanded="true" signature="17409:17415" ph="©" />
+                <marker date="1521159939376" expanded="true" signature="17483:17489" ph="©" />
               </folding>
             </state>
           </provider>
@@ -107,7 +112,7 @@
   <component name="ProjectFrameBounds">
     <option name="x" value="65" />
     <option name="y" value="27" />
-    <option name="width" value="1639" />
+    <option name="width" value="999" />
     <option name="height" value="1047" />
   </component>
   <component name="ProjectView">
@@ -182,10 +187,10 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="2580000" />
+    <option name="totallyTimeSpent" value="4922000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="65" y="27" width="1639" height="1047" extended-state="0" />
+    <frame x="65" y="27" width="999" height="1047" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24942529" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -233,7 +238,9 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
+    <breakpoint-manager>
+      <option name="time" value="4" />
+    </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
@@ -250,15 +257,14 @@
         <state relative-caret-position="2790">
           <caret line="186" column="20" lean-forward="false" selection-start-line="186" selection-start-column="20" selection-end-line="186" selection-end-column="20" />
           <folding>
+            <element signature="n#!!block;n#round#0" expanded="false" />
+            <element signature="n#!!block;n#checkFragment#0" expanded="false" />
             <element signature="n#!!block;n#getFilterData#0" expanded="false" />
             <element signature="n#!!block;n#handleResults#0" expanded="false" />
-            <element signature="n#!!block;n#CellValueStyle#0" expanded="false" />
-            <element signature="n#!!block;n#CellCountStyle#0" expanded="false" />
-            <element signature="n#!!block;n#GetGridValues#0" expanded="false" />
-            <element signature="n#!!block;n#GetOpacity#0" expanded="false" />
-            <element signature="n#!!block;n#GetColor#0" expanded="false" />
-            <marker date="1521065784955" expanded="true" signature="16298:16304" ph="©" />
-            <marker date="1521065784955" expanded="true" signature="16372:16378" ph="©" />
+            <element signature="n#!!block;n#ClearGrid#0" expanded="false" />
+            <element signature="n#!!block;n#DrawGrid#0" expanded="false" />
+            <marker date="1521159939376" expanded="true" signature="17409:17415" ph="©" />
+            <marker date="1521159939376" expanded="true" signature="17483:17489" ph="©" />
           </folding>
         </state>
       </provider>
@@ -321,18 +327,115 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/custom.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="263">
-          <caret line="83" column="44" lean-forward="false" selection-start-line="83" selection-start-column="44" selection-end-line="83" selection-end-column="44" />
+        <state relative-caret-position="807">
+          <caret line="421" column="0" lean-forward="false" selection-start-line="421" selection-start-column="0" selection-end-line="421" selection-end-column="0" />
           <folding>
+            <element signature="n#!!block;n#round#0" expanded="false" />
+            <element signature="n#!!block;n#checkFragment#0" expanded="false" />
             <element signature="n#!!block;n#getFilterData#0" expanded="false" />
             <element signature="n#!!block;n#handleResults#0" expanded="false" />
-            <element signature="n#!!block;n#CellValueStyle#0" expanded="false" />
-            <element signature="n#!!block;n#CellCountStyle#0" expanded="false" />
-            <element signature="n#!!block;n#GetGridValues#0" expanded="false" />
-            <element signature="n#!!block;n#GetOpacity#0" expanded="false" />
-            <element signature="n#!!block;n#GetColor#0" expanded="false" />
-            <marker date="1521065784955" expanded="true" signature="16298:16304" ph="©" />
-            <marker date="1521065784955" expanded="true" signature="16372:16378" ph="©" />
+            <element signature="n#!!block;n#ClearGrid#0" expanded="false" />
+            <element signature="n#!!block;n#DrawGrid#0" expanded="false" />
+            <marker date="1521159939376" expanded="true" signature="17409:17415" ph="©" />
+            <marker date="1521159939376" expanded="true" signature="17483:17489" ph="©" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/custom.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2790">
+          <caret line="186" column="20" lean-forward="false" selection-start-line="186" selection-start-column="20" selection-end-line="186" selection-end-column="20" />
+          <folding>
+            <element signature="n#!!block;n#round#0" expanded="false" />
+            <element signature="n#!!block;n#checkFragment#0" expanded="false" />
+            <element signature="n#!!block;n#getFilterData#0" expanded="false" />
+            <element signature="n#!!block;n#handleResults#0" expanded="false" />
+            <element signature="n#!!block;n#ClearGrid#0" expanded="false" />
+            <element signature="n#!!block;n#DrawGrid#0" expanded="false" />
+            <marker date="1521159939376" expanded="true" signature="17409:17415" ph="©" />
+            <marker date="1521159939376" expanded="true" signature="17483:17489" ph="©" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/All_divStats_tidy_by_phy-1.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Gavin_water_data_2010.tsv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Gavin_water_data_2010_metadata.tsv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="780">
+          <caret line="52" column="0" lean-forward="false" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Gavin_water_data_2010_metadata.tsv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Gavin_water_data_2010.tsv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="787" column="85" lean-forward="true" selection-start-line="787" selection-start-column="85" selection-end-line="787" selection-end-column="85" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/All_divStats_tidy_by_phy-1.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/custom.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="334">
+          <caret line="105" column="37" lean-forward="false" selection-start-line="105" selection-start-column="37" selection-end-line="105" selection-end-column="37" />
+          <folding>
+            <element signature="n#!!block;n#round#0" expanded="false" />
+            <element signature="n#!!block;n#checkFragment#0" expanded="false" />
+            <element signature="n#!!block;n#getFilterData#0" expanded="false" />
+            <element signature="n#!!block;n#handleResults#0" expanded="false" />
+            <element signature="n#!!block;n#ClearGrid#0" expanded="false" />
+            <element signature="n#!!block;n#DrawGrid#0" expanded="false" />
+            <marker date="1521159939376" expanded="true" signature="17409:17415" ph="©" />
+            <marker date="1521159939376" expanded="true" signature="17483:17489" ph="©" />
           </folding>
         </state>
       </provider>
