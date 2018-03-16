@@ -83,6 +83,20 @@ function getSiteWeights(filters) {
                     grid.cells[cellIndex].count++;
                     grid.cells[cellIndex].value += e[k];
 
+                    //test
+                    var cellBacteria = grid.cells[cellIndex];
+                    if (cellBacteria.speciesDict[species] == null) {
+                      cellBacteria.speciesDict[species] = {
+                        name: species,
+                        value: e[k],
+                        count: 1,
+                      };
+                    }
+                    else {
+                      cellBacteria.speciesDict[species].value+=e[k];
+                      cellBacteria.speciesDict[species].count++;
+                    }
+
                     //increment the n_points which is the total amount of sites the bacteria is found at.
                     n_points++;
                 }
@@ -91,6 +105,7 @@ function getSiteWeights(filters) {
     }
     $("#numberResults").text(n_points);
 
+    console.log(grid);
     //warrick: integrating filtered results with grid view.
     DrawGrid(grid);
 
@@ -289,6 +304,7 @@ function MakeGrid(map, detailLevel) {
                 coordinates: cell,
                 count: 0,
                 value: 0,
+                speciesDict: {},
             };
             gridCells.push(cell);
             start = [start[0] + lngOffset, start[1]];
@@ -314,6 +330,7 @@ function ClearGrid(grid) {
         if (cell.value != 0) {
             cell.value = 0;
         }
+        cell.speciesDict = {};
     }
 }
 
@@ -365,7 +382,7 @@ function DrawGrid(grid) {
         var gridCell = gridCells[cell];
         var weightedCount = gridCells[cell].count/maxCount;
         var weightedValue = gridCells[cell].value/maxValue;
-        var popupContent = "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br><strong>Microorganism Amount: </strong>" + gridCell.value;
+        var popupContent = "Grid: " + cell + "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br><strong>Microorganism Amount: </strong>" + gridCell.value;
 
         var cellPolygon = {
             "type": "Feature",
@@ -565,7 +582,7 @@ var slider = L.control.slider(function(value) {
 slider.addTo(map);
 
 //Warrick test: Adding sidebar for Andrew's Visualization
-var sidebar = L.control.sidebar('sidebar').addTo(map);
+//var sidebar = L.control.sidebar('sidebar').addTo(map);
 
 // Nick's grid & pie mode.
 /*
