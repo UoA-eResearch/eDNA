@@ -199,6 +199,7 @@ function getFilterData() {
 function handleResults(results, meta) {
     //creates global var results
     window.results = results;
+    console.log(meta);
     //loops through meta data passed in.
     var metaDict = {};
     for (var i in meta.data) {
