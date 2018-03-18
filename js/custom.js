@@ -43,10 +43,6 @@ function getSiteWeights(filters) {
     ClearGrid(grid);
     var cellSiteDict = MakeGridIndex(grid);
 
-    //test
-    console.log(grid);
-    console.log(cellSiteDict);
-
     //loop through parsed global result data.
     for (var i in window.results.data) {
         //e = contains species name + the bacteria's counts for all sites.
@@ -84,29 +80,8 @@ function getSiteWeights(filters) {
 
                     //Warrick: Add to the corresponding grid as well.
                     var cellIndex = cellSiteDict[k];
-
-                    //The grid for making the geojson.
-                    var organismCell = grid.cells[cellIndex];
-                    organismCell.count++;
-                    organismCell.value += e[k];
-
-                    //TEST: cell-species-metrics
-                    //organismCell[e] = A species of bacteria within a grid.
-                    //I.e. Evaluating If the grid contains the bacteria in the current grid or not.
-                    //if grid doesn't contain value of the bacteria then increment and sum value.
-                    var speciesInGrid = organismCell.speciesDict;
-                    if (speciesInGrid[species] == null) {
-                        speciesInGrid[species] = {
-                            count: 1,
-                            value: e[k],
-                        };
-                    }
-                    else {
-                        speciesInGrid[species].count++;
-                        speciesInGrid[species].value+=e[k]
-                    }
-
-                    //console.log(organismCell[e]);
+                    grid.cells[cellIndex].count++;
+                    grid.cells[cellIndex].value += e[k];
 
                     var cell = grid.cells[cellIndex];
                     if (cell.cellSpecies[species] == null) {
@@ -126,6 +101,7 @@ function getSiteWeights(filters) {
         }
     }
     $("#numberResults").text(n_points);
+
     console.log(grid);
 
     //warrick: integrating filtered results with grid view.
@@ -620,41 +596,19 @@ var layerMenu = L.control.layers(
         "collapsed": false,
     }).addTo(map);
 
-/*using control range slider
-var slider = L.control.range({
-    position: 'bottomleft',
-    min: 0,
-    max: 100,
-    value: 50,
-    step: 1,
-    orient: 'vertical',
-    iconClass: 'leaflet-range-icon',
-    icon: true
-});
-
-slider.on('input change', function(e) {
-    console.log(e.value); // Do something with the slider value here
-    detailLevel = e.value;
-    $("#filter").trigger('change');
-});
-
-map.addControl(slider);
-*/
-
-//using leaflet-slider
+//Adding leaflet slider to map for grip control.
 var slider = L.control.slider(function(value) {
-  detailLevel = value;
-    $("#filter").trigger('change');
-},
-{id: slider,
-  min: 1,
-  max: 100,
-  value: 10,
-  logo: 'Grid',
- orientation: 'horiztonal',
- position: 'bottomleft',
-});
-
+        detailLevel = value;
+        $("#filter").trigger('change');
+    },
+    {id: slider,
+        min: 1,
+        max: 100,
+        value: 10,
+        logo: 'Grid',
+        orientation: 'horiztonal',
+        position: 'bottomleft',
+    });
 slider.addTo(map);
 
 //Warrick test: Adding sidebar for Andrew's Visualization
