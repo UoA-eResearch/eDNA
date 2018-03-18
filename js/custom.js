@@ -517,10 +517,24 @@ function calculateCellMetrics(e){
 
     var speciesInCell = layer.feature.properties.speciesInCell;
 
-    //calculate metrics here.
+    var speciesAmount = Object.keys(speciesInCell).length;
+    console.log(speciesAmount);
+
+    //get total value for shannon index calculation
+    var totalValue = 0;
     for (var species in speciesInCell) {
         var speciesData= speciesInCell[species]
-        console.log(species + " count: " + speciesData.count + " value: " + speciesData.value);
+        totalValue+= speciesData.value;
+    }
+    console.log(totalValue);
+
+    //calculate metrics for species within the cell
+    for (var species in speciesInCell) {
+        speciesData = speciesInCell[species];
+        var speciesShannonIndex = -1 * ((speciesData.value/totalValue) * Math.log(speciesData.value/totalValue));
+        var speciesRichness = speciesData.count;
+        var speciesAbundance = speciesData.value;
+        console.log(species, speciesShannonIndex, speciesRichness, speciesAbundance);
     }
 }
 //warrick custom END
