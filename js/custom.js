@@ -83,6 +83,17 @@ function getSiteWeights(filters) {
                     grid.cells[cellIndex].count++;
                     grid.cells[cellIndex].value += e[k];
 
+                    var cell = grid.cells[cellIndex];
+                    if (cell.cellSpecies[species] == null) {
+                        cell.cellSpecies[species] = {
+                            count: 1,
+                            value: e[k],
+                        };
+                    }
+                    else {
+                        cell.cellSpecies[species].count++;
+                        cell.cellSpecies[species].value+=e[k];
+                    }
                     //increment the n_points which is the total amount of sites the bacteria is found at.
                     n_points++;
                 }
@@ -90,6 +101,8 @@ function getSiteWeights(filters) {
         }
     }
     $("#numberResults").text(n_points);
+
+    console.log(grid);
 
     //warrick: integrating filtered results with grid view.
     DrawGrid(grid);
@@ -290,6 +303,7 @@ function MakeGrid(map, detailLevel) {
                 coordinates: cell,
                 count: 0,
                 value: 0,
+                cellSpecies: {},
             };
             gridCells.push(cell);
             start = [start[0] + lngOffset, start[1]];
@@ -316,6 +330,7 @@ function ClearGrid(grid) {
             cell.value = 0;
         }
     }
+    cell.cellSpecies = {};
 }
 
 function MakeGridIndex(grid) {
@@ -367,12 +382,15 @@ function DrawGrid(grid) {
         var weightedCount = gridCells[cell].count/maxCount;
         var weightedValue = gridCells[cell].value/maxValue;
         var popupContent = "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br><strong>Microorganism Amount: </strong>" + gridCell.value;
+        var speciesInCell = gridCell.cellSpecies;
 
         var cellPolygon = {
             "type": "Feature",
             "properties": {
+                "index": cell,
                 "weightedValue": weightedValue,
                 "weightedCount": weightedCount,
+                "speciesInCell": speciesInCell,
                 "popupContent": popupContent,
             },
             "geometry": {
@@ -411,6 +429,11 @@ function onEachFeature(feature, layer) {
     if (feature.properties && feature.properties.popupContent) {
         layer.bindPopup(feature.properties.popupContent);
     }
+
+    layer.on({
+        mouseover: highlightFeature,
+        click: calculateCellMetrics,
+    });
 }
 
 function CellValueStyle(feature) {
@@ -470,7 +493,38 @@ function GetColor(d) {
                             d > .0   ? '#FED976' :
                                 '#fffbd2';
 }
+
+//TESTING GRID INFO
+function highlightFeature(e) {
+    var layer = e.target;
+
+    layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+    }
+}
+
+function calculateCellMetrics(e){
+    var layer = e.target;
+
+    console.log("index is " + layer.feature.properties.index);
+
+    var speciesInCell = layer.feature.properties.speciesInCell;
+
+    //calculate metrics here.
+    for (var species in speciesInCell) {
+        var speciesData= speciesInCell[species]
+        console.log(species + " count: " + speciesData.count + " value: " + speciesData.value);
+    }
+}
 //warrick custom END
+
 
 //generating the map
 var tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
@@ -501,7 +555,7 @@ window.circles = [];
 
 var detailLevel = 20;
 //warrick map additions
-var grid= MakeGrid(map, detailLevel);
+var grid = MakeGrid(map, detailLevel);
 
 //shows the scale of the map
 var scaleIndicator = L.control.scale().addTo(map);
