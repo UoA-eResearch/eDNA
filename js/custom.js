@@ -43,6 +43,9 @@ function getSiteWeights(filters) {
     ClearGrid(grid);
     var cellSiteDict = MakeGridIndex(grid);
 
+    //Site metrics: Adding dictionary of site metrics for calculations.
+    var siteMetrics = {};
+
     //loop through parsed global result data.
     for (var i in window.results.data) {
         //e = contains species name + the bacteria's counts for all sites.
@@ -78,6 +81,20 @@ function getSiteWeights(filters) {
                     //add the value found at bacteria-e's site-k value.
                     sites[k] += e[k];
 
+                    //site metrics:
+                    //if null; create.
+                    if (siteMetrics[k] == null) {
+                        siteMetrics[k] = {
+                            siteId: k,
+                            abundance: e[k],
+                            richness: 1,
+                        }
+                    }
+                    else {
+                        siteMetrics[k].abundance += e[k];
+                        siteMetrics[k].richness ++;
+                    }
+
                     //Warrick: Add to the corresponding grid as well.
                     var cellIndex = cellSiteDict[k];
                     grid.cells[cellIndex].count++;
@@ -106,6 +123,8 @@ function getSiteWeights(filters) {
     $("#numberResults").text(n_points);
 
     console.log(grid);
+    console.log(siteMetrics);
+    calculateSiteMetrics(siteMetrics);
     //warrick: integrating filtered results with grid view.
     DrawGrid(grid);
 
@@ -486,6 +505,42 @@ function GetColor(d) {
                         d > .15   ? '#FEB24C' :
                             d > .0   ? '#FED976' :
                                 '#fffbd2';
+}
+
+function calculateSiteMetrics(siteMetrics) {
+    //Get sum abundance & richness for calculations.
+    totalAbundance = 0;
+    totalRichness = 0;
+    for (var site in siteMetrics) {
+        totalAbundance += siteMetrics[site].abundance;
+        totalRichness += siteMetrics[site].richness;
+    }
+    //console.log(totalAbundance, totalRichness);
+    for (var site in siteMetrics) {
+        var siteAbundance = siteMetrics[site].abundance
+        var shannonDiversity = -1 * (siteAbundance/totalAbundance) * Math.log(siteAbundance/totalAbundance);
+        if (siteMetrics[site].shannonDiversity == null) {
+            siteMetrics[site].shannonDiversity = shannonDiversity;
+        }
+    }
+    //console.log(siteMetrics);
+    drawGraph(siteMetrics);
+}
+
+//Take in site dictionary to create a d3 graph.
+function drawGraph(siteMetrics) {
+
+    var g = main.append("svg:g")
+        .attr("id", "datapoints");
+
+    var update = g.selectAll(".datapoints")
+        .data(siteMetrics.shannonDiversity);
+
+    var enter = update.enter()
+        .append("g")
+        .attr("class", "datapoints")
+        .merge(update);
+
 }
 //warrick custom END
 
