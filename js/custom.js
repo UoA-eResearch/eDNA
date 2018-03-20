@@ -602,7 +602,7 @@ function drawGraph(siteMetrics) {
         .attr("width", width + margin.right + margin.left)
         .attr("height", height + margin.top + margin.bottom);
 
-    //Axis
+    // Axis
     // Define the x axis
     var x = d3.scaleLinear()
         .domain([0, 1])  // the range of the values to plot
@@ -649,7 +649,9 @@ function drawGraph(siteMetrics) {
         .enter()
         .append("circle")
         .attr("cx", function(d) {
-            return (d.shannonDiversity/max) * 230;
+            var range = max - min;
+            var sampleDifference = d.shannonDiversity - min;
+            return (sampleDifference/range) * width;
         })
         .attr("cy", 100)
         .attr("r", 5)
