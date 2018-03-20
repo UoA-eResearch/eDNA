@@ -82,22 +82,6 @@ function getSiteWeights(filters) {
                     //add the value found at bacteria-e's site-k value.
                     sites[k] += e[k];
 
-<<<<<<< HEAD
-                    //site metrics:
-                    //if null; create.
-                    if (siteMetrics[k] == null) {
-                        siteMetrics[k] = {
-                            siteId: k,
-                            abundance: e[k],
-                            richness: 1,
-                        }
-                    }
-                    else {
-                        siteMetrics[k].abundance += e[k];
-                        siteMetrics[k].richness ++;
-                    }
-
-=======
                     //add values to sitemetrics {} dictionary for visualization.
                     if (siteMetrics[k] == null) {
                         siteMetrics[k] = {
@@ -110,28 +94,11 @@ function getSiteWeights(filters) {
                         siteMetrics[k].abundance += e[k];
                         siteMetrics[k].richness++;
                     }
->>>>>>> 23d5dde1d894de98264fd3b7818fcb03b771756a
                     //Warrick: Add to the corresponding grid as well.
                     var cellIndex = cellSiteDict[k];
                     grid.cells[cellIndex].count++;
                     grid.cells[cellIndex].value += e[k];
 
-<<<<<<< HEAD
-                    //test
-                    var cellBacteria = grid.cells[cellIndex];
-                    if (cellBacteria.speciesDict[species] == null) {
-                      cellBacteria.speciesDict[species] = {
-                        name: species,
-                        value: e[k],
-                        count: 1,
-                      };
-                    }
-                    else {
-                      cellBacteria.speciesDict[species].value+=e[k];
-                      cellBacteria.speciesDict[species].count++;
-                    }
-
-=======
                     var cell = grid.cells[cellIndex];
                     if (cell.cellSpecies[species] == null) {
                         cell.cellSpecies[species] = {
@@ -143,7 +110,6 @@ function getSiteWeights(filters) {
                         cell.cellSpecies[species].count++;
                         cell.cellSpecies[species].value+=e[k];
                     }
->>>>>>> 23d5dde1d894de98264fd3b7818fcb03b771756a
                     //increment the n_points which is the total amount of sites the bacteria is found at.
                     n_points++;
                 }
@@ -358,11 +324,7 @@ function MakeGrid(map, detailLevel) {
                 coordinates: cell,
                 count: 0,
                 value: 0,
-<<<<<<< HEAD
-                speciesDict: {},
-=======
                 cellSpecies: {},
->>>>>>> 23d5dde1d894de98264fd3b7818fcb03b771756a
             };
             gridCells.push(cell);
             start = [start[0] + lngOffset, start[1]];
@@ -441,12 +403,8 @@ function DrawGrid(grid) {
         var gridCell = gridCells[cell];
         var weightedCount = gridCells[cell].count/maxCount;
         var weightedValue = gridCells[cell].value/maxValue;
-<<<<<<< HEAD
-        var popupContent = "Grid: " + cell + "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br><strong>Microorganism Amount: </strong>" + gridCell.value;
-=======
         var popupContent = "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br><strong>Microorganism Amount: </strong>" + gridCell.value;
         var speciesInCell = gridCell.cellSpecies;
->>>>>>> 23d5dde1d894de98264fd3b7818fcb03b771756a
 
         var cellPolygon = {
             "type": "Feature",
@@ -559,42 +517,6 @@ function GetColor(d) {
                                 '#fffbd2';
 }
 
-<<<<<<< HEAD
-function calculateSiteMetrics(siteMetrics) {
-    //Get sum abundance & richness for calculations.
-    totalAbundance = 0;
-    totalRichness = 0;
-    for (var site in siteMetrics) {
-        totalAbundance += siteMetrics[site].abundance;
-        totalRichness += siteMetrics[site].richness;
-    }
-    //console.log(totalAbundance, totalRichness);
-    for (var site in siteMetrics) {
-        var siteAbundance = siteMetrics[site].abundance
-        var shannonDiversity = -1 * (siteAbundance/totalAbundance) * Math.log(siteAbundance/totalAbundance);
-        if (siteMetrics[site].shannonDiversity == null) {
-            siteMetrics[site].shannonDiversity = shannonDiversity;
-        }
-    }
-    //console.log(siteMetrics);
-    drawGraph(siteMetrics);
-}
-
-//Take in site dictionary to create a d3 graph.
-function drawGraph(siteMetrics) {
-
-    var g = main.append("svg:g")
-        .attr("id", "datapoints");
-
-    var update = g.selectAll(".datapoints")
-        .data(siteMetrics.shannonDiversity);
-
-    var enter = update.enter()
-        .append("g")
-        .attr("class", "datapoints")
-        .merge(update);
-
-=======
 //TESTING GRID INFO
 function highlightFeature(e) {
     var layer = e.target;
@@ -745,7 +667,6 @@ function drawGraph(siteMetrics) {
         .attr("font-family", "sans-serif")
         .attr("font-size", "11px")
         .attr("fill", "red");
->>>>>>> 23d5dde1d894de98264fd3b7818fcb03b771756a
 }
 //warrick custom END
 
