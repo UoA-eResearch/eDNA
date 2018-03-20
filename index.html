@@ -15,10 +15,12 @@
     <script src="js/leaflet-pip.js"></script>
     <script src="js/leaflet.minichart.min.js" charset="utf-8"></script>
     <script src="js/leaflet.pattern.js"></script>
-    
+
+    <!-- Warricks links -->
     <script src="js/L.Control.Range-min.js"></script>
     <script src="js/leaflet-slider.js"></script>
     <script src="js/leaflet-sidebar.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
 
     <script src="js/proj4.js"></script>
     <link href="css/select2.min.css" rel="stylesheet" />
@@ -47,8 +49,10 @@
         z-index: 1000;
       }
     </style>
+    <link rel="stylesheet" href="css/custom.css">
   </head>
   <body>
+    <div id="chart"></div>
     <div id="map"></div>
     <div id="filterWrapper">
       <select id="filter" multiple="multiple">

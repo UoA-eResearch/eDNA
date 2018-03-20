@@ -42,6 +42,7 @@ function getSiteWeights(filters) {
     var grid = MakeGrid(map, detailLevel);
     ClearGrid(grid);
     var cellSiteDict = MakeGridIndex(grid);
+    var siteMetrics ={};
 
     //loop through parsed global result data.
     for (var i in window.results.data) {
@@ -78,6 +79,18 @@ function getSiteWeights(filters) {
                     //add the value found at bacteria-e's site-k value.
                     sites[k] += e[k];
 
+                    //add values to sitemetrics {} dictionary for visualization.
+                    if (siteMetrics[k] == null) {
+                        siteMetrics[k] = {
+                          siteId: k,
+                          abundance: e[k],
+                          richness: 1
+                        };
+                    }
+                    else {
+                        siteMetrics[k].abundance += e[k];
+                        siteMetrics[k].richness++;
+                    }
                     //Warrick: Add to the corresponding grid as well.
                     var cellIndex = cellSiteDict[k];
                     grid.cells[cellIndex].count++;
@@ -101,12 +114,14 @@ function getSiteWeights(filters) {
         }
     }
     $("#numberResults").text(n_points);
+    //console.log(grid);
+    //console.log(sites);
 
-    console.log(grid);
+    //todo: test calculate site metrics.
+    calculateSiteMetrics(siteMetrics);
 
     //warrick: integrating filtered results with grid view.
     DrawGrid(grid);
-
     return sites;
 }
 
@@ -534,8 +549,115 @@ function calculateCellMetrics(e){
         var speciesShannonIndex = -1 * ((speciesData.value/totalValue) * Math.log(speciesData.value/totalValue));
         var speciesRichness = speciesData.count;
         var speciesAbundance = speciesData.value;
-        console.log(species, speciesShannonIndex, speciesRichness, speciesAbundance);
+        //console.log(species, speciesShannonIndex, speciesRichness, speciesAbundance);
     }
+}
+
+//holds the site metrics for visualization
+function calculateSiteMetrics(siteMetrics) {
+    //Get sum count and value for calculations.
+    var totalCount = 0;
+    var totalValue = 0;
+    for (var site in siteMetrics) {
+        totalValue += siteMetrics[site].abundance;
+        totalCount += siteMetrics[site].richness;
+    }
+    //calculate ShannonIndex for each site.
+    for (var site in siteMetrics) {
+        var siteValue = siteMetrics[site].abundance;
+        var shannonDiversity = -1 * (siteValue/totalValue) * Math.log(siteValue/totalValue);
+        siteMetrics[site].shannonDiversity = shannonDiversity;
+    }
+    console.log(siteMetrics);
+
+    //Create visualization
+    drawGraph(siteMetrics);
+
+}
+
+function drawGraph(siteMetrics) {
+
+    //Converting dict to list for d3 data processing
+    var dataSet = [];
+    for (var site in siteMetrics) {
+        dataSet.push(siteMetrics[site]);
+    }
+    //console.log(dataSet);
+
+    //SVG for the chart. Contains the graphic
+    var width = 700;
+    var height = 800;
+    var svg = d3.select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    //Axis
+
+    // Define the x axis
+    var x = d3.scaleLinear()
+        .domain([0, 1])  // the range of the values to plot
+        .range([0, width]);  // the pixel range of the x-axis
+    var xTicks = [0, 1];
+    var xLabels = ["Minimum", "Maximum"];
+    var xAxis = d3.axisBottom()
+        .scale(x)
+        .tickValues([0, 1])
+        .tickFormat(function(d,i) { return xLabels[i] });
+
+    //Define Y axis
+    var y = d3.scalePoint()
+        .domain(["Richness", "Abundance", "Shannon Diversity"])
+        .range(0, height - 20)
+        .padding(0.1);
+    var yAxis = d3.axisLeft()
+        .scale(y);
+
+    //Adding x axis
+    svg.append()
+        .attr("transform", "translate(0, " + height + ")")
+        .attr("class", "main axis")
+        .call(xAxis);
+
+    //Adding y axis
+    svg.append()
+        .attr("transform", "translate(0,0)")
+        .attr("class", "main axis")
+        .call(yAxis);
+
+    //Finding max, min for 0-1 axis positioning calculations.
+    var max = d3.max(dataSet, function(d) {
+       return d.shannonDiversity;
+    });
+    var min = d3.min(dataSet, function(d) {
+        return d.shannonDiversity;
+    });
+    console.log(max);
+
+    //Adding circles to the chart.
+    svg.selectAll("circle")
+        .data(dataSet)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) {
+            return (d.shannonDiversity/max) * 230;
+        })
+        .attr("cy", 100)
+        .attr("r", 5)
+
+    svg.selectAll("text")
+        .data(dataSet)
+        .enter()
+        .append("text")
+        .text(function(d) {
+            return d.siteId;
+        })
+        .attr("siteId", function(d) {
+            return d.siteId
+        })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "11px")
+        .attr("fill", "red");
 }
 //warrick custom END
 
@@ -610,6 +732,21 @@ var slider = L.control.slider(function(value) {
         position: 'bottomleft',
     });
 slider.addTo(map);
+
+//Adding custom control for Andrew's Visualization Copy.
+var info = L.control({position: 'bottomright'});
+
+info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info'); //creates div with class "info"
+    this.update();
+    return this._div;
+};
+
+info.update = function(siteValues) {
+    this._div.innerHTML = 'inner html updated';
+};
+
+info.addTo(map);
 
 //Warrick test: Adding sidebar for Andrew's Visualization
 //var sidebar = L.control.sidebar('sidebar').addTo(map);
