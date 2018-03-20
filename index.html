@@ -15,11 +15,12 @@
     <script src="js/leaflet-pip.js"></script>
     <script src="js/leaflet.minichart.min.js" charset="utf-8"></script>
     <script src="js/leaflet.pattern.js"></script>
-    
-    <!-- Warrick Libraries -->
+
+    <!-- Warricks links -->
     <script src="js/L.Control.Range-min.js"></script>
     <script src="js/leaflet-slider.js"></script>
     <script src="js/leaflet-sidebar.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
 
     <!-- Library to load Andrew's data -->
     <script src="js/d3.js"></script>
@@ -51,48 +52,10 @@
         z-index: 1000;
       }
     </style>
+    <link rel="stylesheet" href="css/custom.css">
   </head>
   <body>
-    <!--
-    <div id="sidebar" class="sidebar collapsed">
-        <!-- Nav tabs -->
-        <div class="sidebar-tabs">
-            <ul role="tablist">
-                <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
-                <li><a href="#profile" role="tab"><i class="fa fa-user"></i></a></li>
-                <li class="disabled"><a href="#messages" role="tab"><i class="fa fa-envelope"></i></a></li>
-                <li><a href="https://github.com/Turbo87/sidebar-v2" role="tab" target="_blank"><i class="fa fa-github"></i></a></li>
-            </ul>
-
-            <ul role="tablist">
-                <li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li>
-            </ul>
-        </div>
-
-        <!-- Tab panes -->
-        <div class="sidebar-content">
-            <div class="sidebar-pane" id="home">
-                <h1 class="sidebar-header">
-                    sidebar-v2
-                    <span class="sidebar-close"><i class="fa fa-caret-left"></i>
-                    </span>
-                </h1>
-            </div>
-
-            <div class="sidebar-pane" id="profile">
-                <h1 class="sidebar-header">Profile<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-            </div>
-
-            <div class="sidebar-pane" id="messages">
-                <h1 class="sidebar-header">Messages<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-            </div>
-
-            <div class="sidebar-pane" id="settings">
-                <h1 class="sidebar-header">Settings<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
-            </div>
-        </div>
-      -->
-</div>
+    <div id="chart"></div>
     <div id="map"></div>
     <div id="filterWrapper">
       <select id="filter" multiple="multiple">

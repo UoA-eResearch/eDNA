@@ -42,6 +42,7 @@ function getSiteWeights(filters) {
     var grid = MakeGrid(map, detailLevel);
     ClearGrid(grid);
     var cellSiteDict = MakeGridIndex(grid);
+    var siteMetrics ={};
 
     //Site metrics: Adding dictionary of site metrics for calculations.
     var siteMetrics = {};
@@ -81,6 +82,7 @@ function getSiteWeights(filters) {
                     //add the value found at bacteria-e's site-k value.
                     sites[k] += e[k];
 
+<<<<<<< HEAD
                     //site metrics:
                     //if null; create.
                     if (siteMetrics[k] == null) {
@@ -95,11 +97,26 @@ function getSiteWeights(filters) {
                         siteMetrics[k].richness ++;
                     }
 
+=======
+                    //add values to sitemetrics {} dictionary for visualization.
+                    if (siteMetrics[k] == null) {
+                        siteMetrics[k] = {
+                          siteId: k,
+                          abundance: e[k],
+                          richness: 1
+                        };
+                    }
+                    else {
+                        siteMetrics[k].abundance += e[k];
+                        siteMetrics[k].richness++;
+                    }
+>>>>>>> 23d5dde1d894de98264fd3b7818fcb03b771756a
                     //Warrick: Add to the corresponding grid as well.
                     var cellIndex = cellSiteDict[k];
                     grid.cells[cellIndex].count++;
                     grid.cells[cellIndex].value += e[k];
 
+<<<<<<< HEAD
                     //test
                     var cellBacteria = grid.cells[cellIndex];
                     if (cellBacteria.speciesDict[species] == null) {
@@ -114,6 +131,19 @@ function getSiteWeights(filters) {
                       cellBacteria.speciesDict[species].count++;
                     }
 
+=======
+                    var cell = grid.cells[cellIndex];
+                    if (cell.cellSpecies[species] == null) {
+                        cell.cellSpecies[species] = {
+                            count: 1,
+                            value: e[k],
+                        };
+                    }
+                    else {
+                        cell.cellSpecies[species].count++;
+                        cell.cellSpecies[species].value+=e[k];
+                    }
+>>>>>>> 23d5dde1d894de98264fd3b7818fcb03b771756a
                     //increment the n_points which is the total amount of sites the bacteria is found at.
                     n_points++;
                 }
@@ -121,13 +151,17 @@ function getSiteWeights(filters) {
         }
     }
     $("#numberResults").text(n_points);
+    //console.log(grid);
+    //console.log(sites);
+
+    //todo: test calculate site metrics.
+    calculateSiteMetrics(siteMetrics);
 
     console.log(grid);
     console.log(siteMetrics);
     calculateSiteMetrics(siteMetrics);
     //warrick: integrating filtered results with grid view.
     DrawGrid(grid);
-
     return sites;
 }
 
@@ -324,7 +358,11 @@ function MakeGrid(map, detailLevel) {
                 coordinates: cell,
                 count: 0,
                 value: 0,
+<<<<<<< HEAD
                 speciesDict: {},
+=======
+                cellSpecies: {},
+>>>>>>> 23d5dde1d894de98264fd3b7818fcb03b771756a
             };
             gridCells.push(cell);
             start = [start[0] + lngOffset, start[1]];
@@ -352,6 +390,7 @@ function ClearGrid(grid) {
         }
         cell.speciesDict = {};
     }
+    cell.cellSpecies = {};
 }
 
 function MakeGridIndex(grid) {
@@ -402,13 +441,20 @@ function DrawGrid(grid) {
         var gridCell = gridCells[cell];
         var weightedCount = gridCells[cell].count/maxCount;
         var weightedValue = gridCells[cell].value/maxValue;
+<<<<<<< HEAD
         var popupContent = "Grid: " + cell + "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br><strong>Microorganism Amount: </strong>" + gridCell.value;
+=======
+        var popupContent = "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br><strong>Microorganism Amount: </strong>" + gridCell.value;
+        var speciesInCell = gridCell.cellSpecies;
+>>>>>>> 23d5dde1d894de98264fd3b7818fcb03b771756a
 
         var cellPolygon = {
             "type": "Feature",
             "properties": {
+                "index": cell,
                 "weightedValue": weightedValue,
                 "weightedCount": weightedCount,
+                "speciesInCell": speciesInCell,
                 "popupContent": popupContent,
             },
             "geometry": {
@@ -447,6 +493,12 @@ function onEachFeature(feature, layer) {
     if (feature.properties && feature.properties.popupContent) {
         layer.bindPopup(feature.properties.popupContent);
     }
+
+    layer.on({
+        //Disabled cell highlight because it has no purpose at the moment.
+        //mouseover: highlightFeature,
+        click: calculateCellMetrics,
+    });
 }
 
 function CellValueStyle(feature) {
@@ -507,6 +559,7 @@ function GetColor(d) {
                                 '#fffbd2';
 }
 
+<<<<<<< HEAD
 function calculateSiteMetrics(siteMetrics) {
     //Get sum abundance & richness for calculations.
     totalAbundance = 0;
@@ -541,8 +594,161 @@ function drawGraph(siteMetrics) {
         .attr("class", "datapoints")
         .merge(update);
 
+=======
+//TESTING GRID INFO
+function highlightFeature(e) {
+    var layer = e.target;
+
+    layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+    }
+}
+
+function calculateCellMetrics(e){
+    var layer = e.target;
+
+    console.log("index is " + layer.feature.properties.index);
+
+    var speciesInCell = layer.feature.properties.speciesInCell;
+
+    var speciesAmount = Object.keys(speciesInCell).length;
+    console.log(speciesAmount);
+
+    //get total value for shannon index calculation
+    var totalValue = 0;
+    for (var species in speciesInCell) {
+        var speciesData= speciesInCell[species]
+        totalValue+= speciesData.value;
+    }
+    console.log(totalValue);
+
+    //calculate metrics for species within the cell
+    for (var species in speciesInCell) {
+        speciesData = speciesInCell[species];
+        var speciesShannonIndex = -1 * ((speciesData.value/totalValue) * Math.log(speciesData.value/totalValue));
+        var speciesRichness = speciesData.count;
+        var speciesAbundance = speciesData.value;
+        //console.log(species, speciesShannonIndex, speciesRichness, speciesAbundance);
+    }
+}
+
+//holds the site metrics for visualization
+function calculateSiteMetrics(siteMetrics) {
+    //Get sum count and value for calculations.
+    var totalCount = 0;
+    var totalValue = 0;
+    for (var site in siteMetrics) {
+        totalValue += siteMetrics[site].abundance;
+        totalCount += siteMetrics[site].richness;
+    }
+    //calculate ShannonIndex for each site.
+    for (var site in siteMetrics) {
+        var siteValue = siteMetrics[site].abundance;
+        var shannonDiversity = -1 * (siteValue/totalValue) * Math.log(siteValue/totalValue);
+        siteMetrics[site].shannonDiversity = shannonDiversity;
+    }
+    console.log(siteMetrics);
+
+    //Create visualization
+    drawGraph(siteMetrics);
+
+}
+
+function drawGraph(siteMetrics) {
+
+    //Converting dict to list for d3 data processing
+    var dataSet = [];
+    for (var site in siteMetrics) {
+        dataSet.push(siteMetrics[site]);
+    }
+    //console.log(dataSet);
+
+    var margin = {top: 50, right: 30, bottom: 20, left: 160},
+        width = 960 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+    //SVG for the chart. Contains the graphic
+    var svg = d3.select("body")
+        .append("svg")
+        .attr("width", width + margin.right + margin.left)
+        .attr("height", height + margin.top + margin.bottom);
+
+    //Axis
+    // Define the x axis
+    var x = d3.scaleLinear()
+        .domain([0, 1])  // the range of the values to plot
+        .range([0, width]);  // the pixel range of the x-axis
+    var xTicks = [0, 1];
+    var xLabels = ["Minimum", "Maximum"];
+    var xAxis = d3.axisBottom()
+        .scale(x)
+        .tickValues([0, 1])
+        .tickFormat(function(d,i) { return xLabels[i] });
+
+    //Define Y axis
+    var y = d3.scalePoint()
+        .domain(["Richness", "Abundance", "Shannon Diversity"])
+        .range(0, height - 20)
+        .padding(0.1);
+    var yAxis = d3.axisLeft()
+        .scale(y);
+
+    //Adding x axis
+    svg.append("g")
+        .attr("transform", "translate(0, " + height + ")")
+        .attr("class", "main axis")
+        .call(xAxis);
+
+    //Adding y axis
+    svg.append("g")
+        .attr("transform", "translate(0,0)")
+        .attr("class", "main axis")
+        .call(yAxis);
+
+    //Finding max, min for 0-1 axis positioning calculations.
+    var max = d3.max(dataSet, function(d) {
+       return d.shannonDiversity;
+    });
+    var min = d3.min(dataSet, function(d) {
+        return d.shannonDiversity;
+    });
+    console.log(max);
+
+    //Adding circles to the chart.
+    svg.selectAll("circle")
+        .data(dataSet)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) {
+            return (d.shannonDiversity/max) * 230;
+        })
+        .attr("cy", 100)
+        .attr("r", 5)
+
+    svg.selectAll("text")
+        .data(dataSet)
+        .enter()
+        .append("text")
+        .text(function(d) {
+            return d.siteId;
+        })
+        .attr("siteId", function(d) {
+            return d.siteId
+        })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "11px")
+        .attr("fill", "red");
+>>>>>>> 23d5dde1d894de98264fd3b7818fcb03b771756a
 }
 //warrick custom END
+
 
 //generating the map
 var tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
@@ -573,7 +779,7 @@ window.circles = [];
 
 var detailLevel = 20;
 //warrick map additions
-var grid= MakeGrid(map, detailLevel);
+var grid = MakeGrid(map, detailLevel);
 
 //shows the scale of the map
 var scaleIndicator = L.control.scale().addTo(map);
@@ -600,42 +806,35 @@ var layerMenu = L.control.layers(
         "collapsed": false,
     }).addTo(map);
 
-/*using control range slider
-var slider = L.control.range({
-    position: 'bottomleft',
-    min: 0,
-    max: 100,
-    value: 50,
-    step: 1,
-    orient: 'vertical',
-    iconClass: 'leaflet-range-icon',
-    icon: true
-});
-
-slider.on('input change', function(e) {
-    console.log(e.value); // Do something with the slider value here
-    detailLevel = e.value;
-    $("#filter").trigger('change');
-});
-
-map.addControl(slider);
-*/
-
-//using leaflet-slider
+//Adding leaflet slider to map for grip control.
 var slider = L.control.slider(function(value) {
-  detailLevel = value;
-    $("#filter").trigger('change');
-},
-{id: slider,
-  min: 1,
-  max: 100,
-  value: 10,
-  logo: 'Grid',
- orientation: 'horiztonal',
- position: 'bottomleft',
-});
-
+        detailLevel = value;
+        $("#filter").trigger('change');
+    },
+    {id: slider,
+        min: 1,
+        max: 100,
+        value: 10,
+        logo: 'Grid',
+        orientation: 'horiztonal',
+        position: 'bottomleft',
+    });
 slider.addTo(map);
+
+//Adding custom control for Andrew's Visualization Copy.
+var info = L.control({position: 'bottomright'});
+
+info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info'); //creates div with class "info"
+    this.update();
+    return this._div;
+};
+
+info.update = function(siteValues) {
+    this._div.innerHTML = 'inner html updated';
+};
+
+info.addTo(map);
 
 //Warrick test: Adding sidebar for Andrew's Visualization
 //var sidebar = L.control.sidebar('sidebar').addTo(map);
