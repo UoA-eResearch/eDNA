@@ -446,7 +446,8 @@ function onEachFeature(feature, layer) {
     }
 
     layer.on({
-        mouseover: highlightFeature,
+        //Disabled cell highlight because it has no purpose at the moment.
+        //mouseover: highlightFeature,
         click: calculateCellMetrics,
     });
 }
@@ -584,16 +585,17 @@ function drawGraph(siteMetrics) {
     }
     //console.log(dataSet);
 
+    var margin = {top: 50, right: 30, bottom: 20, left: 160},
+        width = 960 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
     //SVG for the chart. Contains the graphic
-    var width = 700;
-    var height = 800;
     var svg = d3.select("body")
         .append("svg")
-        .attr("width", width)
-        .attr("height", height);
+        .attr("width", width + margin.right + margin.left)
+        .attr("height", height + margin.top + margin.bottom);
 
     //Axis
-
     // Define the x axis
     var x = d3.scaleLinear()
         .domain([0, 1])  // the range of the values to plot
@@ -614,13 +616,13 @@ function drawGraph(siteMetrics) {
         .scale(y);
 
     //Adding x axis
-    svg.append()
+    svg.append("g")
         .attr("transform", "translate(0, " + height + ")")
         .attr("class", "main axis")
         .call(xAxis);
 
     //Adding y axis
-    svg.append()
+    svg.append("g")
         .attr("transform", "translate(0,0)")
         .attr("class", "main axis")
         .call(yAxis);
