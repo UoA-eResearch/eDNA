@@ -651,7 +651,12 @@ function drawGraph(siteMetrics) {
         .attr("cx", function(d) {
             var range = max - min;
             var sampleDifference = d.shannonDiversity - min;
-            return (sampleDifference/range) * width;
+            var cx = (sampleDifference/range) * width;
+            if (isNaN(cx)) {
+                console.log("value is NaN");
+                console.log(d);
+            }
+            return cx;
         })
         .attr("cy", 100)
         .attr("r", 5)
