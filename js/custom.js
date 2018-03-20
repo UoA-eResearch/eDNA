@@ -592,7 +592,7 @@ function drawGraph(siteMetrics) {
     }
     //console.log(dataSet);
 
-    var margin = {top: 50, right: 30, bottom: 20, left: 160},
+    var margin = {top: 20, right: 30, bottom: 20, left: 160},
         width = 960 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
@@ -601,6 +601,13 @@ function drawGraph(siteMetrics) {
         .append("svg")
         .attr("width", width + margin.right + margin.left)
         .attr("height", height + margin.top + margin.bottom);
+
+    //creatin main area for graph drawing.
+    var main = svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("id", "main");
 
     // Axis
     // Define the x axis
@@ -616,23 +623,26 @@ function drawGraph(siteMetrics) {
 
     //Define Y axis
     var y = d3.scalePoint()
-        .domain(["Richness", "Abundance", "Shannon Diversity"])
-        .range(0, height - 20)
-        .padding(0.1);
+       .domain(["Richness","Abundance","Shannon diversity"])
+       .range([0, height - 20])
+       .padding(0.1);
     var yAxis = d3.axisLeft()
-        .scale(y);
+       .scale(y);
 
     //Adding x axis
-    svg.append("g")
-        .attr("transform", "translate(0, " + height + ")")
+    main.append("g")
+        .attr("transform", "translate(0," + height + ")")
         .attr("class", "main axis")
         .call(xAxis);
 
     //Adding y axis
-    svg.append("g")
+    main.append("g")
         .attr("transform", "translate(0,0)")
         .attr("class", "main axis")
         .call(yAxis);
+
+    var g = main.append("svg:g")
+        .attr("id","datapoints");
 
     //Finding max, min for 0-1 axis positioning calculations.
     var max = d3.max(dataSet, function(d) {

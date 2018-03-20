@@ -11,3 +11,34 @@
     margin: 0 0 5px;
     color: #777;
 }
+
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #eee;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+
+.chart text {
+  fill: black;
+  font-family: sans-serif;
+  text-anchor: middle;
+  font-size: 10px;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 3px;
+    font: 12px sans-serif;
+    background: #eeeeee;
+    border: 0px;
+    border-radius: 4px;
+    pointer-events: none;
+}
