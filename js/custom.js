@@ -623,7 +623,7 @@ function drawGraph(siteMetrics) {
 
     //Define Y axis
     var y = d3.scalePoint()
-       .domain(["Richness","Abundance","Shannon diversity"])
+       .domain(["richness","abundance","shannonDiversity"])
        .range([0, height - 20])
        .padding(0.1);
     var yAxis = d3.axisLeft()
@@ -651,9 +651,10 @@ function drawGraph(siteMetrics) {
     var min = d3.min(dataSet, function(d) {
         return d.shannonDiversity;
     });
-    console.log(max);
+    //console.log(min, max);
 
     //Adding circles to the chart.
+    /*
     svg.selectAll("circle")
         .data(dataSet)
         .enter()
@@ -670,20 +671,30 @@ function drawGraph(siteMetrics) {
         })
         .attr("cy", 100)
         .attr("r", 5)
+    */
 
-    svg.selectAll("text")
+    //Fetching data to add to graph
+
+    g.selectAll(".datapoints")
         .data(dataSet)
         .enter()
-        .append("text")
-        .text(function(d) {
+        .append("circle")
+        .attr("id", function(d) {
             return d.siteId;
         })
-        .attr("siteId", function(d) {
-            return d.siteId
+        .attr("cy", y("Shannon diversity"))
+        .attr("cx", function(d) {
+            var maxValue = max - min;
+                    var pointValue = d.shannonDiversity - min;
+                    var cx = pointValue/maxValue;
+                    if (isNaN(cx)) {
+                        cx = 0;
+                    }
+                    return x(cx);
         })
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "11px")
-        .attr("fill", "red");
+        .attr("r", 10)
+        .style("opacity", 0.5)
+        .style("fill", 0.5)
 }
 //warrick custom END
 
