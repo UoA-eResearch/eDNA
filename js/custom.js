@@ -653,28 +653,7 @@ function drawGraph(siteMetrics) {
     });
     //console.log(min, max);
 
-    //Adding circles to the chart.
-    /*
-    svg.selectAll("circle")
-        .data(dataSet)
-        .enter()
-        .append("circle")
-        .attr("cx", function(d) {
-            var range = max - min;
-            var sampleDifference = d.shannonDiversity - min;
-            var cx = (sampleDifference/range) * width;
-            if (isNaN(cx)) {
-                console.log("value is NaN");
-                console.log(d);
-            }
-            return cx;
-        })
-        .attr("cy", 100)
-        .attr("r", 5)
-    */
-
     //Fetching data to add to graph
-
     g.selectAll(".datapoints")
         .data(dataSet)
         .enter()
@@ -682,22 +661,22 @@ function drawGraph(siteMetrics) {
         .attr("id", function(d) {
             return d.siteId;
         })
-        .attr("cy", 100)
+        .attr("cy", y("shannonDiversity"))
         .attr("cx", function(d) {
             var maxValue = max - min;
                     var pointValue = d.shannonDiversity - min;
                     var cx = pointValue/maxValue;
                     if (isNaN(cx)) {
+                        console.log("cx is NaN");
                         cx = 0;
                     }
                     return x(cx);
         })
-        .attr("r", 5)
+        .attr("r", 10)
         .style("fill", "steelblue")
         .style("opacity", 0.5)
         .style("fill", 0.5)
 }
-//warrick custom END
 
 
 //generating the map
