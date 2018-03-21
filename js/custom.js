@@ -645,10 +645,10 @@ function drawGraph(siteMetrics) {
         .attr("id","datapoints");
 
     //Finding max, min for 0-1 axis positioning calculations.
-    var max = d3.max(dataSet, function(d) {
+    var maxShannon = d3.max(dataSet, function(d) {
        return d.shannonDiversity;
     });
-    var min = d3.min(dataSet, function(d) {
+    var minShannon = d3.min(dataSet, function(d) {
         return d.shannonDiversity;
     });
     //console.log(min, max);
@@ -663,8 +663,8 @@ function drawGraph(siteMetrics) {
         })
         .attr("cy", y("shannonDiversity"))
         .attr("cx", function(d) {
-            var maxValue = max - min;
-                    var pointValue = d.shannonDiversity - min;
+            var maxValue = maxShannon - minShannon;
+                    var pointValue = d.shannonDiversity - minShannon;
                     var cx = pointValue/maxValue;
                     if (isNaN(cx)) {
                         console.log("cx is NaN");
@@ -675,9 +675,71 @@ function drawGraph(siteMetrics) {
         .attr("r", 10)
         .style("fill", "steelblue")
         .style("opacity", 0.5)
-        .style("fill", 0.5)
-}
+        .style("fill", 0.5);
 
+
+//Same for richness
+
+    var maxRichness = d3.max(dataSet, function(d) {
+        return d.richness;
+    });
+    var minRichness = d3.min(dataSet, function(d) {
+        return d.richness;
+    });
+    
+    g.selectAll(".datapoints")
+    .data(dataSet)
+    .enter()
+    .append("circle")
+    .attr("id", function(d) {
+        return d.siteId;
+    })
+    .attr("cy", y("richness"))
+    .attr("cx", function(d) {
+        var maxValue = maxRichness - minRichness;
+                var pointValue = d.richness - minRichness;
+                var cx = pointValue/maxValue;
+                if (isNaN(cx)) {
+                    console.log("cx is NaN");
+                    cx = 0;
+                }
+                return x(cx);
+    })
+    .attr("r", 10)
+    .style("fill", "steelblue")
+    .style("opacity", 0.5)
+    .style("fill", 0.5)
+
+    var maxAbundance = d3.max(dataSet, function(d) {
+        return d.abundance;
+    });
+    var minAbundance = d3.min(dataSet, function(d) {
+        return d.abundance;
+    });
+    
+    g.selectAll(".datapoints")
+    .data(dataSet)
+    .enter()
+    .append("circle")
+    .attr("id", function(d) {
+        return d.siteId;
+    })
+    .attr("cy", y("abundance"))
+    .attr("cx", function(d) {
+        var maxValue = maxAbundance - minAbundance;
+                var pointValue = d.abundance - minAbundance;
+                var cx = pointValue/maxValue;
+                if (isNaN(cx)) {
+                    console.log("cx is NaN");
+                    cx = 0;
+                }
+                return x(cx);
+    })
+    .attr("r", 10)
+    .style("fill", "steelblue")
+    .style("opacity", 0.5)
+    .style("fill", 0.5)
+}
 
 //generating the map
 var tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
