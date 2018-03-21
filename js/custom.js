@@ -682,7 +682,7 @@ function drawGraph(siteMetrics) {
         .attr("id", function(d) {
             return d.siteId;
         })
-        .attr("cy", y("Shannon diversity"))
+        .attr("cy", 100)
         .attr("cx", function(d) {
             var maxValue = max - min;
                     var pointValue = d.shannonDiversity - min;
@@ -692,7 +692,8 @@ function drawGraph(siteMetrics) {
                     }
                     return x(cx);
         })
-        .attr("r", 10)
+        .attr("r", 5)
+        .style("fill", "steelblue")
         .style("opacity", 0.5)
         .style("fill", 0.5)
 }
