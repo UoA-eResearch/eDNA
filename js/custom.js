@@ -123,8 +123,8 @@ function getSiteWeights(filters) {
     //todo: test calculate site metrics.
     calculateSiteMetrics(siteMetrics);
 
-    console.log(grid);
-    console.log(siteMetrics);
+    //console.log(grid);
+    //console.log(siteMetrics);
     calculateSiteMetrics(siteMetrics);
     //warrick: integrating filtered results with grid view.
     DrawGrid(grid);
@@ -395,7 +395,7 @@ function DrawGrid(grid) {
     var maxCount = gridMaxes.count;
     var maxValue = gridMaxes.value;
 
-    console.log("max count", maxCount);
+    //console.log("max count", maxCount);
     var features = [];
     var gridCells = grid.cells
     //Generating geojson
@@ -403,12 +403,21 @@ function DrawGrid(grid) {
         var gridCell = gridCells[cell];
         var weightedCount = gridCells[cell].count/maxCount;
         var weightedValue = gridCells[cell].value/maxValue;
+
+        //Add cell statistics within popup.
         var popupContent = "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br />" +
             "<strong>Microorganism Amount: </strong>" + gridCell.value + "<br />" +
             "<strong>Lng:</strong>  " + gridCell.coordinates[0][0] + " to " + gridCell.coordinates[2][0] + "<br />" +
-            "<strong>Lat:</strong>  " + gridCell.coordinates[0][1] + " to " + gridCell.coordinates[2][1];
-        var speciesInCell = gridCell.cellSpecies;
+            "<strong>Lat:</strong>  " + gridCell.coordinates[0][1] + " to " + gridCell.coordinates[2][1] + "<br /><br />";
 
+        var speciesInCell = gridCell.cellSpecies;
+        //console.log(speciesInCell);
+        for (species in speciesInCell) {
+            popupContent += "<strong>" + species + "</strong>" + "<br />" +
+                "<strong>Richness:</strong> " + speciesInCell[species].count + "<br />" +
+                "<strong>Abundance:</strong> " + speciesInCell[species].value + "<br /><br />";
+        }
+        
         var cellPolygon = {
             "type": "Feature",
             "properties": {
@@ -452,7 +461,7 @@ function DrawGrid(grid) {
 
 function onEachFeature(feature, layer) {
     if (feature.properties && feature.properties.popupContent) {
-        layer.bindPopup(feature.properties.popupContent);
+        var popup = layer.bindPopup(feature.properties.popupContent, {"maxWidth": 4000, "maxHeight": 150});
     }
 
     layer.on({
@@ -496,7 +505,7 @@ function GetGridValues(cells) {
         }
         totalCount += cells[cell].count;
     }
-    console.log("max count ", maxCount, "max value ", maxValue, "total count ", totalCount);
+    //console.log("max count ", maxCount, "max value ", maxValue, "total count ", totalCount);
 
     var gridMaxes = {
         count: maxCount,
@@ -579,7 +588,7 @@ function calculateSiteMetrics(siteMetrics) {
         var shannonDiversity = -1 * (siteValue/totalValue) * Math.log(siteValue/totalValue);
         siteMetrics[site].shannonDiversity = shannonDiversity;
     }
-    console.log(siteMetrics);
+    //console.log(siteMetrics);
 
     //Create visualization
     drawGraph(siteMetrics);
@@ -592,7 +601,7 @@ function drawGraph(siteMetrics) {
     for (var site in siteMetrics) {
         dataSet.push(siteMetrics[site]);
     }
-    //console.log(dataSet);
+    console.log(dataSet);
 
     var nestedData = d3.nest()
         .key(function (d) {
@@ -797,9 +806,9 @@ var baseMaps = {
     "Base": tileLayer,
 };
 var overlays = {
-    "Grid: Values": gridValueLayerGroup,
-    "Grid: Counts": gridCountLayerGroup,
-    "Heat: Values": heatLayerGroup,
+    "Grid: Abundance": gridValueLayerGroup,
+    "Grid: Richness": gridCountLayerGroup,
+    "Heat: Abundance": heatLayerGroup,
 };
 var layerMenu = L.control.layers(
     baseMaps,
