@@ -584,7 +584,6 @@ function calculateSiteMetrics(siteMetrics) {
 }
 
 function drawGraph(siteMetrics) {
-
     //Converting dict to list for d3 data processing
     var dataSet = [];
     for (var site in siteMetrics) {
@@ -609,6 +608,11 @@ function drawGraph(siteMetrics) {
         .attr("height", height)
         .attr("id", "main");
 
+    tooltip = d3.select("#main")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
     // Axis
     // Define the x axis
     var x = d3.scaleLinear()
@@ -623,7 +627,7 @@ function drawGraph(siteMetrics) {
 
     //Define Y axis
     var y = d3.scalePoint()
-       .domain(["richness","abundance","shannonDiversity"])
+       .domain(["Shannon diversity","Richness","Abundance"])
        .range([0, height - 20])
        .padding(0.1);
     var yAxis = d3.axisLeft()
@@ -661,7 +665,7 @@ function drawGraph(siteMetrics) {
         .attr("id", function(d) {
             return d.siteId;
         })
-        .attr("cy", y("shannonDiversity"))
+        .attr("cy", y("Shannon diversity"))
         .attr("cx", function(d) {
             var maxValue = maxShannon - minShannon;
                     var pointValue = d.shannonDiversity - minShannon;
@@ -678,8 +682,7 @@ function drawGraph(siteMetrics) {
         .style("fill", 0.5);
 
 
-//Same for richness
-
+    //Same for richness
     var maxRichness = d3.max(dataSet, function(d) {
         return d.richness;
     });
@@ -694,7 +697,7 @@ function drawGraph(siteMetrics) {
     .attr("id", function(d) {
         return d.siteId;
     })
-    .attr("cy", y("richness"))
+    .attr("cy", y("Richness"))
     .attr("cx", function(d) {
         var maxValue = maxRichness - minRichness;
                 var pointValue = d.richness - minRichness;
@@ -708,8 +711,9 @@ function drawGraph(siteMetrics) {
     .attr("r", 10)
     .style("fill", "steelblue")
     .style("opacity", 0.5)
-    .style("fill", 0.5)
+    .style("fill", 0.5);
 
+    //Adding abundance as well.
     var maxAbundance = d3.max(dataSet, function(d) {
         return d.abundance;
     });
@@ -724,7 +728,7 @@ function drawGraph(siteMetrics) {
     .attr("id", function(d) {
         return d.siteId;
     })
-    .attr("cy", y("abundance"))
+    .attr("cy", y("Abundance"))
     .attr("cx", function(d) {
         var maxValue = maxAbundance - minAbundance;
                 var pointValue = d.abundance - minAbundance;
@@ -738,7 +742,7 @@ function drawGraph(siteMetrics) {
     .attr("r", 10)
     .style("fill", "steelblue")
     .style("opacity", 0.5)
-    .style("fill", 0.5)
+    .style("fill", 0.5);
 }
 
 //generating the map
