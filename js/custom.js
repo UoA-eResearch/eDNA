@@ -403,7 +403,10 @@ function DrawGrid(grid) {
         var gridCell = gridCells[cell];
         var weightedCount = gridCells[cell].count/maxCount;
         var weightedValue = gridCells[cell].value/maxValue;
-        var popupContent = "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br><strong>Microorganism Amount: </strong>" + gridCell.value;
+        var popupContent = "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br />" +
+            "<strong>Microorganism Amount: </strong>" + gridCell.value + "<br />" +
+            "<strong>Lng:</strong>  " + gridCell.coordinates[0][0] + " to " + gridCell.coordinates[2][0] + "<br />" +
+            "<strong>Lat:</strong>  " + gridCell.coordinates[0][1] + " to " + gridCell.coordinates[2][1];
         var speciesInCell = gridCell.cellSpecies;
 
         var cellPolygon = {
@@ -590,6 +593,13 @@ function drawGraph(siteMetrics) {
         dataSet.push(siteMetrics[site]);
     }
     //console.log(dataSet);
+
+    var nestedData = d3.nest()
+        .key(function (d) {
+            return d.metric;
+        })
+        .entries(dataSet);
+    console.log(nestedData);
 
     var margin = {top: 20, right: 30, bottom: 20, left: 160},
         width = 960 - margin.left - margin.right,
