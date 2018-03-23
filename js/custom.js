@@ -591,49 +591,67 @@ function calculateSiteMetrics(siteMetrics) {
     //console.log(siteMetrics);
 
     //Create visualization
-    drawGraph(siteMetrics);
+    updateGraph(siteMetrics);
 
 }
 
-function drawGraph(siteMetrics) {
-    //Converting dict to list for d3 data processing
+function updateGraph(siteMetrics) {
+
     var dataSet = [];
     for (var site in siteMetrics) {
-        dataSet.push(siteMetrics[site]);
+        var siteMetric = siteMetrics[site];
+        var siteRichness = {
+            "siteId": siteMetric.siteId,
+            "Metric": "OTU richness",
+            "value": siteMetric.richness,
+        }
+        dataSet.push(siteRichness);
+        
+        var siteShannon = {
+            "siteId": siteMetric.siteId,
+            "Metric": "Shannon diversity",
+            "value": siteMetric.shannonDiversity,
+        }
+        dataSet.push(siteShannon);
+        
+        var siteAbundance = {
+            "siteId": siteMetric.siteId,
+            "Metric": "Sequence abundance",
+            "value": siteMetric.abundance,
+        }
+        dataSet.push(siteAbundance);
     }
-    console.log(dataSet);
+    //console.log(dataSet);
 
-    var nestedData = d3.nest()
-        .key(function (d) {
-            return d.metric;
+    var dataNested = d3.nest()
+        .key(function(d) {
+            return d.Metric;
         })
         .entries(dataSet);
-    console.log(nestedData);
+    console.log(dataNested);
 
+    //gets each metric's array length.
+    var update = g.selectAll(".datapoints")
+        .data(dataNested);
+
+}
+
+function drawGraph() {
     var margin = {top: 20, right: 30, bottom: 20, left: 160},
         width = 960 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
-    //SVG for the chart. Contains the graphic
-    var svg = d3.select("body")
-        .append("svg")
+    var chart = d3.select("#chart").append("svg")
         .attr("width", width + margin.right + margin.left)
         .attr("height", height + margin.top + margin.bottom);
 
-    //creatin main area for graph drawing.
-    var main = svg.append("g")
+    // Define area where the graph will be drawn
+    var main = chart.append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
         .attr("width", width)
         .attr("height", height)
         .attr("id", "main");
 
-    tooltip = d3.select("#main")
-        .append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
-
-    // Axis
-    // Define the x axis
     var x = d3.scaleLinear()
         .domain([0, 1])  // the range of the values to plot
         .range([0, width]);  // the pixel range of the x-axis
@@ -644,124 +662,30 @@ function drawGraph(siteMetrics) {
         .tickValues([0, 1])
         .tickFormat(function(d,i) { return xLabels[i] });
 
-    //Define Y axis
     var y = d3.scalePoint()
-       .domain(["Shannon diversity","Richness","Abundance"])
-       .range([0, height - 20])
-       .padding(0.1);
+        //.domain(nested.map( function(d) { return d.key }) )
+        .domain(["OTU richness","Sequence abundance","Shannon diversity","Effective alpha diversity","Orders"])
+        .range([0, height - 20])
+        .padding(0.1);
     var yAxis = d3.axisLeft()
-       .scale(y);
-
-    //Adding x axis
+        .scale(y);
+    
+    // Draw the x and y axes
     main.append("g")
-        .attr("transform", "translate(0," + height + ")")
+        .attr("transform", "translate(0," + height + ")")  // Position at bottom of chart
         .attr("class", "main axis")
+        .attr("id", "xAxis")
         .call(xAxis);
-
-    //Adding y axis
+    
     main.append("g")
-        .attr("transform", "translate(0,0)")
+        .attr("transform", "translate(0,0)")  // Position at left of chart
         .attr("class", "main axis")
+        .attr("id", "yAxis")
         .call(yAxis);
 
+    // Draw the graph object holding the data points
     var g = main.append("svg:g")
-        .attr("id","datapoints");
-
-    //Finding max, min for 0-1 axis positioning calculations.
-    var maxShannon = d3.max(dataSet, function(d) {
-       return d.shannonDiversity;
-    });
-    var minShannon = d3.min(dataSet, function(d) {
-        return d.shannonDiversity;
-    });
-    //console.log(min, max);
-
-    //Fetching data to add to graph
-    g.selectAll(".datapoints")
-        .data(dataSet)
-        .enter()
-        .append("circle")
-        .attr("id", function(d) {
-            return d.siteId;
-        })
-        .attr("cy", y("Shannon diversity"))
-        .attr("cx", function(d) {
-            var maxValue = maxShannon - minShannon;
-                    var pointValue = d.shannonDiversity - minShannon;
-                    var cx = pointValue/maxValue;
-                    if (isNaN(cx)) {
-                        console.log("cx is NaN");
-                        cx = 0;
-                    }
-                    return x(cx);
-        })
-        .attr("r", 10)
-        .style("fill", "steelblue")
-        .style("opacity", 0.5)
-        .style("fill", 0.5);
-
-
-    //Same for richness
-    var maxRichness = d3.max(dataSet, function(d) {
-        return d.richness;
-    });
-    var minRichness = d3.min(dataSet, function(d) {
-        return d.richness;
-    });
-    
-    g.selectAll(".datapoints")
-    .data(dataSet)
-    .enter()
-    .append("circle")
-    .attr("id", function(d) {
-        return d.siteId;
-    })
-    .attr("cy", y("Richness"))
-    .attr("cx", function(d) {
-        var maxValue = maxRichness - minRichness;
-                var pointValue = d.richness - minRichness;
-                var cx = pointValue/maxValue;
-                if (isNaN(cx)) {
-                    console.log("cx is NaN");
-                    cx = 0;
-                }
-                return x(cx);
-    })
-    .attr("r", 10)
-    .style("fill", "steelblue")
-    .style("opacity", 0.5)
-    .style("fill", 0.5);
-
-    //Adding abundance as well.
-    var maxAbundance = d3.max(dataSet, function(d) {
-        return d.abundance;
-    });
-    var minAbundance = d3.min(dataSet, function(d) {
-        return d.abundance;
-    });
-    
-    g.selectAll(".datapoints")
-    .data(dataSet)
-    .enter()
-    .append("circle")
-    .attr("id", function(d) {
-        return d.siteId;
-    })
-    .attr("cy", y("Abundance"))
-    .attr("cx", function(d) {
-        var maxValue = maxAbundance - minAbundance;
-                var pointValue = d.abundance - minAbundance;
-                var cx = pointValue/maxValue;
-                if (isNaN(cx)) {
-                    console.log("cx is NaN");
-                    cx = 0;
-                }
-                return x(cx);
-    })
-    .attr("r", 10)
-    .style("fill", "steelblue")
-    .style("opacity", 0.5)
-    .style("fill", 0.5);
+        .attr("id","datapoints"); 
 }
 
 //generating the map
@@ -849,6 +773,57 @@ info.update = function(siteValues) {
 };
 
 info.addTo(map);
+
+//adding graph
+var margin = {top: 20, right: 30, bottom: 20, left: 160},
+        width = 960 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+var chart = d3.select("#chart").append("svg")
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom);
+
+// Define area where the graph will be drawn
+var main = chart.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("id", "main");
+
+var x = d3.scaleLinear()
+    .domain([0, 1])  // the range of the values to plot
+    .range([0, width]);  // the pixel range of the x-axis
+var xTicks = [0, 1];
+var xLabels = ["Minimum", "Maximum"];
+var xAxis = d3.axisBottom()
+    .scale(x)
+    .tickValues([0, 1])
+    .tickFormat(function(d,i) { return xLabels[i] });
+
+var y = d3.scalePoint()
+    //.domain(nested.map( function(d) { return d.key }) )
+    .domain(["OTU richness","Sequence abundance","Shannon diversity","Effective alpha diversity","Orders"])
+    .range([0, height - 20])
+    .padding(0.1);
+var yAxis = d3.axisLeft()
+    .scale(y);
+
+// Draw the x and y axes
+main.append("g")
+    .attr("transform", "translate(0," + height + ")")  // Position at bottom of chart
+    .attr("class", "main axis")
+    .attr("id", "xAxis")
+    .call(xAxis);
+
+main.append("g")
+    .attr("transform", "translate(0,0)")  // Position at left of chart
+    .attr("class", "main axis")
+    .attr("id", "yAxis")
+    .call(yAxis);
+
+// Draw the graph object holding the data points
+var g = main.append("svg:g")
+    .attr("id","datapoints"); 
 
 //Warrick test: Adding sidebar for Andrew's Visualization
 //var sidebar = L.control.sidebar('sidebar').addTo(map);
