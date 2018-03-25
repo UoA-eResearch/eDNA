@@ -679,7 +679,10 @@ function updateGraph(siteMetrics) {
             var max = d3.max(d.values, function (d) {
                 return d.value;
             });
-            console.log(min, max);
+            var mean = d3.mean(d.values, function(d) {
+                return d.value;
+            })
+            console.log(min, max, mean);
 
             var circle = d3.select(this).selectAll("circle")
                 .data(d.values, function (d) {
@@ -715,6 +718,19 @@ function updateGraph(siteMetrics) {
                         var cx = (d.value - min) / (max - min);
                         return x(cx);
                     })
+
+                //adding mean circles
+                d3.select(this).append("circle")
+                    .attr("class", "enter")
+                    .attr("cy", y(d.key))
+                    .attr("r", 18)
+                    .style("stroke", "grey")
+                    .style("fill", "none")
+                    .style("opacity", 0)
+                    .transition().duration(1500)
+                    .style("opacity", 0.75)
+                    .attr("cx", x((mean-min)/(max-min)))
+
         })
     var remove = update.exit().remove();
 }
