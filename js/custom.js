@@ -693,15 +693,11 @@ function updateGraph(siteMetrics) {
                 .append("circle")
                 .attr("class", "enter")
                 .attr("id", d => d.siteId)
-                .attr("cx", function (d) {
-                    var cx = (d.value - min) / (max - min);
-                    return x(cx);
-                })
                 .attr("cy", y(d.key))
                 .attr("r", 5)
                 .attr("opacity", 0.2)
                 .on("mouseover", function (d) {
-                    d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
+                    var thing = d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
                         .transition()
                         .attr("r", 20)
                         .duration(250)
@@ -712,6 +708,13 @@ function updateGraph(siteMetrics) {
                         .attr("r", 5)
                         .duration(250)
                 })
+                .merge(circle)
+                .transition()
+                    .duration(1500)
+                    .attr("cx", function (d) {
+                        var cx = (d.value - min) / (max - min);
+                        return x(cx);
+                    })
         })
     var remove = update.exit().remove();
 }
@@ -849,7 +852,7 @@ info.onAdd = function (map) {
 };
 
 info.update = function(siteValues) {
-    this._div.innerHTML = 'inner html updated';
+    this._div.innerHTML = '<div id="chart"></div>';
 };
 
 info.addTo(map);
