@@ -125,7 +125,6 @@ function getSiteWeights(filters) {
 
     //console.log(grid);
     //console.log(siteMetrics);
-    calculateSiteMetrics(siteMetrics);
     //warrick: integrating filtered results with grid view.
     DrawGrid(grid);
     return sites;
@@ -218,7 +217,7 @@ function getFilterData() {
 function handleResults(results, meta) {
     //creates global var results
     window.results = results;
-    console.log(meta);
+    //console.log(meta);
     //loops through meta data passed in.
     var metaDict = {};
     for (var i in meta.data) {
@@ -434,7 +433,7 @@ function DrawGrid(grid) {
         };
         features.push(cellPolygon);
     }
-    console.log(features);
+    //console.log(features);
 
     var featureCollection = {
         "type": "FeatureCollection",
@@ -492,7 +491,7 @@ function CellCountStyle (feature) {
 }
 
 function GetGridValues(cells) {
-    console.log(cells);
+    //console.log(cells);
     var maxCount = 0;
     var maxValue = 0;
     var totalCount = 0;
@@ -597,6 +596,8 @@ function calculateSiteMetrics(siteMetrics) {
 
 function updateGraph(siteMetrics) {
 
+    console.log("Running update graph");
+
     var dataSet = [];
     for (var site in siteMetrics) {
         var siteMetric = siteMetrics[site];
@@ -623,17 +624,82 @@ function updateGraph(siteMetrics) {
     }
     //console.log(dataSet);
 
-    var dataNested = d3.nest()
+    var nestedData = d3.nest()
         .key(function(d) {
             return d.Metric;
         })
         .entries(dataSet);
-    console.log(dataNested);
+    console.log(nestedData);
 
-    //gets each metric's array length.
+    /*
     var update = g.selectAll(".datapoints")
-        .data(dataNested);
+        .data(nestedData[0].values);
 
+    var remove = g.selectAll(".datapoints")
+        .data(nestedData[0].values)
+        .exit()
+        .remove();
+
+    var enter = update.enter()
+        .append("g")
+        .attr("class", "datapoints")
+        .merge(update)
+    */
+
+    //selects the nested values arrays
+    /*
+    var updateSel = d3.selectAll(".datapoints")
+        .data(nestedData, function(d) {
+            return d.values;
+        });
+    */
+
+    /* removes excess
+    updateSel.exit()
+        .remove();
+    */
+
+    //TRYINGIGNGINGIN
+    console.log(nestedData);
+
+    //within the svg, within the g tags, select the class datapoints
+    var update = g.selectAll(".datapoints")
+        .data(nestedData, function(d) {
+            return d.values;
+        });
+
+    var enter = update.enter()
+        .append("g")
+        .attr("class", "datapoints")
+        .merge(update)
+        .each(function (d) {    //loop through each data group
+            var min = d3.min(d.values, function(d) {
+                return d.value;
+            });
+            var max = d3.max(d.values, function(d) {
+                return d.value;
+            });
+            console.log(min, max);
+
+            var circle = d3.select(this).selectAll("circle")
+                .data(d.values, function(d) {
+                    return d.siteId;
+                });
+
+            circle.exit().remove();
+
+            //add new
+            circle.enter()
+                .append("circle")
+                .attr("cx", function(d) {
+                    var cx = (d.value - min)/(max - min);
+                    return x(cx);
+                })
+                .attr("cy", y(d.key))
+                .attr("r", 5)
+                .attr("opacity", 0.2)
+        })
+    var remove = update.exit().remove();
 }
 
 function drawGraph() {
