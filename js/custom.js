@@ -631,37 +631,6 @@ function updateGraph(siteMetrics) {
         .entries(dataSet);
     console.log(nestedData);
 
-    /*
-    var update = g.selectAll(".datapoints")
-        .data(nestedData[0].values);
-
-    var remove = g.selectAll(".datapoints")
-        .data(nestedData[0].values)
-        .exit()
-        .remove();
-
-    var enter = update.enter()
-        .append("g")
-        .attr("class", "datapoints")
-        .merge(update)
-    */
-
-    //selects the nested values arrays
-    /*
-    var updateSel = d3.selectAll(".datapoints")
-        .data(nestedData, function(d) {
-            return d.values;
-        });
-    */
-
-    /* removes excess
-    updateSel.exit()
-        .remove();
-    */
-
-    //TRYINGIGNGINGIN
-    console.log(nestedData);
-
     //within the svg, within the g tags, select the class datapoints
     var update = g.selectAll(".datapoints")
         .data(nestedData, function (d) {
@@ -697,7 +666,7 @@ function updateGraph(siteMetrics) {
                 .attr("class", "enter")
                 .attr("id", d => d.siteId)
                 .attr("cy", y(d.key))
-                .attr("r", 5)
+                .attr("r", 10)
                 .attr("opacity", 0.2)
                 .on("mouseover", function (d) {
                     var thing = d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
@@ -708,14 +677,20 @@ function updateGraph(siteMetrics) {
                 .on("mouseout", function (d) {
                     d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
                         .transition()
-                        .attr("r", 5)
+                        .attr("r", 10)
                         .duration(250)
                 })
                 .merge(circle)
                 .transition()
                     .duration(1500)
                     .attr("cx", function (d) {
-                        var cx = (d.value - min) / (max - min);
+                        var cx;
+                        if (max == min) {
+                            cx = 0;
+                        }
+                        else {
+                            cx = (d.value - min) / (max - min);
+                        }
                         return x(cx);
                     })
 
@@ -729,9 +704,10 @@ function updateGraph(siteMetrics) {
                     .style("opacity", 0)
                     .transition().duration(1500)
                     .style("opacity", 0.75)
-                    .attr("cx", x((mean-min)/(max-min)))
+                    .attr("cx", x((mean-min)/(max-min)));
 
-        })
+        })  //.each() end.
+
     var remove = update.exit().remove();
 }
 
