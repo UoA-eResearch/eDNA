@@ -631,37 +631,6 @@ function updateGraph(siteMetrics) {
         .entries(dataSet);
     console.log(nestedData);
 
-    /*
-    var update = g.selectAll(".datapoints")
-        .data(nestedData[0].values);
-
-    var remove = g.selectAll(".datapoints")
-        .data(nestedData[0].values)
-        .exit()
-        .remove();
-
-    var enter = update.enter()
-        .append("g")
-        .attr("class", "datapoints")
-        .merge(update)
-    */
-
-    //selects the nested values arrays
-    /*
-    var updateSel = d3.selectAll(".datapoints")
-        .data(nestedData, function(d) {
-            return d.values;
-        });
-    */
-
-    /* removes excess
-    updateSel.exit()
-        .remove();
-    */
-
-    //TRYINGIGNGINGIN
-    console.log(nestedData);
-
     //within the svg, within the g tags, select the class datapoints
     var update = g.selectAll(".datapoints")
         .data(nestedData, function (d) {
@@ -679,7 +648,10 @@ function updateGraph(siteMetrics) {
             var max = d3.max(d.values, function (d) {
                 return d.value;
             });
-            console.log(min, max);
+            var mean = d3.mean(d.values, function(d) {
+                return d.value;
+            })
+            console.log(min, max, mean);
 
             var circle = d3.select(this).selectAll("circle")
                 .data(d.values, function (d) {
@@ -693,15 +665,11 @@ function updateGraph(siteMetrics) {
                 .append("circle")
                 .attr("class", "enter")
                 .attr("id", d => d.siteId)
-                .attr("cx", function (d) {
-                    var cx = (d.value - min) / (max - min);
-                    return x(cx);
-                })
                 .attr("cy", y(d.key))
-                .attr("r", 5)
+                .attr("r", 10)
                 .attr("opacity", 0.2)
                 .on("mouseover", function (d) {
-                    d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
+                    var thing = d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
                         .transition()
                         .attr("r", 20)
                         .duration(250)
@@ -709,10 +677,37 @@ function updateGraph(siteMetrics) {
                 .on("mouseout", function (d) {
                     d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
                         .transition()
-                        .attr("r", 5)
+                        .attr("r", 10)
                         .duration(250)
                 })
-        })
+                .merge(circle)
+                .transition()
+                    .duration(1500)
+                    .attr("cx", function (d) {
+                        var cx;
+                        if (max == min) {
+                            cx = 0;
+                        }
+                        else {
+                            cx = (d.value - min) / (max - min);
+                        }
+                        return x(cx);
+                    })
+
+                //adding mean circles
+                d3.select(this).append("circle")
+                    .attr("class", "enter")
+                    .attr("cy", y(d.key))
+                    .attr("r", 18)
+                    .style("stroke", "grey")
+                    .style("fill", "none")
+                    .style("opacity", 0)
+                    .transition().duration(1500)
+                    .style("opacity", 0.75)
+                    .attr("cx", x((mean-min)/(max-min)));
+
+        })  //.each() end.
+
     var remove = update.exit().remove();
 }
 
@@ -849,7 +844,7 @@ info.onAdd = function (map) {
 };
 
 info.update = function(siteValues) {
-    this._div.innerHTML = 'inner html updated';
+    this._div.innerHTML = '<div id="chart"></div>';
 };
 
 info.addTo(map);
