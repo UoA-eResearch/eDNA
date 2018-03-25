@@ -664,7 +664,7 @@ function updateGraph(siteMetrics) {
 
     //within the svg, within the g tags, select the class datapoints
     var update = g.selectAll(".datapoints")
-        .data(nestedData, function(d) {
+        .data(nestedData, function (d) {
             return d.values;
         });
 
@@ -673,16 +673,16 @@ function updateGraph(siteMetrics) {
         .attr("class", "datapoints")
         .merge(update)
         .each(function (d) {    //loop through each data group
-            var min = d3.min(d.values, function(d) {
+            var min = d3.min(d.values, function (d) {
                 return d.value;
             });
-            var max = d3.max(d.values, function(d) {
+            var max = d3.max(d.values, function (d) {
                 return d.value;
             });
             console.log(min, max);
 
             var circle = d3.select(this).selectAll("circle")
-                .data(d.values, function(d) {
+                .data(d.values, function (d) {
                     return d.siteId;
                 });
 
@@ -691,13 +691,27 @@ function updateGraph(siteMetrics) {
             //add new
             circle.enter()
                 .append("circle")
-                .attr("cx", function(d) {
-                    var cx = (d.value - min)/(max - min);
+                .attr("class", "enter")
+                .attr("id", d => d.siteId)
+                .attr("cx", function (d) {
+                    var cx = (d.value - min) / (max - min);
                     return x(cx);
                 })
                 .attr("cy", y(d.key))
                 .attr("r", 5)
                 .attr("opacity", 0.2)
+                .on("mouseover", function (d) {
+                    d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
+                        .transition()
+                        .attr("r", 20)
+                        .duration(250)
+                })
+                .on("mouseout", function (d) {
+                    d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
+                        .transition()
+                        .attr("r", 5)
+                        .duration(250)
+                })
         })
     var remove = update.exit().remove();
 }
