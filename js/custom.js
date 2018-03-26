@@ -572,6 +572,7 @@ function calculateCellMetrics(e){
     }
 }
 
+
 //holds the site metrics for visualization
 function calculateSiteMetrics(siteMetrics) {
     //Get sum count and value for calculations.
@@ -790,7 +791,7 @@ var params = new URLSearchParams(window.location.search);
 var mode = params.get("mode");
 window.circles = [];
 
-var detailLevel = 20;
+var detailLevel = 10;
 //warrick map additions
 var grid = MakeGrid(map, detailLevel);
 
@@ -820,11 +821,12 @@ var layerMenu = L.control.layers(
     }).addTo(map);
 
 //Adding leaflet slider to map for grip control.
-var slider = L.control.slider(function(value) {
-        detailLevel = value;
-        $("#filter").trigger('change');
-    },
-    {id: slider,
+var slider = L.control.slider(function (value) {
+    detailLevel = value;
+    $("#filter").trigger('change');
+},
+    {
+        id: slider,
         min: 1,
         max: 100,
         value: 10,
@@ -835,24 +837,21 @@ var slider = L.control.slider(function(value) {
 slider.addTo(map);
 
 //Adding custom control for Andrew's Visualization Copy.
-var info = L.control({position: 'bottomright'});
-
+var info = L.control({ position: 'bottomright' });
 info.onAdd = function (map) {
     this._div = L.DomUtil.create('div', 'info'); //creates div with class "info"
     this.update();
     return this._div;
 };
-
-info.update = function(siteValues) {
+info.update = function (siteValues) {
     this._div.innerHTML = '<div id="chart"></div>';
 };
-
 info.addTo(map);
 
-//adding graph
-var margin = {top: 20, right: 30, bottom: 20, left: 160},
-        width = 960 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
+//Adding d3 visualization
+var margin = { top: 20, right: 30, bottom: 20, left: 160 },
+    width = 960 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
 
 var chart = d3.select("#chart").append("svg")
     .attr("width", width + margin.right + margin.left)
@@ -873,11 +872,11 @@ var xLabels = ["Minimum", "Maximum"];
 var xAxis = d3.axisBottom()
     .scale(x)
     .tickValues([0, 1])
-    .tickFormat(function(d,i) { return xLabels[i] });
+    .tickFormat(function (d, i) { return xLabels[i] });
 
 var y = d3.scalePoint()
     //.domain(nested.map( function(d) { return d.key }) )
-    .domain(["OTU richness","Sequence abundance","Shannon diversity","Effective alpha diversity","Orders"])
+    .domain(["OTU richness", "Sequence abundance", "Shannon diversity", "Effective alpha diversity", "Orders"])
     .range([0, height - 20])
     .padding(0.1);
 var yAxis = d3.axisLeft()
@@ -898,7 +897,7 @@ main.append("g")
 
 // Draw the graph object holding the data points
 var g = main.append("svg:g")
-    .attr("id","datapoints"); 
+    .attr("id", "datapoints"); 
 
 //Warrick test: Adding sidebar for Andrew's Visualization
 //var sidebar = L.control.sidebar('sidebar').addTo(map);
