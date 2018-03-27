@@ -42,7 +42,6 @@ function getSiteWeights(filters) {
     var grid = MakeGrid(map, detailLevel);
     ClearGrid(grid);
     var cellSiteDict = MakeGridIndex(grid);
-    var siteMetrics ={};
 
     //Site metrics: Adding dictionary of site metrics for calculations.
     var siteMetrics = {};
@@ -84,16 +83,16 @@ function getSiteWeights(filters) {
 
                     //add values to sitemetrics {} dictionary for visualization.
                     if (siteMetrics[k] == null) {
-                        siteMetrics[k] = {
-                          siteId: k,
-                          abundance: e[k],
-                          richness: 1
-                        };
+                        siteMetrics[k] = site;
+                        siteMetrics[k].abundance = e[k];
+                        siteMetrics[k].richness = 1;
                     }
                     else {
                         siteMetrics[k].abundance += e[k];
                         siteMetrics[k].richness++;
                     }
+
+                    //console.log(siteMetrics);
                     //Warrick: Add to the corresponding grid as well.
                     var cellIndex = cellSiteDict[k];
                     grid.cells[cellIndex].count++;
@@ -122,9 +121,9 @@ function getSiteWeights(filters) {
 
     //todo: test calculate site metrics.
     calculateSiteMetrics(siteMetrics);
+    //console.log(siteMetrics);
 
     //console.log(grid);
-    //console.log(siteMetrics);
     //warrick: integrating filtered results with grid view.
     DrawGrid(grid);
     return sites;
@@ -603,27 +602,33 @@ function updateGraph(siteMetrics) {
     for (var site in siteMetrics) {
         var siteMetric = siteMetrics[site];
         var siteRichness = {
-            "siteId": siteMetric.siteId,
+            "siteId": siteMetric.site,
             "Metric": "OTU richness",
             "value": siteMetric.richness,
         }
         dataSet.push(siteRichness);
         
         var siteShannon = {
-            "siteId": siteMetric.siteId,
+            "siteId": siteMetric.site,
             "Metric": "Shannon diversity",
             "value": siteMetric.shannonDiversity,
         }
         dataSet.push(siteShannon);
         
         var siteAbundance = {
-            "siteId": siteMetric.siteId,
+            "siteId": siteMetric.site,
             "Metric": "Sequence abundance",
             "value": siteMetric.abundance,
         }
         dataSet.push(siteAbundance);
     }
     //console.log(dataSet);
+
+    //test get min/max/mean values for another random metric in the data.
+    var testMin = d3.min(siteMetrics, function (site) {
+        return site.x;
+    });
+    console.log("test min" + testMin);
 
     var nestedData = d3.nest()
         .key(function(d) {
