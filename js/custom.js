@@ -844,8 +844,15 @@ info.onAdd = function (map) {
     return this._div;
 };
 info.update = function (siteValues) {
-    this._div.innerHTML = '<div id="chart"></div>';
+    this._div.innerHTML = '<div id="chart" style=\"display: none;\"></div><br />' +
+    "<button onclick=\"toggleGraph()\">Toggle Graph</button>";
 };
+
+//function to toggle display chart element containing visualization.
+function toggleGraph() {
+    var graph = $("#chart").toggle("slow");
+}
+
 info.addTo(map);
 
 //Adding d3 visualization
