@@ -42,7 +42,6 @@ function getSiteWeights(filters) {
     var grid = MakeGrid(map, detailLevel);
     ClearGrid(grid);
     var cellSiteDict = MakeGridIndex(grid);
-    var siteMetrics ={};
 
     //Site metrics: Adding dictionary of site metrics for calculations.
     var siteMetrics = {};
@@ -84,16 +83,16 @@ function getSiteWeights(filters) {
 
                     //add values to sitemetrics {} dictionary for visualization.
                     if (siteMetrics[k] == null) {
-                        siteMetrics[k] = {
-                          siteId: k,
-                          abundance: e[k],
-                          richness: 1
-                        };
+                        siteMetrics[k] = site;
+                        siteMetrics[k].abundance = e[k];
+                        siteMetrics[k].richness = 1;
                     }
                     else {
                         siteMetrics[k].abundance += e[k];
                         siteMetrics[k].richness++;
                     }
+
+                    //console.log(siteMetrics);
                     //Warrick: Add to the corresponding grid as well.
                     var cellIndex = cellSiteDict[k];
                     grid.cells[cellIndex].count++;
@@ -122,9 +121,9 @@ function getSiteWeights(filters) {
 
     //todo: test calculate site metrics.
     calculateSiteMetrics(siteMetrics);
+    //console.log(siteMetrics);
 
     //console.log(grid);
-    //console.log(siteMetrics);
     //warrick: integrating filtered results with grid view.
     DrawGrid(grid);
     return sites;
@@ -572,6 +571,7 @@ function calculateCellMetrics(e){
     }
 }
 
+
 //holds the site metrics for visualization
 function calculateSiteMetrics(siteMetrics) {
     //Get sum count and value for calculations.
@@ -594,31 +594,64 @@ function calculateSiteMetrics(siteMetrics) {
 
 }
 
+//Gets the extents of a specified metric in the result set
+//returns colour scale based on extents.
+function colourPoints(metric, siteMetrics) {
+    if (metric == null) {
+        metric = "elev";
+    }
+    
+    sites = [];
+    for (var site in siteMetrics) {
+        sites.push(siteMetrics[site]);
+    }
+
+    var min = d3.min(sites, function(d) {
+        return d[metric];
+    });
+    var max = d3.max(sites, function(d) {
+        return d[metric];
+    });
+
+    var metricColour = d3.scaleLinear()
+        .domain([0, max])
+        .range(["orange", "blue"]);
+
+    return metricColour;
+}
+
 function updateGraph(siteMetrics) {
 
     console.log("Running update graph");
+    console.log(siteMetrics);
+
+    var metricColour = colourPoints("elev", siteMetrics);
+
 
     var dataSet = [];
     for (var site in siteMetrics) {
         var siteMetric = siteMetrics[site];
         var siteRichness = {
-            "siteId": siteMetric.siteId,
+            "siteId": siteMetric.site,
             "Metric": "OTU richness",
             "value": siteMetric.richness,
+            "elev": siteMetric.elev,
         }
         dataSet.push(siteRichness);
         
         var siteShannon = {
-            "siteId": siteMetric.siteId,
+            "siteId": siteMetric.site,
             "Metric": "Shannon diversity",
             "value": siteMetric.shannonDiversity,
+            "elev": siteMetric.elev,
         }
         dataSet.push(siteShannon);
         
         var siteAbundance = {
-            "siteId": siteMetric.siteId,
+            "siteId": siteMetric.site,
             "Metric": "Sequence abundance",
             "value": siteMetric.abundance,
+            "elev": siteMetric.elev,
         }
         dataSet.push(siteAbundance);
     }
@@ -667,18 +700,37 @@ function updateGraph(siteMetrics) {
                 .attr("id", d => d.siteId)
                 .attr("cy", y(d.key))
                 .attr("r", 10)
-                .attr("opacity", 0.2)
+                .attr("opacity", 0.4)
+                .attr("fill", function(d) {
+                    return metricColour(d.elev);
+                 })
                 .on("mouseover", function (d) {
-                    var thing = d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
+                    d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
                         .transition()
                         .attr("r", 20)
                         .duration(250)
+                    tooltip.transition()
+                        .style("opacity", 0.9)
+                        .duration(250);
+                    tooltip.html(
+                        "<strong>" + d.siteId + "</strong><br />" +
+                        "<strong>" + d.Metric + ": </strong>" + d.value + "<br />" +
+                        "<strong>Elevation: </strong>" + d.elev
+                        )
+                        .style("left", (d3.event.pageX ) + "px")
+                        .style("top", (d3.event.pageY - 10) + "px")
+                        .style("opacity", 0.9)
+                        .style("z-index", 1000);
                 })
                 .on("mouseout", function (d) {
                     d3.select(this.parentNode.parentNode).selectAll("#" + d.siteId)
                         .transition()
                         .attr("r", 10)
                         .duration(250)
+                    tooltip.transition()
+                        .style("opacity", 0)
+                        .style("z-index", 1000)
+                        .duration(250);
                 })
                 .merge(circle)
                 .transition()
@@ -711,58 +763,6 @@ function updateGraph(siteMetrics) {
     var remove = update.exit().remove();
 }
 
-function drawGraph() {
-    var margin = {top: 20, right: 30, bottom: 20, left: 160},
-        width = 960 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
-
-    var chart = d3.select("#chart").append("svg")
-        .attr("width", width + margin.right + margin.left)
-        .attr("height", height + margin.top + margin.bottom);
-
-    // Define area where the graph will be drawn
-    var main = chart.append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("id", "main");
-
-    var x = d3.scaleLinear()
-        .domain([0, 1])  // the range of the values to plot
-        .range([0, width]);  // the pixel range of the x-axis
-    var xTicks = [0, 1];
-    var xLabels = ["Minimum", "Maximum"];
-    var xAxis = d3.axisBottom()
-        .scale(x)
-        .tickValues([0, 1])
-        .tickFormat(function(d,i) { return xLabels[i] });
-
-    var y = d3.scalePoint()
-        //.domain(nested.map( function(d) { return d.key }) )
-        .domain(["OTU richness","Sequence abundance","Shannon diversity","Effective alpha diversity","Orders"])
-        .range([0, height - 20])
-        .padding(0.1);
-    var yAxis = d3.axisLeft()
-        .scale(y);
-    
-    // Draw the x and y axes
-    main.append("g")
-        .attr("transform", "translate(0," + height + ")")  // Position at bottom of chart
-        .attr("class", "main axis")
-        .attr("id", "xAxis")
-        .call(xAxis);
-    
-    main.append("g")
-        .attr("transform", "translate(0,0)")  // Position at left of chart
-        .attr("class", "main axis")
-        .attr("id", "yAxis")
-        .call(yAxis);
-
-    // Draw the graph object holding the data points
-    var g = main.append("svg:g")
-        .attr("id","datapoints"); 
-}
-
 //generating the map
 var tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
@@ -790,7 +790,7 @@ var params = new URLSearchParams(window.location.search);
 var mode = params.get("mode");
 window.circles = [];
 
-var detailLevel = 20;
+var detailLevel = 10;
 //warrick map additions
 var grid = MakeGrid(map, detailLevel);
 
@@ -820,11 +820,12 @@ var layerMenu = L.control.layers(
     }).addTo(map);
 
 //Adding leaflet slider to map for grip control.
-var slider = L.control.slider(function(value) {
-        detailLevel = value;
-        $("#filter").trigger('change');
-    },
-    {id: slider,
+var slider = L.control.slider(function (value) {
+    detailLevel = value;
+    $("#filter").trigger('change');
+},
+    {
+        id: slider,
         min: 1,
         max: 100,
         value: 10,
@@ -835,24 +836,28 @@ var slider = L.control.slider(function(value) {
 slider.addTo(map);
 
 //Adding custom control for Andrew's Visualization Copy.
-var info = L.control({position: 'bottomright'});
-
+var info = L.control({ position: 'bottomright' });
 info.onAdd = function (map) {
     this._div = L.DomUtil.create('div', 'info'); //creates div with class "info"
     this.update();
     return this._div;
 };
-
-info.update = function(siteValues) {
-    this._div.innerHTML = '<div id="chart"></div>';
+info.update = function (siteValues) {
+    this._div.innerHTML = '<div id="chart" style=\"display: none;\"></div><br />' +
+    "<button onclick=\"toggleGraph()\">Toggle Graph</button>";
 };
+
+//function to toggle display chart element containing visualization.
+function toggleGraph() {
+    var graph = $("#chart").toggle("slow");
+}
 
 info.addTo(map);
 
-//adding graph
-var margin = {top: 20, right: 30, bottom: 20, left: 160},
-        width = 960 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
+//Adding d3 visualization
+var margin = { top: 20, right: 30, bottom: 20, left: 160 },
+    width = 960 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
 
 var chart = d3.select("#chart").append("svg")
     .attr("width", width + margin.right + margin.left)
@@ -873,11 +878,11 @@ var xLabels = ["Minimum", "Maximum"];
 var xAxis = d3.axisBottom()
     .scale(x)
     .tickValues([0, 1])
-    .tickFormat(function(d,i) { return xLabels[i] });
+    .tickFormat(function (d, i) { return xLabels[i] });
 
 var y = d3.scalePoint()
     //.domain(nested.map( function(d) { return d.key }) )
-    .domain(["OTU richness","Sequence abundance","Shannon diversity","Effective alpha diversity","Orders"])
+    .domain(["OTU richness", "Sequence abundance", "Shannon diversity", "Effective alpha diversity", "Orders"])
     .range([0, height - 20])
     .padding(0.1);
 var yAxis = d3.axisLeft()
@@ -898,7 +903,12 @@ main.append("g")
 
 // Draw the graph object holding the data points
 var g = main.append("svg:g")
-    .attr("id","datapoints"); 
+    .attr("id", "datapoints"); 
+
+var tooltip = d3.select("#map").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
 
 //Warrick test: Adding sidebar for Andrew's Visualization
 //var sidebar = L.control.sidebar('sidebar').addTo(map);
