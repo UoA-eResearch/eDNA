@@ -926,7 +926,7 @@ var slider = L.control.slider(function (value) {
     {
         id: slider,
         min: 1,
-        max: 500,
+        max: 1500,
         value: detailLevel,
         logo: 'Grid',
         orientation: 'horiztonal',
