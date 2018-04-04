@@ -513,7 +513,7 @@ function onEachFeature(feature, layer) {
 function CellSitesStyle(feature) {
     return {
         "fillColor": GetFillColor(feature.properties.weightedSites),
-        "weight": 2,
+        "weight": 1,
         "opacity": GetOutlineOpacity(feature.properties.weightedSites, feature.properties.hasSamples),
         "color": '#ffffff',
         "fillOpacity": GetFillOpacity(feature.properties.weightedSites, feature.properties.hasSamples)
@@ -523,7 +523,7 @@ function CellSitesStyle(feature) {
 function CellValueStyle(feature) {
     return {
         "fillColor": GetFillColor(feature.properties.weightedValue),
-        "weight": 2,
+        "weight": 1,
         "opacity": GetOutlineOpacity(feature.properties.weightedValue, feature.properties.hasSamples),
         "color": '#ffffff',
         "fillOpacity": GetFillOpacity(feature.properties.weightedValue, feature.properties.hasSamples)
@@ -533,7 +533,7 @@ function CellValueStyle(feature) {
 function CellCountStyle (feature) {
     return {
         "fillColor": GetFillColor(feature.properties.weightedCount),
-        "weight": 2,
+        "weight": 1,
         "opacity": GetOutlineOpacity(feature.properties.weightedCount, feature.properties.hasSamples),
         "color": '#ffffff',
         "fillOpacity": GetFillOpacity(feature.properties.weightedCount, feature.properties.hasSamples)
@@ -570,7 +570,7 @@ function GetGridValues(cells) {
 
 function GetOutlineOpacity(d, hasSamples){
     if (hasSamples) {
-        return d > .0 ? .8 : .5;
+        return d > .0 ? .8 : 1;
     }
     else {
         return 0;
@@ -580,7 +580,7 @@ function GetOutlineOpacity(d, hasSamples){
 function GetFillOpacity(d, hasSamples){
     //Should always eval to true, does not create cell polygons unless bool is true.
     if (hasSamples) {
-        return d > .0 ? .7 : .3;
+        return d > .0 ? .8 : .35;
     }
     else {
         return 0;
@@ -595,7 +595,7 @@ function GetFillColor(d) {
                     d > .3   ? '#FD8D3C' :
                         d > .15   ? '#FEB24C' :
                             d > .0   ? '#FED976' :
-                                '#7a7a7a';
+                                '#9ecae1';
 }
 
 //TESTING GRID INFO
