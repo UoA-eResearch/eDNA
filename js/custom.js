@@ -451,6 +451,12 @@ function DrawGrid(grid) {
         //console.log(speciesInCell);
 
         //list all sites within the cell.
+        popupContent += "<strong>Sites in cell: </strong><br />" +
+            "<ul>";
+        for (var site in gridCell.cellSites) {
+            popupContent += "<li>" + gridCell.cellSites[site] + "</li>";
+        }
+        popupContent += "</ul>";
         
 
         //lists all the species within a cell.
