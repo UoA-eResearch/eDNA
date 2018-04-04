@@ -535,7 +535,7 @@ function CellSitesStyle(feature) {
         "fillColor": GetFillColor(feature.properties.weightedSites),
         "weight": 1,
         "opacity": GetOutlineOpacity(feature.properties.weightedSites, feature.properties.hasSamples),
-        "color": '#ffffff',
+        "color": GetOutlineColour(feature.properties.hasSamples),
         "fillOpacity": GetFillOpacity(feature.properties.weightedSites, feature.properties.hasSamples)
     }
 }
@@ -545,7 +545,7 @@ function CellValueStyle(feature) {
         "fillColor": GetFillColor(feature.properties.weightedValue),
         "weight": 1,
         "opacity": GetOutlineOpacity(feature.properties.weightedValue, feature.properties.hasSamples),
-        "color": '#ffffff',
+        "color": GetOutlineColour(feature.properties.hasSamples),
         "fillOpacity": GetFillOpacity(feature.properties.weightedValue, feature.properties.hasSamples)
     }
 }
@@ -555,7 +555,7 @@ function CellCountStyle (feature) {
         "fillColor": GetFillColor(feature.properties.weightedCount),
         "weight": 1,
         "opacity": GetOutlineOpacity(feature.properties.weightedCount, feature.properties.hasSamples),
-        "color": '#ffffff',
+        "color": GetOutlineColour(feature.properties.hasSamples),
         "fillOpacity": GetFillOpacity(feature.properties.weightedCount, feature.properties.hasSamples)
     };
 }
@@ -590,17 +590,21 @@ function GetGridValues(cells) {
 
 function GetOutlineOpacity(d, hasSamples){
     if (hasSamples) {
-        return d > .0 ? .8 : 1;
+        return d > .0 ? .15 : .15;
     }
     else {
         return 0;
     }
 }
 
+function GetOutlineColour(d, hasSamples) {
+    return '#000000';
+}
+
 function GetFillOpacity(d, hasSamples){
     //Should always eval to true, does not create cell polygons unless bool is true.
     if (hasSamples) {
-        return d > .0 ? .8 : .35;
+        return d > .0 ? .8 : .2;
     }
     else {
         return 0;
@@ -609,12 +613,14 @@ function GetFillOpacity(d, hasSamples){
 
 function GetFillColor(d) {
     return d > .9 ? '#800026' :
-        d > .75  ? '#BD0026' :
-            d > .6  ? '#E31A1C' :
-                d > .45  ? '#FC4E2A' :
-                    d > .3   ? '#FD8D3C' :
-                        d > .15   ? '#FEB24C' :
-                            d > .0   ? '#FED976' :
+        d > .8  ? '#BD0026' :
+            d > .7  ? '#E31A1C' :
+                d > .6  ? '#FC4E2A' :
+                    d > .5   ? '#FD8D3C' :
+                        d > .4   ? '#FEB24C' :
+                            d > .3   ? '#FED976' :
+                                d > .2   ? '#FFEDA0' :
+                                    d > .0   ? '#FFFFCC' :
                                 '#9ecae1';
 }
 
