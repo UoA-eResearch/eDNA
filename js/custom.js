@@ -116,7 +116,8 @@ function getSiteWeights(filters) {
                         cell.cellSpecies[species].value+=e[k];
                     }
 
-                    //increments cell site list when bacteria present
+                    //increments cell site list when bacteria present.
+                    //if using this site evaluation remove the one from makegridindex function.
                     /*
                     if ($.inArray(site.site, cell.cellSites) == -1) {
                         cell.cellSites.push(site.site);
