@@ -43,9 +43,12 @@ function getSiteWeights(filters) {
     ClearGrid(grid);
     var cellSiteDict = MakeGridIndex(grid);
 
-    var testTotal = 0;
-    
+    console.log(grid);
+    //set bool for all the grids that don't have a site.
 
+    //
+    var totalSitesInResult = 0;
+    
     //Site metrics: Adding dictionary of site metrics for calculations.
     var siteMetrics = {};
 
@@ -116,7 +119,7 @@ function getSiteWeights(filters) {
                     //Create list of unique sites in the grid.cell. 
                     if ($.inArray(site.site, cell.cellSites) == -1) {
                         cell.cellSites.push(site.site);
-                        testTotal++;
+                        totalSitesInResult++;
                     }
                     //increment the n_points which is the total amount of sites the bacteria is found at.
                     n_points++;
@@ -127,7 +130,7 @@ function getSiteWeights(filters) {
     $("#numberResults").text(n_points);
     console.log(grid);
 
-    console.log("Total unique sites in search: " + testTotal);
+    console.log("Total unique sites in search: " + totalSitesInResult);
     //console.log(sites);
 
     //todo: test calculate site metrics.
@@ -335,6 +338,7 @@ function MakeGrid(map, detailLevel) {
                 value: 0,
                 cellSpecies: {},
                 cellSites: [],
+                hasSamples: false,
             };
             gridCells.push(cell);
             start = [start[0] + lngOffset, start[1]];
@@ -388,6 +392,10 @@ function MakeGridIndex(grid) {
             //console.log(siteCellIndex);
 
             siteCellDict[siteName] = siteCellIndex;
+            //only-sampled-grids: add haSamples bool
+
+            //Set the grids that contain samples to true. Not search-dependent.
+            grid.cells[siteCellIndex].hasSamples = true;
         }
         else {
             continue;
@@ -412,6 +420,12 @@ function DrawGrid(grid) {
     //Generating geojson
     for (var cell in gridCells) {
         var gridCell = gridCells[cell];
+
+        //if grid doesn't contain any sites then don't add to map.
+        if (!gridCell.hasSamples) {
+            continue;
+        }
+
         var weightedCount = gridCells[cell].count/maxCount;
         var weightedValue = gridCells[cell].value/maxValue;
         var weightedSites = gridCells[cell].cellSites.length/maxSites;
@@ -442,6 +456,7 @@ function DrawGrid(grid) {
                 "weightedCount": weightedCount,
                 "speciesInCell": speciesInCell,
                 "weightedSites": weightedSites,
+                "hasSamples": gridCell.hasSamples,
                 "popupContent": popupContent,
             },
             "geometry": {
@@ -497,31 +512,31 @@ function onEachFeature(feature, layer) {
 
 function CellSitesStyle(feature) {
     return {
-        "fillColor": GetColor(feature.properties.weightedSites),
-        "weight": 1,
-        "opacity": GetOpacity(feature.properties.weightedSites),
+        "fillColor": GetFillColor(feature.properties.weightedSites),
+        "weight": 2,
+        "opacity": GetFillOpacity(feature.properties.weightedSites, feature.properties.hasSamples),
         "color": '#ffffff',
-        "fillOpacity": GetOpacity(feature.properties.weightedSites)
+        "fillOpacity": GetFillOpacity(feature.properties.weightedSites, feature.properties.hasSamples)
     }
 }
 
 function CellValueStyle(feature) {
     return {
-        "fillColor": GetColor(feature.properties.weightedValue),
-        "weight": 1,
-        "opacity": GetOpacity(feature.properties.weightedValue),
+        "fillColor": GetFillColor(feature.properties.weightedValue),
+        "weight": 2,
+        "opacity": GetFillOpacity(feature.properties.weightedValue, feature.properties.hasSamples),
         "color": '#ffffff',
-        "fillOpacity": GetOpacity(feature.properties.weightedValue)
+        "fillOpacity": GetFillOpacity(feature.properties.weightedValue, feature.properties.hasSamples)
     }
 }
 
 function CellCountStyle (feature) {
     return {
-        "fillColor": GetColor(feature.properties.weightedCount),
-        "weight": 1,
-        "opacity": GetOpacity(feature.properties.weightedCount),
+        "fillColor": GetFillColor(feature.properties.weightedCount),
+        "weight": 2,
+        "opacity": GetFillOpacity(feature.properties.weightedCount, feature.properties.hasSamples),
         "color": '#ffffff',
-        "fillOpacity": GetOpacity(feature.properties.weightedCount)
+        "fillOpacity": GetFillOpacity(feature.properties.weightedCount, feature.properties.hasSamples)
     };
 }
 
@@ -553,11 +568,25 @@ function GetGridValues(cells) {
     return gridMaxes;
 }
 
-function GetOpacity(d){
-    return d > .0 ? .8 : .2;
+function GetOutlineOpacity(d, hasSamples){
+    if (hasSamples) {
+        return d > .0 ? .8 : .5;
+    }
+    else {
+        return 0;
+    }
 }
 
-function GetColor(d) {
+function GetFillOpacity(d, hasSamples){
+    if (hasSamples) {
+        return d > .0 ? .8 : .3;
+    }
+    else {
+        return 0;
+    }
+}
+
+function GetFillColor(d) {
     return d > .9 ? '#800026' :
         d > .75  ? '#BD0026' :
             d > .6  ? '#E31A1C' :
@@ -565,7 +594,7 @@ function GetColor(d) {
                     d > .3   ? '#FD8D3C' :
                         d > .15   ? '#FEB24C' :
                             d > .0   ? '#FED976' :
-                                '#fffbd2';
+                                '#7a7a7a';
 }
 
 //TESTING GRID INFO
