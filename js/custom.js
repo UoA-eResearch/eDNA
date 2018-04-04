@@ -116,11 +116,14 @@ function getSiteWeights(filters) {
                         cell.cellSpecies[species].value+=e[k];
                     }
 
-                    //Create list of unique sites in the grid.cell. 
+                    //increments cell site list when bacteria present
+                    /*
                     if ($.inArray(site.site, cell.cellSites) == -1) {
                         cell.cellSites.push(site.site);
                         totalSitesInResult++;
                     }
+                    */
+
                     //increment the n_points which is the total amount of sites the bacteria is found at.
                     n_points++;
                 }
@@ -396,6 +399,12 @@ function MakeGridIndex(grid) {
 
             //Set the grids that contain samples to true. Not search-dependent.
             grid.cells[siteCellIndex].hasSamples = true;
+
+            //if site count unfiltered.
+            if ($.inArray(siteName, grid.cells[siteCellIndex].cellSites) == -1) {
+                grid.cells[siteCellIndex].cellSites.push(siteName);
+            }
+
         }
         else {
             continue;
@@ -440,6 +449,9 @@ function DrawGrid(grid) {
 
         var speciesInCell = gridCell.cellSpecies;
         //console.log(speciesInCell);
+
+        //list all sites within the cell.
+        
 
         //lists all the species within a cell.
         for (species in speciesInCell) {
