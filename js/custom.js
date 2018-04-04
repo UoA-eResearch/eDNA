@@ -861,7 +861,7 @@ var params = new URLSearchParams(window.location.search);
 var mode = params.get("mode");
 window.circles = [];
 
-var detailLevel = 10;
+var detailLevel = 60;
 //warrick map additions
 var grid = MakeGrid(map, detailLevel);
 
@@ -900,8 +900,8 @@ var slider = L.control.slider(function (value) {
     {
         id: slider,
         min: 1,
-        max: 100,
-        value: 10,
+        max: 500,
+        value: detailLevel,
         logo: 'Grid',
         orientation: 'horiztonal',
         position: 'bottomleft',
