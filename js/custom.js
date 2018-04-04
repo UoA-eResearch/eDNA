@@ -514,7 +514,7 @@ function CellSitesStyle(feature) {
     return {
         "fillColor": GetFillColor(feature.properties.weightedSites),
         "weight": 2,
-        "opacity": GetFillOpacity(feature.properties.weightedSites, feature.properties.hasSamples),
+        "opacity": GetOutlineOpacity(feature.properties.weightedSites, feature.properties.hasSamples),
         "color": '#ffffff',
         "fillOpacity": GetFillOpacity(feature.properties.weightedSites, feature.properties.hasSamples)
     }
@@ -524,7 +524,7 @@ function CellValueStyle(feature) {
     return {
         "fillColor": GetFillColor(feature.properties.weightedValue),
         "weight": 2,
-        "opacity": GetFillOpacity(feature.properties.weightedValue, feature.properties.hasSamples),
+        "opacity": GetOutlineOpacity(feature.properties.weightedValue, feature.properties.hasSamples),
         "color": '#ffffff',
         "fillOpacity": GetFillOpacity(feature.properties.weightedValue, feature.properties.hasSamples)
     }
@@ -534,7 +534,7 @@ function CellCountStyle (feature) {
     return {
         "fillColor": GetFillColor(feature.properties.weightedCount),
         "weight": 2,
-        "opacity": GetFillOpacity(feature.properties.weightedCount, feature.properties.hasSamples),
+        "opacity": GetOutlineOpacity(feature.properties.weightedCount, feature.properties.hasSamples),
         "color": '#ffffff',
         "fillOpacity": GetFillOpacity(feature.properties.weightedCount, feature.properties.hasSamples)
     };
@@ -578,8 +578,9 @@ function GetOutlineOpacity(d, hasSamples){
 }
 
 function GetFillOpacity(d, hasSamples){
+    //Should always eval to true, does not create cell polygons unless bool is true.
     if (hasSamples) {
-        return d > .0 ? .8 : .3;
+        return d > .0 ? .7 : .3;
     }
     else {
         return 0;
