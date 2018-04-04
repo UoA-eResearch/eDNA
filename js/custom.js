@@ -43,6 +43,9 @@ function getSiteWeights(filters) {
     ClearGrid(grid);
     var cellSiteDict = MakeGridIndex(grid);
 
+    var testTotal = 0;
+    
+
     //Site metrics: Adding dictionary of site metrics for calculations.
     var siteMetrics = {};
 
@@ -109,6 +112,12 @@ function getSiteWeights(filters) {
                         cell.cellSpecies[species].count++;
                         cell.cellSpecies[species].value+=e[k];
                     }
+
+                    //Create list of unique sites in the grid.cell. 
+                    if ($.inArray(site.site, cell.cellSites) == -1) {
+                        cell.cellSites.push(site.site);
+                        testTotal++;
+                    }
                     //increment the n_points which is the total amount of sites the bacteria is found at.
                     n_points++;
                 }
@@ -116,7 +125,9 @@ function getSiteWeights(filters) {
         }
     }
     $("#numberResults").text(n_points);
-    //console.log(grid);
+    console.log(grid);
+
+    console.log("Total unique sites in search: " + testTotal);
     //console.log(sites);
 
     //todo: test calculate site metrics.
@@ -323,6 +334,7 @@ function MakeGrid(map, detailLevel) {
                 count: 0,
                 value: 0,
                 cellSpecies: {},
+                cellSites: [],
             };
             gridCells.push(cell);
             start = [start[0] + lngOffset, start[1]];
@@ -392,6 +404,7 @@ function DrawGrid(grid) {
 
     var maxCount = gridMaxes.count;
     var maxValue = gridMaxes.value;
+    var maxSites = gridMaxes.sites;
 
     //console.log("max count", maxCount);
     var features = [];
@@ -401,15 +414,20 @@ function DrawGrid(grid) {
         var gridCell = gridCells[cell];
         var weightedCount = gridCells[cell].count/maxCount;
         var weightedValue = gridCells[cell].value/maxValue;
+        var weightedSites = gridCells[cell].cellSites.length/maxSites;
 
         //Add cell statistics within popup.
-        var popupContent = "<strong>Microorganism Occurences:</strong> " + gridCell.count + "<br />" +
-            "<strong>Microorganism Amount: </strong>" + gridCell.value + "<br />" +
+        //Cell coordinates
+        var popupContent = "<strong>Cell Richness:</strong> " + gridCell.count + "<br />" +
+            "<strong>Cell Abundance: </strong>" + gridCell.value + "<br />" +
+            "<strong>Cell Site Count: </strong>" + gridCell.cellSites.length + "<br />" +
             "<strong>Lng:</strong>  " + gridCell.coordinates[0][0] + " to " + gridCell.coordinates[2][0] + "<br />" +
             "<strong>Lat:</strong>  " + gridCell.coordinates[0][1] + " to " + gridCell.coordinates[2][1] + "<br /><br />";
 
         var speciesInCell = gridCell.cellSpecies;
         //console.log(speciesInCell);
+
+        //lists all the species within a cell.
         for (species in speciesInCell) {
             popupContent += "<strong>" + species + "</strong>" + "<br />" +
                 "<strong>Richness:</strong> " + speciesInCell[species].count + "<br />" +
@@ -423,6 +441,7 @@ function DrawGrid(grid) {
                 "weightedValue": weightedValue,
                 "weightedCount": weightedCount,
                 "speciesInCell": speciesInCell,
+                "weightedSites": weightedSites,
                 "popupContent": popupContent,
             },
             "geometry": {
@@ -432,29 +451,36 @@ function DrawGrid(grid) {
         };
         features.push(cellPolygon);
     }
-    //console.log(features);
+    console.log(features);
 
     var featureCollection = {
         "type": "FeatureCollection",
         "features": features
     };
 
+    //Clear count layer and add new one to layergroup.
     var gridCountLayer = L.geoJSON(featureCollection, {
         style: CellCountStyle,
         onEachFeature: onEachFeature
     });
-
-    //gridLayer.addTo(map);
     gridCountLayerGroup.clearLayers();
     gridCountLayerGroup.addLayer(gridCountLayer);
 
+    //Clear count layer, add new one to layergroup.
     var gridValueLayer = L.geoJSON(featureCollection, {
         style: CellValueStyle,
         onEachFeature: onEachFeature
     });
-
     gridValueLayerGroup.clearLayers();
     gridValueLayerGroup.addLayer(gridValueLayer);
+
+    //Clear site count layer, add new one to layergroup.
+    var gridSitesLayer = L.geoJSON(featureCollection, {
+        style: CellSitesStyle,
+        onEachFeature: onEachFeature
+    });
+    gridSitesLayerGroup.clearLayers();
+    gridSitesLayerGroup.addLayer(gridSitesLayer);
 }
 
 function onEachFeature(feature, layer) {
@@ -462,11 +488,21 @@ function onEachFeature(feature, layer) {
         var popup = layer.bindPopup(feature.properties.popupContent, {"maxWidth": 4000, "maxHeight": 150});
     }
 
+    //Disabled cell highlight because it has no purpose at the moment.
     layer.on({
-        //Disabled cell highlight because it has no purpose at the moment.
         //mouseover: highlightFeature,
-        click: calculateCellMetrics,
+        //click: handleCellClick,
     });
+}
+
+function CellSitesStyle(feature) {
+    return {
+        "fillColor": GetColor(feature.properties.weightedSites),
+        "weight": 1,
+        "opacity": GetOpacity(feature.properties.weightedSites),
+        "color": '#ffffff',
+        "fillOpacity": GetOpacity(feature.properties.weightedSites)
+    }
 }
 
 function CellValueStyle(feature) {
@@ -493,6 +529,7 @@ function GetGridValues(cells) {
     //console.log(cells);
     var maxCount = 0;
     var maxValue = 0;
+    var maxSites = 0;
     var totalCount = 0;
     for (var cell in cells) {
         if (cells[cell].count > maxCount) {
@@ -501,6 +538,9 @@ function GetGridValues(cells) {
         if (cells[cell].value > maxValue) {
             maxValue = cells[cell].value;
         }
+        if (cells[cell].cellSites.length > maxSites) {
+            maxSites = cells[cell].cellSites.length;
+        }
         totalCount += cells[cell].count;
     }
     //console.log("max count ", maxCount, "max value ", maxValue, "total count ", totalCount);
@@ -508,6 +548,7 @@ function GetGridValues(cells) {
     var gridMaxes = {
         count: maxCount,
         value: maxValue,
+        sites: maxSites,
     }
     return gridMaxes;
 }
@@ -543,7 +584,7 @@ function highlightFeature(e) {
     }
 }
 
-function calculateCellMetrics(e){
+function handleCellClick(e){
     var layer = e.target;
 
     console.log("index is " + layer.feature.properties.index);
@@ -800,6 +841,7 @@ var scaleIndicator = L.control.scale().addTo(map);
 //instantiating empty layer control layers to be filled later
 var gridCountLayerGroup = L.layerGroup();
 var gridValueLayerGroup = L.layerGroup();
+var gridSitesLayerGroup =L.layerGroup();
 var heatLayerGroup = L.layerGroup();
 var baseMaps = {
     "Base": tileLayer,
@@ -808,6 +850,7 @@ var overlays = {
     "Grid: Abundance": gridValueLayerGroup,
     "Grid: Richness": gridCountLayerGroup,
     "Heat: Abundance": heatLayerGroup,
+    "Grid: Site Count": gridSitesLayerGroup,
 };
 var layerMenu = L.control.layers(
     baseMaps,
