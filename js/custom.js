@@ -456,10 +456,11 @@ function DrawGrid(grid) {
         for (var site in gridCell.cellSites) {
             popupContent += "<li>" + gridCell.cellSites[site] + "</li>";
         }
-        popupContent += "</ul>";
+        popupContent += "</ul><br />";
         
 
         //lists all the species within a cell.
+        popupContent += "<strong>Classifications in cell: </strong><br /><br />"
         for (species in speciesInCell) {
             popupContent += "<strong>" + species + "</strong>" + "<br />" +
                 "<strong>Richness:</strong> " + speciesInCell[species].count + "<br />" +
