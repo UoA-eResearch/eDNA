@@ -476,6 +476,7 @@ function DrawGrid(grid) {
                 "weightedCount": weightedCount,
                 "speciesInCell": speciesInCell,
                 "weightedSites": weightedSites,
+                "cellSites": gridCell.cellSites,
                 "hasSamples": gridCell.hasSamples,
                 "popupContent": popupContent,
             },
@@ -525,7 +526,8 @@ function onEachFeature(feature, layer) {
 
     //Disabled cell highlight because it has no purpose at the moment.
     layer.on({
-        //mouseover: highlightFeature,
+        mouseover: handleMouseOver,
+        mouseout: handleMouseOut,
         click: handleCellClick,
     });
 }
@@ -555,6 +557,36 @@ function handleCellClick(e){
         var speciesRichness = speciesData.count;
         var speciesAbundance = speciesData.value;
         //console.log(species, speciesShannonIndex, speciesRichness, speciesAbundance);
+    }
+}
+
+function handleMouseOver(e) {
+    var layer = e.target;
+
+    //highlight d3 circles.
+    //for layer
+    console.log(layer.feature.properties.cellSites);
+    var siteList = layer.feature.properties.cellSites;
+    for (site in siteList) {
+        var circle = d3.selectAll('#' + siteList[site]);
+        circle.transition()
+            .duration(250)
+            .attr("r", 20);
+    }
+}
+
+function handleMouseOut(e) {
+    var layer = e.target;
+
+    //highlight d3 circles.
+    //for layer
+    console.log(layer.feature.properties.cellSites);
+    var siteList = layer.feature.properties.cellSites;
+    for (site in siteList) {
+        var circle = d3.selectAll('#' + siteList[site]);
+        circle.transition()
+            .duration(250)
+            .attr("r", 10);
     }
 }
 
