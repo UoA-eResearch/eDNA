@@ -891,7 +891,8 @@ var tileLayer = L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/
 var map = L.map('map', {
     zoomSnap: 0.25,
     zoomDelta: 0.25,
-    layers: tileLayer
+    layers: tileLayer,
+    fullscreenControl: true,
 }).setView([-41.235726, 172.5118422], 6);
 var bounds = map.getBounds();
 bounds._northEast.lat += 10;
@@ -971,8 +972,12 @@ info.update = function (siteValues) {
 function toggleGraph() {
     var graph = $("#chart").toggle("slow");
 }
-
 info.addTo(map);
+
+// Create a new map with a fullscreen button:
+
+// or, add to an existing map:
+//map.addControl(new L.Control.Fullscreen());
 
 //Adding d3 visualization
 var margin = { top: 20, right: 30, bottom: 20, left: 160 },
