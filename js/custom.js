@@ -43,12 +43,9 @@ function getSiteWeights(filters) {
     ClearGrid(grid);
     var cellSiteDict = MakeGridIndex(grid);
 
-    console.log(grid);
+    //console.log(grid);
     //set bool for all the grids that don't have a site.
 
-    //
-    var totalSitesInResult = 0;
-    
     //Site metrics: Adding dictionary of site metrics for calculations.
     var siteMetrics = {};
 
@@ -132,9 +129,8 @@ function getSiteWeights(filters) {
         }
     }
     $("#numberResults").text(n_points);
-    console.log(grid);
+    //console.log(grid);
 
-    console.log("Total unique sites in search: " + totalSitesInResult);
     //console.log(sites);
 
     //todo: test calculate site metrics.
@@ -487,7 +483,7 @@ function DrawGrid(grid) {
         };
         features.push(cellPolygon);
     }
-    console.log(features);
+    //console.log(features);
 
     var featureCollection = {
         "type": "FeatureCollection",
@@ -562,10 +558,7 @@ function handleCellClick(e){
 
 function handleMouseOver(e) {
     var layer = e.target;
-
-    //highlight d3 circles.
-    //for layer
-    console.log(layer.feature.properties.cellSites);
+    //console.log(layer.feature.properties.cellSites);
     var siteList = layer.feature.properties.cellSites;
     for (site in siteList) {
         var circle = d3.selectAll('#' + siteList[site]);
@@ -577,10 +570,7 @@ function handleMouseOver(e) {
 
 function handleMouseOut(e) {
     var layer = e.target;
-
-    //highlight d3 circles.
-    //for layer
-    console.log(layer.feature.properties.cellSites);
+    //console.log(layer.feature.properties.cellSites);
     var siteList = layer.feature.properties.cellSites;
     for (site in siteList) {
         var circle = d3.selectAll('#' + siteList[site]);
@@ -750,8 +740,8 @@ function colourPoints(metric, siteMetrics) {
 
 function updateGraph(siteMetrics) {
 
-    console.log("Running update graph");
-    console.log(siteMetrics);
+    //console.log("Running update graph");
+    //console.log(siteMetrics);
 
     var metricColour = colourPoints("elev", siteMetrics);
 
@@ -790,7 +780,7 @@ function updateGraph(siteMetrics) {
             return d.Metric;
         })
         .entries(dataSet);
-    console.log(nestedData);
+    //console.log(nestedData);
 
     //within the svg, within the g tags, select the class datapoints
     var update = g.selectAll(".datapoints")
@@ -812,7 +802,7 @@ function updateGraph(siteMetrics) {
             var mean = d3.mean(d.values, function(d) {
                 return d.value;
             })
-            console.log(min, max, mean);
+            //console.log(min, max, mean);
 
             var circle = d3.select(this).selectAll("circle")
                 .data(d.values, function (d) {
