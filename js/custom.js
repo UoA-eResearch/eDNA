@@ -968,7 +968,7 @@ info.update = function (siteValues) {
     "<button onclick=\"toggleGraph()\">Toggle Graph</button>";
 };
 
-//function to toggle display chart element containing visualization.
+//toggle display chart element containing visualization.
 function toggleGraph() {
     var graph = $("#chart").toggle("slow");
 }
