@@ -526,8 +526,36 @@ function onEachFeature(feature, layer) {
     //Disabled cell highlight because it has no purpose at the moment.
     layer.on({
         //mouseover: highlightFeature,
-        //click: handleCellClick,
+        click: handleCellClick,
     });
+}
+
+function handleCellClick(e){
+    var layer = e.target;
+
+    console.log("index is " + layer.feature.properties.index);
+
+    var speciesInCell = layer.feature.properties.speciesInCell;
+
+    var speciesAmount = Object.keys(speciesInCell).length;
+    console.log("Number of unique classifications in cell: " + speciesAmount);
+
+    //get total value for shannon index calculation
+    var totalValue = 0;
+    for (var species in speciesInCell) {
+        var speciesData= speciesInCell[species]
+        totalValue+= speciesData.value;
+    }
+    console.log("total abundance of cell: " + totalValue);
+
+    //calculate metrics for species within the cell
+    for (var species in speciesInCell) {
+        speciesData = speciesInCell[species];
+        var speciesShannonIndex = -1 * ((speciesData.value/totalValue) * Math.log(speciesData.value/totalValue));
+        var speciesRichness = speciesData.count;
+        var speciesAbundance = speciesData.value;
+        //console.log(species, speciesShannonIndex, speciesRichness, speciesAbundance);
+    }
 }
 
 function CellSitesStyle(feature) {
@@ -639,35 +667,6 @@ function highlightFeature(e) {
         layer.bringToFront();
     }
 }
-
-function handleCellClick(e){
-    var layer = e.target;
-
-    console.log("index is " + layer.feature.properties.index);
-
-    var speciesInCell = layer.feature.properties.speciesInCell;
-
-    var speciesAmount = Object.keys(speciesInCell).length;
-    console.log(speciesAmount);
-
-    //get total value for shannon index calculation
-    var totalValue = 0;
-    for (var species in speciesInCell) {
-        var speciesData= speciesInCell[species]
-        totalValue+= speciesData.value;
-    }
-    console.log(totalValue);
-
-    //calculate metrics for species within the cell
-    for (var species in speciesInCell) {
-        speciesData = speciesInCell[species];
-        var speciesShannonIndex = -1 * ((speciesData.value/totalValue) * Math.log(speciesData.value/totalValue));
-        var speciesRichness = speciesData.count;
-        var speciesAbundance = speciesData.value;
-        //console.log(species, speciesShannonIndex, speciesRichness, speciesAbundance);
-    }
-}
-
 
 //holds the site metrics for visualization
 function calculateSiteMetrics(siteMetrics) {
