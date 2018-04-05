@@ -733,7 +733,7 @@ function colourPoints(metric, siteMetrics) {
 
     var metricColour = d3.scaleLinear()
         .domain([0, max])
-        .range(["orange", "blue"]);
+        .range(["blue", "orange"]);
 
     return metricColour;
 }
@@ -818,7 +818,7 @@ function updateGraph(siteMetrics) {
                 .attr("id", d => d.siteId)
                 .attr("cy", y(d.key))
                 .attr("r", 10)
-                .attr("opacity", 0.4)
+                .attr("opacity", 0.5)
                 .attr("fill", function(d) {
                     return metricColour(d.elev);
                  })
@@ -971,6 +971,15 @@ info.update = function (siteValues) {
 //toggle display chart element containing visualization.
 function toggleGraph() {
     var graph = $("#chart").toggle("slow");
+
+    /* for minimizing the width
+    chart
+    .transition()
+        .duration(1000)
+        .attr("width", function() {
+            return (main.attr("width") / 3);
+    });
+    */
 }
 info.addTo(map);
 
@@ -993,7 +1002,7 @@ var main = chart.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
     .attr("width", width)
     .attr("height", height)
-    .attr("id", "main");
+    .attr("id", "main")
 
 var x = d3.scaleLinear()
     .domain([0, 1])  // the range of the values to plot
