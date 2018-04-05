@@ -981,8 +981,8 @@ info.addTo(map);
 
 //Adding d3 visualization
 var margin = { top: 20, right: 30, bottom: 20, left: 160 },
-    width = 960 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+    width = (window.innerWidth * .75) - margin.left - margin.right,
+    height = (window.innerHeight * .35) - margin.top - margin.bottom;
 
 var chart = d3.select("#chart").append("svg")
     .attr("width", width + margin.right + margin.left)
