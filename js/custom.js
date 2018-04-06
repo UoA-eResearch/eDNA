@@ -532,10 +532,6 @@ function onEachFeature(feature, layer) {
     });
 }
 
-function highlightLayer() {
-    console.log("test select function");
-}
-
 function handleCellClick(e){
     console.log(e);
     var layer = e.target;
@@ -684,8 +680,8 @@ function GetFillColor(d) {
                                 '#9ecae1';
 }
 
-//TESTING GRID INFO
-function highlightFeature(e) {
+//to highlight by mouse click.
+function highlightFeatureClick(layer) {
     var layer = e.target;
 
     layer.setStyle({
@@ -698,6 +694,28 @@ function highlightFeature(e) {
     if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
         layer.bringToFront();
     }
+}
+
+//to highlight without clicking
+function highlightLayer(layer) {
+
+    layer.setStyle({
+        weight: 3,
+        color: 'black',
+        dashArray: '',
+        opacity: 1,
+        fillOpacity: .95,
+    });
+
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+    }
+}
+
+var geojson;
+function highlightLayerDisable(layer) {
+    //geojson.resetStyle(layer);
+    console.log(layer);
 }
 
 //holds the site metrics for visualization
@@ -865,20 +883,32 @@ function updateGraph(siteMetrics) {
                     var site = circle.attr("id");
                     
                     //Uses grid cell look-up to zoom to
+                    // TODO: Doesn't work after grid isn't default 60.
                     var featureIndex = cellSiteDict[site];
                     console.log(featureIndex);
                     var g = grid.cells[featureIndex];
                     var coord = g.coordinates[0];
                     console.log(coord);
                     map.flyTo([coord[1], coord[0]]);
+                    
 
                     //e>layers>feature>properties> index == featureIndex. Then highlight.
                     var activeLayers = [];
                     map.eachLayer(function(layer) {
                         //console.log(layer.feature);
-                        console.log(layer);
-                        if (layer.feature != null && layer.feature.properties.index == featureIndex) {
-                            console.log(layer.feature);
+                        //console.log(layer.feature);
+                        if (layer.feature != null) {
+                            if (layer.feature.properties.index == featureIndex) {
+                                console.log(layer);
+                                console.log(layer.feature);
+                                //var bounds = layer.getBounds();
+                                //var centre = bounds.getCenter();
+                                //map.flyTo(centre);
+                                highlightLayer(layer);
+                            }
+                            else {
+                                highlightLayerDisable(layer);
+                            }
                         }
                     });
                 })
