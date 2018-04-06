@@ -873,6 +873,14 @@ function updateGraph(siteMetrics) {
                     map.flyTo([coord[1], coord[0]]);
 
                     //e>layers>feature>properties> index == featureIndex. Then highlight.
+                    var activeLayers = [];
+                    map.eachLayer(function(layer) {
+                        //console.log(layer.feature);
+                        console.log(layer);
+                        if (layer.feature != null && layer.feature.properties.index == featureIndex) {
+                            console.log(layer.feature);
+                        }
+                    });
                 })
                 .merge(circle)
                 .transition()
