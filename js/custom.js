@@ -33,6 +33,7 @@ function checkFragment(f, species, site) {
     return false;
 }
 
+var cellSiteDict = {}; 
 //Called by handeResults
 function getSiteWeights(filters) {
     var sites = {};
@@ -41,7 +42,7 @@ function getSiteWeights(filters) {
     //warrick Clears grid layer values, gives them an index.
     var grid = MakeGrid(map, detailLevel);
     ClearGrid(grid);
-    var cellSiteDict = MakeGridIndex(grid);
+    cellSiteDict = MakeGridIndex(grid);
 
     //console.log(grid);
     //set bool for all the grids that don't have a site.
@@ -513,6 +514,9 @@ function DrawGrid(grid) {
     });
     gridSitesLayerGroup.clearLayers();
     gridSitesLayerGroup.addLayer(gridSitesLayer);
+
+    //test
+    console.log(gridSitesLayer);
 }
 
 function onEachFeature(feature, layer) {
@@ -520,16 +524,22 @@ function onEachFeature(feature, layer) {
         var popup = layer.bindPopup(feature.properties.popupContent, {"maxWidth": 4000, "maxHeight": 150});
     }
 
-    //Disabled cell highlight because it has no purpose at the moment.
     layer.on({
         mouseover: handleMouseOver,
         mouseout: handleMouseOut,
         click: handleCellClick,
+        select: highlightLayer,
     });
 }
 
+function highlightLayer() {
+    console.log("test select function");
+}
+
 function handleCellClick(e){
+    console.log(e);
     var layer = e.target;
+    console.log(layer);
 
     console.log("index is " + layer.feature.properties.index);
 
@@ -849,6 +859,20 @@ function updateGraph(siteMetrics) {
                         .style("opacity", 0)
                         .style("z-index", 1000)
                         .duration(250);
+                })
+                .on("click", function(d) {
+                    var circle = d3.select(this);
+                    var site = circle.attr("id");
+                    
+                    //Uses grid cell look-up to zoom to
+                    var featureIndex = cellSiteDict[site];
+                    console.log(featureIndex);
+                    var g = grid.cells[featureIndex];
+                    var coord = g.coordinates[0];
+                    console.log(coord);
+                    map.flyTo([coord[1], coord[0]]);
+
+                    //e>layers>feature>properties> index == featureIndex. Then highlight.
                 })
                 .merge(circle)
                 .transition()
