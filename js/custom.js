@@ -245,7 +245,7 @@ function handleResults(results, meta) {
     window.meta = metaDict;
     //instantiates the filter search bar
     $("#filter").select2({
-        placeholder: 'Type to filter by species and environment characteristics',
+        placeholder: 'Type to filter by classification and metadata',
         //allows multiple tag filters at once.
         multiple: true,
         //allows clearing of the box instantly
@@ -697,8 +697,8 @@ function highlightFeatureClick(layer) {
 }
 
 //to highlight without clicking
+//not being used due to difficulty resetting layer style.
 function highlightLayer(layer) {
-
     layer.setStyle({
         weight: 3,
         color: 'black',
@@ -710,12 +710,6 @@ function highlightLayer(layer) {
     if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
         layer.bringToFront();
     }
-}
-
-var geojson;
-function highlightLayerDisable(layer) {
-    //geojson.resetStyle(layer);
-    console.log(layer);
 }
 
 //holds the site metrics for visualization
@@ -881,33 +875,26 @@ function updateGraph(siteMetrics) {
                 .on("click", function(d) {
                     var circle = d3.select(this);
                     var site = circle.attr("id");
-                    
                     //Uses grid cell look-up to zoom to
                     // TODO: Doesn't work after grid isn't default 60.
                     var featureIndex = cellSiteDict[site];
-                    console.log(featureIndex);
-                    var g = grid.cells[featureIndex];
-                    var coord = g.coordinates[0];
-                    console.log(coord);
-                    map.flyTo([coord[1], coord[0]]);
-                    
+                    //console.log(featureIndex);
 
                     //e>layers>feature>properties> index == featureIndex. Then highlight.
                     var activeLayers = [];
                     map.eachLayer(function(layer) {
-                        //console.log(layer.feature);
+                        console.log(layer);
                         //console.log(layer.feature);
                         if (layer.feature != null) {
                             if (layer.feature.properties.index == featureIndex) {
                                 console.log(layer);
-                                console.log(layer.feature);
-                                //var bounds = layer.getBounds();
-                                //var centre = bounds.getCenter();
-                                //map.flyTo(centre);
-                                highlightLayer(layer);
+                                //console.log(layer.feature);
+                                var bounds = layer.getBounds();
+                                var centre = bounds.getCenter();
+                                map.flyToBounds(bounds, { padding: [100, 100] });
+                                //highlightLayer(layer);
                             }
                             else {
-                                highlightLayerDisable(layer);
                             }
                         }
                     });
@@ -1006,11 +993,14 @@ var layerMenu = L.control.layers(
 var slider = L.control.slider(function (value) {
     detailLevel = value;
     $("#filter").trigger('change');
-},
+    },
     {
         id: slider,
         min: 1,
+        //width not working.
+        width: '500px',
         max: 1500,
+        step: 1,
         value: detailLevel,
         logo: 'Grid',
         orientation: 'horiztonal',
