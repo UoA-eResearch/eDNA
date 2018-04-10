@@ -883,14 +883,13 @@ function updateGraph(siteMetrics) {
                     //e>layers>feature>properties> index == featureIndex. Then highlight.
                     var activeLayers = [];
                     map.eachLayer(function(layer) {
-                        console.log(layer);
-                        //console.log(layer.feature);
+                        //console.log(layer);
                         if (layer.feature != null) {
                             if (layer.feature.properties.index == featureIndex) {
                                 console.log(layer);
                                 //console.log(layer.feature);
                                 var bounds = layer.getBounds();
-                                var centre = bounds.getCenter();
+                                //var centre = bounds.getCenter();
                                 map.flyToBounds(bounds, { padding: [100, 100] });
                                 //highlightLayer(layer);
                             }
