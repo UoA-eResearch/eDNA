@@ -309,7 +309,6 @@ function handleResults(results, meta) {
   $('#filter').trigger('change');
 }
 
-//CUSTOM START WARRICK
 function MakeGrid(map, detailLevel) {
   //Hard coded bounds and offsets.
   start = [164.71222, -33.977509];
