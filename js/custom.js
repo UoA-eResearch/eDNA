@@ -92,9 +92,13 @@ function getSiteWeights(filters) {
             siteMetrics[k] = site;
             siteMetrics[k].abundance = e[k];
             siteMetrics[k].richness = 1;
+            siteMetrics[k].species = [species];
           } else {
             siteMetrics[k].abundance += e[k];
             siteMetrics[k].richness++;
+            if (siteMetrics[k].species.indexOf(species) == -1) {
+              siteMetrics[k].species.push(species);
+            }
           }
 
           //console.log(siteMetrics);
@@ -136,7 +140,7 @@ function getSiteWeights(filters) {
 
   //todo: test calculate site metrics.
   calculateSiteMetrics(siteMetrics);
-  //console.log(siteMetrics);
+  console.log(siteMetrics);
 
   //console.log(grid);
   //warrick: integrating filtered results with grid view.
@@ -845,7 +849,16 @@ function updateGraph(siteMetrics) {
       elev: siteMetric.elev
     };
     dataSet.push(siteAbundance);
-  }
+
+    var siteAlpha = {
+      siteId: siteMetric.site,
+      Metric: 'Effective alpha diversity',
+      value: siteMetric.species.length,
+      elev: siteMetric.elev
+    };
+    dataSet.push(siteAlpha);
+  
+  }//end of for loop
   //console.log(dataSet);
 
   var nestedData = d3
