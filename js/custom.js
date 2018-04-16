@@ -697,11 +697,7 @@ function GetGridValues(cells) {
 }
 
 function GetOutlineOpacity(hasSamples) {
-  if (hasSamples) {
     return 0.15;
-  } else {
-    return 0;
-  }
 }
 
 function GetOutlineColour(d, hasSamples) {
@@ -1108,6 +1104,23 @@ var layerMenu = L.control
   })
   .addTo(map);
 
+  var input = L.control({
+    position: 'bottomleft'
+  });
+  input.onAdd = (map) => {
+    this._div = L.DomUtil.create('div', 'info');
+    this._div.innerHTML = '<input id="grid-input" placeholder="Custom grid value" type="number" onchange="changeSliderValue(this.value)"/>';
+    return this._div;
+  };
+  input.addTo(map);
+  
+  function changeSliderValue(value) {
+    slider._expand();
+    slider._sliderValue.innerHTML = value;
+    detailLevel = value;
+    $('#filter').trigger('change');
+  }
+
 //Adding leaflet slider to map for grip control.
 var slider = L.control.slider(
   function(value) {
@@ -1118,29 +1131,35 @@ var slider = L.control.slider(
     id: slider,
     min: 1,
     //width not working.
-    width: '500px',
+    size: '500px',
     max: 1500,
     step: 1,
     value: detailLevel,
     logo: 'Grid',
+    increment: true,
     orientation: 'horiztonal',
-    position: 'bottomleft'
+    position: 'bottomleft',
+    syncSlider: true,
   }
 );
 slider.addTo(map);
 
+console.log(slider);
+slider._sliderValue.innerHTML = 23;
+
 //Adding custom control for Andrew's Visualization Copy.
-var info = L.control({ position: 'bottomright' });
-info.onAdd = function(map) {
+var visControl = L.control({ position: 'bottomright' });
+visControl.onAdd = function(map) {
   this._div = L.DomUtil.create('div', 'info'); //creates div with class "info"
   this.update();
   return this._div;
 };
-info.update = function(siteValues) {
+visControl.update = function(siteValues) {
   this._div.innerHTML =
     '<div id="chart" style="display: none;"></div><br />' +
     '<button onclick="toggleGraph()">Toggle Graph</button>';
 };
+//console.log(visControl);
 
 //toggle display chart element containing visualization.
 function toggleGraph() {
@@ -1155,7 +1174,7 @@ function toggleGraph() {
     });
     */
 }
-info.addTo(map);
+visControl.addTo(map);
 
 // Create a new map with a fullscreen button:
 
