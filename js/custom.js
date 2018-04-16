@@ -140,7 +140,7 @@ function getSiteWeights(filters) {
 
   //todo: test calculate site metrics.
   calculateSiteMetrics(siteMetrics);
-  console.log(siteMetrics);
+  //console.log(siteMetrics);
 
   //console.log(grid);
   //warrick: integrating filtered results with grid view.
@@ -542,7 +542,7 @@ function DrawGrid(grid) {
   gridSitesLayerGroup.addLayer(gridSitesLayer);
 
   //test
-  console.log(gridSitesLayer);
+   console.log(gridSitesLayer._layers[283].feature.properties);
 }
 
 function onEachFeature(feature, layer) {
@@ -697,9 +697,9 @@ function GetGridValues(cells) {
   return gridMaxes;
 }
 
-function GetOutlineOpacity(d, hasSamples) {
+function GetOutlineOpacity(hasSamples) {
   if (hasSamples) {
-    return d > 0.0 ? 0.15 : 0.15;
+    return 0.15;
   } else {
     return 0;
   }
@@ -757,15 +757,21 @@ function highlightFeatureClick(layer) {
 function highlightLayer(layer) {
   layer.setStyle({
     weight: 3,
-    color: 'black',
-    dashArray: '',
-    opacity: 1,
-    fillOpacity: 0.95
+    opacity: 0.9
   });
 
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
     layer.bringToFront();
   }
+}
+
+function disableHighlightLayer(layer) {
+  var properties = layer.feature.properties;
+  console.log(properties);
+  layer.setStyle({
+    weight: 1,
+    opacity: GetOutlineOpacity(properties.hasSamples),
+  });
 }
 
 //holds the site metrics for visualization
@@ -909,7 +915,7 @@ function updateGraph(siteMetrics) {
         .attr('id', d => d.siteId)
         .attr('cy', y(d.key))
         .attr('r', 10)
-        .attr('opacity', 0.5)
+        .attr('opacity', 0.15)
         .attr('fill', function(d) {
           return metricColour(d.elev);
         })
@@ -941,6 +947,24 @@ function updateGraph(siteMetrics) {
             .style('top', d3.event.pageY - 10 + 'px')
             .style('opacity', 0.9)
             .style('z-index', 1000);
+
+            var circle = d3.select(this);
+            var site = circle.attr('id');
+            //Uses grid cell look-up to zoom to
+            // TODO: Doesn't work after grid isn't default 60.
+            var featureIndex = cellSiteDict[site];
+            //console.log(featureIndex);
+
+            //e>layers>feature>properties> index == featureIndex. Then highlight.
+            map.eachLayer(function (layer) {
+              //console.log(layer);
+              if (layer.feature != null) {
+                if (layer.feature.properties.index == featureIndex) {
+                  console.log(layer);
+                  highlightLayer(layer);
+                }
+              }
+            });  
         })
         .on('mouseout', function(d) {
           d3
@@ -954,6 +978,24 @@ function updateGraph(siteMetrics) {
             .style('opacity', 0)
             .style('z-index', 1000)
             .duration(250);
+
+            var circle = d3.select(this);
+            var site = circle.attr('id');
+            //Uses grid cell look-up to zoom to
+            // TODO: Doesn't work after grid isn't default 60.
+            var featureIndex = cellSiteDict[site];
+            //console.log(featureIndex);
+
+            //e>layers>feature>properties> index == featureIndex. Then highlight.
+            map.eachLayer(function (layer) {
+              //console.log(layer);
+              if (layer.feature != null) {
+                if (layer.feature.properties.index == featureIndex) {
+                  console.log(layer);
+                  disableHighlightLayer(layer);
+                }
+              }
+            }); 
         })
         .on('click', function(d) {
           var circle = d3.select(this);
@@ -964,7 +1006,6 @@ function updateGraph(siteMetrics) {
           //console.log(featureIndex);
 
           //e>layers>feature>properties> index == featureIndex. Then highlight.
-          var activeLayers = [];
           map.eachLayer(function(layer) {
             //console.log(layer);
             if (layer.feature != null) {
@@ -975,7 +1016,6 @@ function updateGraph(siteMetrics) {
                 //var centre = bounds.getCenter();
                 map.flyToBounds(bounds, { padding: [100, 100] });
                 //highlightLayer(layer);
-              } else {
               }
             }
           });
