@@ -1131,7 +1131,7 @@ var slider = L.control.slider(
     id: slider,
     min: 1,
     //width not working.
-    size: '500px',
+    size: '300px',
     max: 1500,
     step: 1,
     value: detailLevel,
