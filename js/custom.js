@@ -759,11 +759,9 @@ function highlightLayer(layer) {
     opacity: 0.9
   });
 
-  /*
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
     layer.bringToFront();
   }
-  */
 }
 
 function disableHighlightLayer(layer) {
