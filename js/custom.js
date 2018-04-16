@@ -700,7 +700,7 @@ function GetOutlineOpacity(hasSamples) {
     return 0.15;
 }
 
-function GetOutlineColour(d, hasSamples) {
+function GetOutlineColour(hasSamples) {
   return '#000000';
 }
 
@@ -713,6 +713,7 @@ function GetFillOpacity(d, hasSamples) {
   }
 }
 
+//todo: might be better to use leaflet chloropleth plugin for this
 function GetFillColor(d) {
   return d > 0.9
     ? '#800026'
@@ -1104,6 +1105,7 @@ var layerMenu = L.control
   })
   .addTo(map);
 
+  //Adding input field for alternative grid slider control
   var input = L.control({
     position: 'bottomleft'
   });
@@ -1113,7 +1115,7 @@ var layerMenu = L.control
     return this._div;
   };
   input.addTo(map);
-  
+  //function for input change 
   function changeSliderValue(value) {
     slider._expand();
     slider._sliderValue.innerHTML = value;
@@ -1144,8 +1146,6 @@ var slider = L.control.slider(
 );
 slider.addTo(map);
 
-console.log(slider);
-slider._sliderValue.innerHTML = 23;
 
 //Adding custom control for Andrew's Visualization Copy.
 var visControl = L.control({ position: 'bottomright' });
@@ -1165,7 +1165,7 @@ visControl.update = function(siteValues) {
 function toggleGraph() {
   var graph = $('#chart').toggle('slow');
 
-  /* for minimizing the width
+  /* for minimizing the width based on window size.
     chart
     .transition()
         .duration(1000)
@@ -1175,11 +1175,6 @@ function toggleGraph() {
     */
 }
 visControl.addTo(map);
-
-// Create a new map with a fullscreen button:
-
-// or, add to an existing map:
-//map.addControl(new L.Control.Fullscreen());
 
 //Adding d3 visualization
 var margin = { top: 20, right: 30, bottom: 20, left: 160 },
@@ -1251,9 +1246,6 @@ var tooltip = d3
   .append('div')
   .attr('class', 'tooltip')
   .style('opacity', 0);
-
-//Warrick test: Adding sidebar for Andrew's Visualization
-//var sidebar = L.control.sidebar('sidebar').addTo(map);
 
 // Nick's grid & pie mode.
 /*
