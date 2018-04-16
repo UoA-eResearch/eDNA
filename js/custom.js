@@ -142,7 +142,6 @@ function getSiteWeights(filters) {
   calculateSiteMetrics(siteMetrics);
   //console.log(siteMetrics);
 
-  //console.log(grid);
   //warrick: integrating filtered results with grid view.
   DrawGrid(grid);
   return sites;
@@ -542,7 +541,7 @@ function DrawGrid(grid) {
   gridSitesLayerGroup.addLayer(gridSitesLayer);
 
   //test
-   console.log(gridSitesLayer._layers[283].feature.properties);
+  //console.log(gridSitesLayer);
 }
 
 function onEachFeature(feature, layer) {
@@ -760,14 +759,16 @@ function highlightLayer(layer) {
     opacity: 0.9
   });
 
+  /*
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
     layer.bringToFront();
   }
+  */
 }
 
 function disableHighlightLayer(layer) {
   var properties = layer.feature.properties;
-  console.log(properties);
+  //console.log(properties);
   layer.setStyle({
     weight: 1,
     opacity: GetOutlineOpacity(properties.hasSamples),
@@ -960,7 +961,6 @@ function updateGraph(siteMetrics) {
               //console.log(layer);
               if (layer.feature != null) {
                 if (layer.feature.properties.index == featureIndex) {
-                  console.log(layer);
                   highlightLayer(layer);
                 }
               }
@@ -984,14 +984,11 @@ function updateGraph(siteMetrics) {
             //Uses grid cell look-up to zoom to
             // TODO: Doesn't work after grid isn't default 60.
             var featureIndex = cellSiteDict[site];
-            //console.log(featureIndex);
 
             //e>layers>feature>properties> index == featureIndex. Then highlight.
             map.eachLayer(function (layer) {
-              //console.log(layer);
               if (layer.feature != null) {
                 if (layer.feature.properties.index == featureIndex) {
-                  console.log(layer);
                   disableHighlightLayer(layer);
                 }
               }
@@ -1003,15 +1000,11 @@ function updateGraph(siteMetrics) {
           //Uses grid cell look-up to zoom to
           // TODO: Doesn't work after grid isn't default 60.
           var featureIndex = cellSiteDict[site];
-          //console.log(featureIndex);
 
           //e>layers>feature>properties> index == featureIndex. Then highlight.
           map.eachLayer(function(layer) {
-            //console.log(layer);
             if (layer.feature != null) {
               if (layer.feature.properties.index == featureIndex) {
-                console.log(layer);
-                //console.log(layer.feature);
                 var bounds = layer.getBounds();
                 //var centre = bounds.getCenter();
                 map.flyToBounds(bounds, { padding: [100, 100] });
