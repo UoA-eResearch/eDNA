@@ -138,7 +138,6 @@ function getSiteWeights(filters) {
 
   //console.log(sites);
 
-  //todo: test calculate site metrics.
   calculateSiteMetrics(siteMetrics);
   //console.log(siteMetrics);
 
@@ -947,7 +946,6 @@ function updateGraph(siteMetrics) {
             var circle = d3.select(this);
             var site = circle.attr('id');
             //Uses grid cell look-up to zoom to
-            // TODO: Doesn't work after grid isn't default 60.
             var featureIndex = cellSiteDict[site];
             //console.log(featureIndex);
 
@@ -1048,7 +1046,7 @@ var tileLayer = L.tileLayer(
       '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
     subdomains: 'abcd',
     maxZoom: 19,
-    minZoom: 6
+    minZoom: 5.75,
   }
 );
 var map = L.map('map', {
@@ -1056,7 +1054,7 @@ var map = L.map('map', {
   zoomDelta: 0.25,
   layers: tileLayer,
   fullscreenControl: true
-}).setView([-41.235726, 172.5118422], 6);
+}).setView([-41.235726, 172.5118422], 5.75);
 var bounds = map.getBounds();
 bounds._northEast.lat += 10;
 bounds._northEast.lng += 10;
@@ -1111,7 +1109,7 @@ var layerMenu = L.control
   });
   input.onAdd = (map) => {
     this._div = L.DomUtil.create('div', 'info');
-    this._div.innerHTML = '<input id="grid-input" placeholder="Custom grid value" type="number" onchange="changeSliderValue(this.value)"/>';
+    this._div.innerHTML = '<label for="grid-input">Grid </label><input id="grid-input" size="3" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
     return this._div;
   };
   input.addTo(map);
@@ -1165,7 +1163,8 @@ visControl.update = function(siteValues) {
 function toggleGraph() {
   var graph = $('#chart').toggle('slow');
 
-  /* for minimizing the width based on window size.
+   //for minimizing the width based on window size.
+   /*
     chart
     .transition()
         .duration(1000)
@@ -1186,6 +1185,8 @@ var chart = d3
   .append('svg')
   .attr('width', width + margin.right + margin.left)
   .attr('height', height + margin.top + margin.bottom);
+  //.attr("viewBox", "0 0 " + width + " " + height)
+  //.attr("preserveAspectRatio", "xMidYMid meet");
 
 // Define area where the graph will be drawn
 var main = chart
