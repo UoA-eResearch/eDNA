@@ -752,7 +752,7 @@ function highlightFeatureClick(layer) {
 //not being used due to difficulty resetting layer style.
 function highlightLayer(layer) {
   layer.setStyle({
-    weight: 3,
+    weight: 5,
     opacity: 0.9
   });
 
