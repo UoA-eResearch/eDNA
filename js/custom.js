@@ -703,8 +703,6 @@ function CalculateGridMaxes(gridCells) {
     abundance: abundance,
     siteCount: siteCount
   };
-
-  console.log(gridCells);
   return gridMaxes;
 }
 
@@ -922,7 +920,7 @@ function updateGraph(siteMetrics) {
         .attr('class', 'enter')
         .attr('id', d => d.siteId)
         .attr('cy', y(d.key))
-        .attr('r', 10)
+        .attr('r', 5)
         .attr('opacity', 0.15)
         .attr('fill', function(d) {
           return metricColour(d.elev);
@@ -932,7 +930,7 @@ function updateGraph(siteMetrics) {
             .select(this.parentNode.parentNode)
             .selectAll('#' + d.siteId)
             .transition()
-            .attr('r', 20)
+            .attr('r', 10)
             .duration(250);
           tooltip
             .transition()
@@ -977,7 +975,7 @@ function updateGraph(siteMetrics) {
             .select(this.parentNode.parentNode)
             .selectAll('#' + d.siteId)
             .transition()
-            .attr('r', 10)
+            .attr('r', 5)
             .duration(250);
           tooltip
             .transition()
