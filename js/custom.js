@@ -487,10 +487,10 @@ function DrawGrid(grid) {
         species +
         '</strong>' +
         '<br />' +
-        '<strong>Richness:</strong> ' +
+        '<strong>Cell frequency:</strong> ' +
         speciesInCell[species].count +
         '<br />' +
-        '<strong>Abundance:</strong> ' +
+        '<strong>Cell abundance:</strong> ' +
         speciesInCell[species].value +
         '<br /><br />';
     }
