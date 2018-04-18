@@ -848,7 +848,7 @@ function updateGraph(siteMetrics) {
 
     var siteShannon = {
       siteId: siteMetric.site,
-      Metric: 'Shannon diversity',
+      Metric: 'Shannon entropy',
       value: siteMetric.shannonDiversity,
       elev: siteMetric.elev
     };
@@ -1227,7 +1227,7 @@ var y = d3
   .domain([
     'OTU richness',
     'Sequence abundance',
-    'Shannon diversity',
+    'Shannon entropy',
     'Effective alpha diversity',
     'Orders'
   ])
