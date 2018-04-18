@@ -426,6 +426,7 @@ function DrawGrid(grid) {
 
   var features = [];
   var gridCells = grid.cells;
+  var cellId = 0;
   //Generating geojson
   for (var i in gridCells) {
     var cell = gridCells[i];
@@ -449,6 +450,9 @@ function DrawGrid(grid) {
     //Add cell statistics within popup.
     //Cell coordinates
     var popupContent =
+      '<strong>Cell id:</strong> ' +
+      cellId +
+      '<br />' +
       '<strong>Cell Richness:</strong> ' +
       cell.richness +
       '<br />' +
@@ -469,6 +473,7 @@ function DrawGrid(grid) {
       cell.coordinates[2][1] +
       '<br /><br />';
 
+    cellId++;
     var speciesInCell = cell.cellSpecies;
     //console.log(speciesInCell);
 
@@ -608,7 +613,7 @@ function handleMouseOver(e) {
     circle
       .transition()
       .duration(250)
-      .attr('r', 10);
+      .attr('r', 14);
   }
 }
 
@@ -621,7 +626,7 @@ function handleMouseOut(e) {
     circle
       .transition()
       .duration(250)
-      .attr('r', 5);
+      .attr('r', 7);
   }
 }
 
@@ -920,7 +925,7 @@ function updateGraph(siteMetrics) {
         .attr('class', 'enter')
         .attr('id', d => d.siteId)
         .attr('cy', y(d.key))
-        .attr('r', 5)
+        .attr('r', 7)
         .attr('opacity', 0.15)
         .attr('fill', function(d) {
           return metricColour(d.elev);
@@ -930,7 +935,7 @@ function updateGraph(siteMetrics) {
             .select(this.parentNode.parentNode)
             .selectAll('#' + d.siteId)
             .transition()
-            .attr('r', 10)
+            .attr('r', 14)
             .duration(250);
           tooltip
             .transition()
@@ -975,7 +980,7 @@ function updateGraph(siteMetrics) {
             .select(this.parentNode.parentNode)
             .selectAll('#' + d.siteId)
             .transition()
-            .attr('r', 5)
+            .attr('r', 7)
             .duration(250);
           tooltip
             .transition()
@@ -1036,7 +1041,7 @@ function updateGraph(siteMetrics) {
         .append('circle')
         .attr('class', 'enter')
         .attr('cy', y(d.key))
-        .attr('r', 18)
+        .attr('r', 12)
         .style('stroke', 'grey')
         .style('fill', 'none')
         .style('opacity', 0)
