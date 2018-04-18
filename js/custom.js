@@ -419,11 +419,11 @@ function DrawGrid(grid) {
   var cells = grid.cells;
   var gridMaxes = CalculateGridMaxes(cells);
 
-  var maxCount = gridMaxes.richness;
-  var maxValue = gridMaxes.abundance;
-  var maxSites = gridMaxes.siteCount;
+  var maxRichness = gridMaxes.richness;
+  var maxAbundance = gridMaxes.abundance;
+  var maxSiteCount = gridMaxes.siteCount;
 
-  //console.log("max count", maxCount);
+
   var features = [];
   var gridCells = grid.cells;
   //Generating geojson
@@ -442,15 +442,15 @@ function DrawGrid(grid) {
       continue;
     }
 
-    var weightedCount = cell.count / maxCount;
-    var weightedValue = cell.value / maxValue;
-    var weightedSites = cell.cellSites.length / maxSites;
+    var weightedCount = cell.richness / maxRichness;
+    var weightedValue = cell.value / maxAbundance;
+    var weightedSites = cell.cellSites.length / maxSiteCount;
 
     //Add cell statistics within popup.
     //Cell coordinates
     var popupContent =
       '<strong>Cell Richness:</strong> ' +
-      cell.count +
+      cell.richness +
       '<br />' +
       '<strong>Cell Abundance: </strong>' +
       cell.value +
@@ -682,8 +682,10 @@ function CalculateGridMaxes(gridCells) {
   for (var i in gridCells) {
     var cell = gridCells[i];
 
+    //Summing sites within cell. Add the data to the cell.
     var cellRichness = Object.keys(cell.cellSpecies).length;
-    if (cellRichness > richness) {
+    cell.richness = cellRichness;
+    if (cell.richness > richness) {
       richness = cellRichness;
     }
     if (cell.value > abundance) {
@@ -701,6 +703,8 @@ function CalculateGridMaxes(gridCells) {
     abundance: abundance,
     siteCount: siteCount
   };
+
+  console.log(gridCells);
   return gridMaxes;
 }
 
