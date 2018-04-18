@@ -417,64 +417,70 @@ function MakeGridIndex(grid) {
 
 function DrawGrid(grid) {
   var cells = grid.cells;
+  var gridMaxes = CalculateGridMaxes(cells);
 
-  var gridMaxes = GetGridValues(cells);
-
-  var maxCount = gridMaxes.count;
-  var maxValue = gridMaxes.value;
-  var maxSites = gridMaxes.sites;
+  var maxCount = gridMaxes.richness;
+  var maxValue = gridMaxes.abundance;
+  var maxSites = gridMaxes.siteCount;
 
   //console.log("max count", maxCount);
   var features = [];
   var gridCells = grid.cells;
   //Generating geojson
-  for (var cell in gridCells) {
-    var gridCell = gridCells[cell];
+  for (var i in gridCells) {
+    var cell = gridCells[i];
+
+    var cellRichness = 0;
+    if (cell.hasSamples && cell.cellSpecies != null){
+      cellRichness = Object.keys(cell.cellSpecies).length;
+    }
+
+    var cellAbundance = cell.abundance;
 
     //if grid doesn't contain any sites then don't add to map.
-    if (!gridCell.hasSamples) {
+    if (!cell.hasSamples) {
       continue;
     }
 
-    var weightedCount = gridCells[cell].count / maxCount;
-    var weightedValue = gridCells[cell].value / maxValue;
-    var weightedSites = gridCells[cell].cellSites.length / maxSites;
+    var weightedCount = cell.count / maxCount;
+    var weightedValue = cell.value / maxValue;
+    var weightedSites = cell.cellSites.length / maxSites;
 
     //Add cell statistics within popup.
     //Cell coordinates
     var popupContent =
       '<strong>Cell Richness:</strong> ' +
-      gridCell.count +
+      cell.count +
       '<br />' +
       '<strong>Cell Abundance: </strong>' +
-      gridCell.value +
+      cell.value +
       '<br />' +
       '<strong>Cell Site Count: </strong>' +
-      gridCell.cellSites.length +
+      cell.cellSites.length +
       '<br />' +
       '<strong>Lng:</strong>  ' +
-      gridCell.coordinates[0][0] +
+      cell.coordinates[0][0] +
       ' to ' +
-      gridCell.coordinates[2][0] +
+      cell.coordinates[2][0] +
       '<br />' +
       '<strong>Lat:</strong>  ' +
-      gridCell.coordinates[0][1] +
+      cell.coordinates[0][1] +
       ' to ' +
-      gridCell.coordinates[2][1] +
+      cell.coordinates[2][1] +
       '<br /><br />';
 
-    var speciesInCell = gridCell.cellSpecies;
+    var speciesInCell = cell.cellSpecies;
     //console.log(speciesInCell);
 
     //list all sites within the cell.
     popupContent += '<strong>Sites in cell: </strong><br />' + '<ul>';
-    for (var site in gridCell.cellSites) {
-      popupContent += '<li>' + gridCell.cellSites[site] + '</li>';
+    for (var site in cell.cellSites) {
+      popupContent += '<li>' + cell.cellSites[site] + '</li>';
     }
     popupContent += '</ul><br />';
 
     //lists all the species within a cell.
-    popupContent += '<strong>Classifications in cell: </strong><br /><br />';
+    popupContent += '<strong>Search results in cell: </strong><br /><br />';
     for (species in speciesInCell) {
       popupContent +=
         '<strong>' +
@@ -497,13 +503,13 @@ function DrawGrid(grid) {
         weightedCount: weightedCount,
         speciesInCell: speciesInCell,
         weightedSites: weightedSites,
-        cellSites: gridCell.cellSites,
-        hasSamples: gridCell.hasSamples,
+        cellSites: cell.cellSites,
+        hasSamples: cell.hasSamples,
         popupContent: popupContent
       },
       geometry: {
         type: 'Polygon',
-        coordinates: [gridCells[cell].coordinates]
+        coordinates: [cell.coordinates]
       }
     };
     features.push(cellPolygon);
@@ -667,30 +673,33 @@ function CellCountStyle(feature) {
   };
 }
 
-function GetGridValues(cells) {
+function CalculateGridMaxes(gridCells) {
   //console.log(cells);
-  var maxCount = 0;
-  var maxValue = 0;
-  var maxSites = 0;
+  var richness = 0;
+  var abundance = 0;
+  var siteCount = 0;
   var totalCount = 0;
-  for (var cell in cells) {
-    if (cells[cell].count > maxCount) {
-      maxCount = cells[cell].count;
+  for (var i in gridCells) {
+    var cell = gridCells[i];
+
+    var cellRichness = Object.keys(cell.cellSpecies).length;
+    if (cellRichness > richness) {
+      richness = cellRichness;
     }
-    if (cells[cell].value > maxValue) {
-      maxValue = cells[cell].value;
+    if (cell.value > abundance) {
+      abundance = cell.value;
     }
-    if (cells[cell].cellSites.length > maxSites) {
-      maxSites = cells[cell].cellSites.length;
+    if (cell.cellSites.length > siteCount) {
+      siteCount = cell.cellSites.length;
     }
-    totalCount += cells[cell].count;
+    totalCount += cell.count;
   }
   //console.log("max count ", maxCount, "max value ", maxValue, "total count ", totalCount);
 
   var gridMaxes = {
-    count: maxCount,
-    value: maxValue,
-    sites: maxSites
+    richness: richness,
+    abundance: abundance,
+    siteCount: siteCount
   };
   return gridMaxes;
 }
