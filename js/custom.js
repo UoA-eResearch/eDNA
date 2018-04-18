@@ -608,7 +608,7 @@ function handleMouseOver(e) {
     circle
       .transition()
       .duration(250)
-      .attr('r', 20);
+      .attr('r', 10);
   }
 }
 
@@ -621,7 +621,7 @@ function handleMouseOut(e) {
     circle
       .transition()
       .duration(250)
-      .attr('r', 10);
+      .attr('r', 5);
   }
 }
 
