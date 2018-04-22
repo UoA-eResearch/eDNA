@@ -118,15 +118,6 @@ function getSiteWeights(filters) {
             cell.cellSpecies[species].value += e[k];
           }
 
-          //increments cell site list when bacteria present.
-          //if using this site evaluation remove the one from makegridindex function.
-          /*
-                    if ($.inArray(site.site, cell.cellSites) == -1) {
-                        cell.cellSites.push(site.site);
-                        totalSitesInResult++;
-                    }
-                    */
-
           //increment the n_points which is the total amount of sites the bacteria is found at.
           n_points++;
         }
@@ -134,8 +125,8 @@ function getSiteWeights(filters) {
     }
   }
   $('#numberResults').text(n_points);
+  
   //console.log(grid);
-
   //console.log(sites);
 
   calculateSiteMetrics(siteMetrics);
@@ -785,7 +776,10 @@ function disableHighlightLayer(layer) {
   });
 }
 
-//holds the site metrics for visualization
+/**
+ * Calculates site metric maxes and shannon entropy then calls updateGraph.
+ * @param {siteMetrics} siteMetrics 
+ */
 function calculateSiteMetrics(siteMetrics) {
   //Get sum count and value for calculations.
   var totalCount = 0;
@@ -809,6 +803,11 @@ function calculateSiteMetrics(siteMetrics) {
 
 //Gets the extents of a specified metric in the result set
 //returns colour scale based on extents.
+/**
+ * Calculates queries max and minimum metric. Returns based on value within the min, max range for plot visualization.
+ * @param {*} metric 
+ * @param {*} siteMetrics 
+ */
 function colourPoints(metric, siteMetrics) {
   if (metric == null) {
     metric = 'elev';
@@ -834,6 +833,10 @@ function colourPoints(metric, siteMetrics) {
   return metricColour;
 }
 
+/**
+ * Converts siteMetrics to an easier format for d3 use. Updates existing datapoints, enters new additional datapoints
+ * @param {*} siteMetrics 
+ */
 function updateGraph(siteMetrics) {
   //console.log("Running update graph");
   //console.log(siteMetrics);
@@ -1168,10 +1171,18 @@ visControl.onAdd = function(map) {
   this.update();
   return this._div;
 };
+
 visControl.update = function(siteValues) {
+  //using ECMA script 6 template literal using backticks.
   this._div.innerHTML =
-    '<div id="chart" style="display: none;"></div><br />' +
-    '<button onclick="toggleGraph()">Toggle Graph</button>';
+    `<div id="chart" style="display: none;"></div><br />
+    <button onclick="toggleGraph()">Toggle Graph</button>
+    <label> Shading Mode: 
+      <select>
+        <option value="Environment Type">Environment Type</option>
+      </select>
+    </label>`
+    ;
 };
 //console.log(visControl);
 
