@@ -137,8 +137,9 @@ function getSiteWeights(filters) {
   return sites;
 }
 
-//Called by handleResults
-//Populates the select dropdown.
+/**
+ * Called by handleresults. Populates search bar dropdown.
+ */
 function getFilterData() {
   var data = {};
   for (var i in window.results.data) {
@@ -226,7 +227,11 @@ function getFilterData() {
   return options;
 }
 
-//first called
+/**
+ * Function called by papaparse on completion. Fills in the siteMeta and gridCell objects based on filtered results.
+ * @param {*} results 
+ * @param {*} meta 
+ */
 function handleResults(results, meta) {
   //creates global var results
   window.results = results;
@@ -302,6 +307,11 @@ function handleResults(results, meta) {
   $('#filter').trigger('change');
 }
 
+/**
+ * Makes grid array for cells. Each cell starts off with only containing coordinates.
+ * @param {*} map 
+ * @param {*} detailLevel 
+ */
 function MakeGrid(map, detailLevel) {
   //Hard coded bounds and offsets.
   start = [164.71222, -33.977509];
@@ -353,6 +363,10 @@ function MakeGrid(map, detailLevel) {
   return grid;
 }
 
+/**
+ * Clears the values in the grid.
+ * @param {*} grid 
+ */
 function ClearGrid(grid) {
   for (var cell in grid.cells) {
     if (cell.count != 0) {
@@ -366,6 +380,10 @@ function ClearGrid(grid) {
   cell.cellSpecies = {};
 }
 
+/**
+ * Creates the grid lookup object/dictionary used for filling in the grid and calculating it's position.
+ * @param {*} grid 
+ */
 function MakeGridIndex(grid) {
   var siteCellDict = {};
   var gridStart = grid.start;
@@ -406,6 +424,17 @@ function MakeGridIndex(grid) {
   return siteCellDict;
 }
 
+/**
+ * Main function for calculating and rendering the grid layers.
+ * Calculates grid metrics to style the grid.
+ * Gives each layer a id in feature.properties.
+ * Creates feature collection
+ * Creates cell polygons
+ * Styles all layergroups
+ * Clears layergroups and adds new ones to map layer control.
+ * Generates popup content for the individual cell layers.
+ * @param {*} grid 
+ */
 function DrawGrid(grid) {
   var cells = grid.cells;
   var gridMaxes = CalculateGridMaxes(cells);
@@ -421,11 +450,6 @@ function DrawGrid(grid) {
   //Generating geojson
   for (var i in gridCells) {
     var cell = gridCells[i];
-
-    var cellRichness = 0;
-    if (cell.hasSamples && cell.cellSpecies != null){
-      cellRichness = Object.keys(cell.cellSpecies).length;
-    }
 
     var cellAbundance = cell.abundance;
 
@@ -492,6 +516,8 @@ function DrawGrid(grid) {
     }
 
     //TODO: cellPolygon and popupcontent id's are out of sync. Maybe make cell polygon nested somehow.
+    //TODO: Alternative make when making the gridCells that the feature index is based off. Reduce the array down to just
+    //TODO: the cells that have samples then it should match.
     var cellPolygon = {
       type: 'Feature',
       properties: {
@@ -546,6 +572,11 @@ function DrawGrid(grid) {
   //console.log(gridSitesLayer);
 }
 
+/**
+ * Performs this function on every feature selected.
+ * @param {*} feature 
+ * @param {*} layer 
+ */
 function onEachFeature(feature, layer) {
   if (feature.properties && feature.properties.popupContent) {
     var popup = layer.bindPopup(feature.properties.popupContent, {
@@ -562,12 +593,14 @@ function onEachFeature(feature, layer) {
   });
 }
 
+/**
+ * Currently used for debugging. Logs cell layer metrics.
+ * @param {*} e 
+ */
 function handleCellClick(e) {
-  console.log(e);
   var layer = e.target;
-  console.log(layer);
 
-  console.log('index is ' + layer.feature.properties.index);
+  console.log('layer index is ' + layer.feature.properties.index);
 
   var speciesInCell = layer.feature.properties.speciesInCell;
 
@@ -596,6 +629,10 @@ function handleCellClick(e) {
   }
 }
 
+/**
+ * Highlights visualization datapoints contained within the cellSites property of the hovered feature.
+ * @param {*} e mouse hover 
+ */
 function handleMouseOver(e) {
   var layer = e.target;
   //console.log(layer.feature.properties.cellSites);
@@ -609,6 +646,10 @@ function handleMouseOver(e) {
   }
 }
 
+/**
+ * Reverts the datapoint style to default when mouse leaves the cell containing the datapoint.
+ * @param {*} e 
+ */
 function handleMouseOut(e) {
   var layer = e.target;
   //console.log(layer.feature.properties.cellSites);
@@ -622,6 +663,11 @@ function handleMouseOut(e) {
   }
 }
 
+/**
+ * returns feature style based on feature properties cellSites length
+ * which is the amount of unique sites within the cell.
+ * @param {*} feature 
+ */
 function CellSitesStyle(feature) {
   return {
     fillColor: GetFillColor(feature.properties.weightedSites),
@@ -638,6 +684,10 @@ function CellSitesStyle(feature) {
   };
 }
 
+/**
+ * returns feature style based on feature properties value/abundance.
+ * @param {*} feature 
+ */
 function CellValueStyle(feature) {
   return {
     fillColor: GetFillColor(feature.properties.weightedValue),
@@ -654,6 +704,10 @@ function CellValueStyle(feature) {
   };
 }
 
+/**
+ * returns feature style based on feature properties count/richness.
+ * @param {*} feature 
+ */
 function CellCountStyle(feature) {
   return {
     fillColor: GetFillColor(feature.properties.weightedCount),
@@ -670,6 +724,11 @@ function CellCountStyle(feature) {
   };
 }
 
+/**
+ * Provides aggregate calculation for richness and adds it to the gridCell data.
+ * Calculates and returns the maximums for cell richness, abundance and shannon entropy within the grid.
+ * @param {*} gridCells 
+ */
 function CalculateGridMaxes(gridCells) {
   //console.log(cells);
   var richness = 0;
@@ -703,16 +762,31 @@ function CalculateGridMaxes(gridCells) {
   return gridMaxes;
 }
 
+/**
+ * Returns value for outline opacity. Currently hardcoded to 0.15.
+ * Currently used to centralize style changes across multiple layers.
+ * @param {*} hasSamples 
+ */
 function GetOutlineOpacity(hasSamples) {
     return 0.15;
 }
 
+/**
+ * Returns value for outline color. Currently hardcoded to 0.15.
+ * Currently used to centralize style changes across multiple layers.
+ * @param {*} hasSamples 
+ */
 function GetOutlineColour(hasSamples) {
   return '#000000';
 }
 
+/**
+ * Returns value for fill opacity based on if has Samples or not.
+ * Currently used to centralize style changes across multiple layers.
+ * @param {*, *} hasSamples 
+ */
 function GetFillOpacity(d, hasSamples) {
-  //Should always eval to true, does not create cell polygons unless bool is true.
+  //Should always eval to true as polygons aren't created unless hasSamples = true
   if (hasSamples) {
     return d > 0.0 ? 0.8 : 0.2;
   } else {
@@ -720,8 +794,12 @@ function GetFillOpacity(d, hasSamples) {
   }
 }
 
-//todo: might be better to use leaflet chloropleth plugin for this
+/**
+ * Returns layer fill colour based on it's value within the range 0-1.
+ * @param {*} d property value.
+ */
 function GetFillColor(d) {
+  // ?: might be better to use leaflet chloropleth plugin for this
   return d > 0.9
     ? '#800026'
     : d > 0.8
@@ -739,7 +817,10 @@ function GetFillColor(d) {
                 : d > 0.2 ? '#FFEDA0' : d > 0.0 ? '#FFFFCC' : '#9ecae1';
 }
 
-//to highlight by mouse click.
+/**
+ * Function called when layer is clicked on
+ * @param {*} layer 
+ */
 function highlightFeatureClick(layer) {
   var layer = e.target;
 
@@ -755,8 +836,11 @@ function highlightFeatureClick(layer) {
   }
 }
 
-//to highlight without clicking
-//not being used due to difficulty resetting layer style.
+/**
+ * Function to increase cell layer outline weight and opacity without
+ * the need for mouseover/mouse click on the layer
+ * @param {*} layer 
+ */
 function highlightLayer(layer) {
   layer.setStyle({
     weight: 5,
@@ -768,6 +852,11 @@ function highlightLayer(layer) {
   }
 }
 
+/**
+ * Resets layer outline weight and opacity to original values.
+ * Values are hardcoded due to geojson.reset() not working as planned.
+ * @param {*} layer 
+ */
 function disableHighlightLayer(layer) {
   var properties = layer.feature.properties;
   //console.log(properties);
@@ -778,7 +867,8 @@ function disableHighlightLayer(layer) {
 }
 
 /**
- * Calculates site metric maxes and shannon entropy then calls updateGraph.
+ * Calculates site metric max abundance, richness and shannon entropy then calls updateGraph. 
+ * Different from calculateGridMaxes which targets cell aggregated data.
  * @param {siteMetrics} siteMetrics 
  */
 function calculateSiteMetrics(siteMetrics) {
@@ -798,14 +888,12 @@ function calculateSiteMetrics(siteMetrics) {
   }
   //console.log(siteMetrics);
 
-  //Create visualization
   updateGraph(siteMetrics);
 }
 
-//Gets the extents of a specified metric in the result set
-//returns colour scale based on extents.
 /**
- * Calculates queries max and minimum metric. Returns based on value within the min, max range for plot visualization.
+ * Calculates queries max and minimum site metrics. 
+ * Returns colour range with spectrum from minimum value metric to max value metric.
  * @param {*} metric 
  * @param {*} siteMetrics 
  */
@@ -813,6 +901,8 @@ function colourPoints(metric, siteMetrics) {
   if (metric == null) {
     metric = 'elev';
   }
+
+  console.log(siteMetrics);
 
   sites = [];
   for (var site in siteMetrics) {
@@ -826,12 +916,12 @@ function colourPoints(metric, siteMetrics) {
     return d[metric];
   });
 
-  var metricColour = d3
+  var colourRange = d3
     .scaleLinear()
     .domain([0, max])
     .range(['blue', 'orange']);
 
-  return metricColour;
+  return colourRange;
 }
 
 /**
@@ -839,9 +929,6 @@ function colourPoints(metric, siteMetrics) {
  * @param {*} siteMetrics 
  */
 function updateGraph(siteMetrics) {
-  //console.log("Running update graph");
-  //console.log(siteMetrics);
-
   var metricColour = colourPoints('elev', siteMetrics);
 
   var dataSet = [];
@@ -880,7 +967,6 @@ function updateGraph(siteMetrics) {
     dataSet.push(siteAlpha);
   
   }//end of for loop
-  //console.log(dataSet);
 
   var nestedData = d3
     .nest()
@@ -888,7 +974,7 @@ function updateGraph(siteMetrics) {
       return d.Metric;
     })
     .entries(dataSet);
-  //console.log(nestedData);
+  console.log(nestedData);
 
   //within the svg, within the g tags, select the class datapoints
   var update = g.selectAll('.datapoints').data(nestedData, function(d) {
@@ -995,7 +1081,7 @@ function updateGraph(siteMetrics) {
             var circle = d3.select(this);
             var site = circle.attr('id');
             //Uses grid cell look-up to zoom to
-            // TODO: Doesn't work after grid isn't default 60.
+            //TODO: feature index doesn't match up with popup content index. Reduce grid to only include sampled cells.
             var featureIndex = cellSiteDict[site];
 
             //e>layers>feature>properties> index == featureIndex. Then highlight.
@@ -1011,7 +1097,8 @@ function updateGraph(siteMetrics) {
           var circle = d3.select(this);
           var site = circle.attr('id');
           //Uses grid cell look-up to zoom to
-          // TODO: Doesn't work after grid isn't default 60.
+
+          //TODO: feature index doesn't match up with popup content index. Reduce grid to only include sampled cells.
           var featureIndex = cellSiteDict[site];
 
           //e>layers>feature>properties> index == featureIndex. Then highlight.
@@ -1176,19 +1263,46 @@ visControl.onAdd = function(map) {
 visControl.update = function(siteValues) {
   //using ECMA script 6 template literal using backticks.
   this._div.innerHTML =
-    `<div id="chart" style="display: none;"></div><br />
+    `<div id="chart" style="display: none;">
+    </div>
+    <br />
     <button onclick="toggleGraph()">Toggle Graph</button>
     <label> Shading Mode: 
-      <select>
-        <option value="Environment Type">Environment Type</option>
+      <select onChange="selectColorChange(this.value)" >
+        <option value="y">Y</option>
+        <option value="x">X</option>
       </select>
     </label>`
     ;
-};
+}
 //console.log(visControl);
 
-//toggle display chart element containing visualization.
+function selectColorChange(e) {
+  console.log(e);
+
+  var metricColour = colourPoints(e)
+
+  /*
+  .attr('fill', function(d) {
+    return metricColour(d.elev);
+  })
+  */
+
+  var circles = d3.selectAll(".enter");
+  console.log(circles);
+  circles
+    .transition()
+    .duration(200)
+      .attr('fill', function(d) {
+        return metricColour(e);
+      });
+}
+
+/**
+ * Toggles the datapoint visualization visibility.
+ */
 function toggleGraph() {
+  //TODO: Add ability to reduce size by a factor.
   var graph = $('#chart').toggle('slow');
 
    //for minimizing the width based on window size.
