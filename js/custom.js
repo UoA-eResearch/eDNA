@@ -898,7 +898,7 @@ function calculateSiteMetrics(siteMetrics) {
  * @param {*} metric 
  * @param {*} siteMetrics 
  */
-function colourPoints(metric, siteMetrics) {
+function createColourScale(metric, siteMetrics) {
   if (metric == null) {
     metric = 'elev';
   }
@@ -917,9 +917,11 @@ function colourPoints(metric, siteMetrics) {
     return d[metric];
   });
 
+  console.log(min, max);
+
   var colourRange = d3
     .scaleLinear()
-    .domain([0, max])
+    .domain([min, max])
     .range(['blue', 'orange']);
 
   return colourRange;
@@ -932,7 +934,7 @@ function colourPoints(metric, siteMetrics) {
 function updateGraph(siteMetrics) {
 
   //default metric colouring set to elev.
-  var metricColour = colourPoints('elev', siteMetrics);
+  var metricColour = createColourScale('elev', siteMetrics);
 
   var dataSet = [];
   for (var site in siteMetrics) {
@@ -1044,8 +1046,8 @@ function updateGraph(siteMetrics) {
                 ': </strong>' +
                 d.value +
                 '<br />' +
-                '<strong>Elevation: </strong>' +
-                d.meta.elev
+                '<strong>' + document.getElementById("meta-select").value +': </strong>' +
+                d.meta[document.getElementById("meta-select").value]
             )
             .style('left', d3.event.pageX + 'px')
             .style('top', d3.event.pageY - 10 + 'px')
@@ -1271,7 +1273,7 @@ visControl.update = function(siteValues) {
     <br />
     <button onclick="toggleGraph()">Toggle Graph</button>
     <label> Shading Mode: 
-      <select onChange="selectColorChange(this.value)" >
+      <select id="meta-select" onChange="selectColorChange(this.value)" >
         <option value="y">Y</option>
         <option value="x">X</option>
       </select>
@@ -1283,7 +1285,7 @@ visControl.update = function(siteValues) {
 function selectColorChange(e) {
   console.log(e);
 
-  var metricColour = colourPoints(e, siteMetrics)
+  var metricColour = createColourScale(e, siteMetrics)
 
   /*
   .attr('fill', function(d) {
@@ -1306,8 +1308,8 @@ function selectColorChange(e) {
 
   var circles = d3.selectAll(".enter")
     .attr("fill", function(d) {
-      console.log(d.meta[e]);
-      console.log(metricColour(d.meta[e]));
+      //console.log(d.meta[e]);
+      //console.log(metricColour(d.meta[e]));
       return metricColour(d.meta[e])
     })
   console.log(circles);
