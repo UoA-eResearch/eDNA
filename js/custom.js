@@ -491,10 +491,11 @@ function DrawGrid(grid) {
         '<br /><br />';
     }
 
+    //TODO: cellPolygon and popupcontent id's are out of sync. Maybe make cell polygon nested somehow.
     var cellPolygon = {
       type: 'Feature',
       properties: {
-        index: cell,
+        index: i,
         weightedValue: weightedValue,
         weightedCount: weightedCount,
         speciesInCell: speciesInCell,
