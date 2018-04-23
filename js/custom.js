@@ -1272,7 +1272,7 @@ visControl.update = function(siteValues) {
     </div>
     <br />
     <button onclick="toggleGraph()">Toggle Graph</button>
-    <label> Shading Mode: 
+    <label> Colour by: 
       <select id="meta-select" onChange="selectColorChange(this.value)" >
         <option value="y">Y</option>
         <option value="x">X</option>
