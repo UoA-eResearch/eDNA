@@ -36,6 +36,7 @@ function checkFragment(f, species, site) {
 }
 
 var cellSiteDict = {};
+var siteMetrics;
 //Called by handeResults
 function getSiteWeights(filters) {
   var sites = {};
@@ -50,7 +51,7 @@ function getSiteWeights(filters) {
   //set bool for all the grids that don't have a site.
 
   //Site metrics: Adding dictionary of site metrics for calculations.
-  var siteMetrics = {};
+  siteMetrics = {};
 
   //loop through parsed global result data.
   for (var i in window.results.data) {
@@ -929,6 +930,8 @@ function colourPoints(metric, siteMetrics) {
  * @param {*} siteMetrics 
  */
 function updateGraph(siteMetrics) {
+
+  //default metric colouring set to elev.
   var metricColour = colourPoints('elev', siteMetrics);
 
   var dataSet = [];
@@ -938,7 +941,7 @@ function updateGraph(siteMetrics) {
       siteId: siteMetric.site,
       Metric: 'OTU richness',
       value: siteMetric.richness,
-      elev: siteMetric.elev
+      meta: siteMetric
     };
     dataSet.push(siteRichness);
 
@@ -946,7 +949,7 @@ function updateGraph(siteMetrics) {
       siteId: siteMetric.site,
       Metric: 'Shannon entropy',
       value: siteMetric.shannonDiversity,
-      elev: siteMetric.elev
+      meta: siteMetric
     };
     dataSet.push(siteShannon);
 
@@ -954,7 +957,7 @@ function updateGraph(siteMetrics) {
       siteId: siteMetric.site,
       Metric: 'Sequence abundance',
       value: siteMetric.abundance,
-      elev: siteMetric.elev
+      meta: siteMetric
     };
     dataSet.push(siteAbundance);
 
@@ -962,7 +965,7 @@ function updateGraph(siteMetrics) {
       siteId: siteMetric.site,
       Metric: 'Effective alpha diversity',
       value: siteMetric.species.length,
-      elev: siteMetric.elev
+      meta: siteMetric
     };
     dataSet.push(siteAlpha);
   
@@ -1018,7 +1021,7 @@ function updateGraph(siteMetrics) {
         .attr('r', 7)
         .attr('opacity', 0.15)
         .attr('fill', function(d) {
-          return metricColour(d.elev);
+          return metricColour(d.meta.elev);
         })
         .on('mouseover', function(d) {
           d3
@@ -1042,7 +1045,7 @@ function updateGraph(siteMetrics) {
                 d.value +
                 '<br />' +
                 '<strong>Elevation: </strong>' +
-                d.elev
+                d.meta.elev
             )
             .style('left', d3.event.pageX + 'px')
             .style('top', d3.event.pageY - 10 + 'px')
@@ -1288,6 +1291,7 @@ function selectColorChange(e) {
   })
   */
 
+  /*
   var circles = d3.selectAll(".enter");
   console.log(circles);
   circles
@@ -1296,6 +1300,18 @@ function selectColorChange(e) {
       .attr('fill', function(d) {
         return metricColour(e);
       });
+  */
+
+  console.log(siteMetrics);
+
+  var circles = d3.selectAll(".enter")
+    .attr("fill", function(d) {
+      console.log(d.meta.x);
+      console.log(metricColour(d.meta.x));
+      return metricColour(d.meta.x)
+    })
+  console.log(circles);
+  
 }
 
 /**
