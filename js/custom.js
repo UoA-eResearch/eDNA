@@ -1283,7 +1283,7 @@ visControl.update = function(siteValues) {
 function selectColorChange(e) {
   console.log(e);
 
-  var metricColour = colourPoints(e)
+  var metricColour = colourPoints(e, siteMetrics)
 
   /*
   .attr('fill', function(d) {
