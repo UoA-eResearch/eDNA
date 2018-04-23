@@ -1133,7 +1133,7 @@ function updateGraph(siteMetrics) {
       d3
         .select(this)
         .append('circle')
-        .attr('class', 'enter')
+        .attr('class', 'enter-mean')
         .attr('cy', y(d.key))
         .attr('r', 12)
         .style('stroke', 'grey')
@@ -1306,9 +1306,9 @@ function selectColorChange(e) {
 
   var circles = d3.selectAll(".enter")
     .attr("fill", function(d) {
-      console.log(d.meta.x);
-      console.log(metricColour(d.meta.x));
-      return metricColour(d.meta.x)
+      console.log(d.meta[e]);
+      console.log(metricColour(d.meta[e]));
+      return metricColour(d.meta[e])
     })
   console.log(circles);
   
