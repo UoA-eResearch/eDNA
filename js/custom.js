@@ -898,31 +898,45 @@ function calculateSiteMetrics(siteMetrics) {
  * @param {*} metric 
  * @param {*} siteMetrics 
  */
-function createColourScale(metric, siteMetrics) {
-  if (metric == null) {
-    metric = 'elev';
-  }
+function createColorRange(siteMetrics) {
+  
+  var metric = document.getElementById('meta-select').value;
 
   console.log(siteMetrics);
+  console.log(metric, colorScheme);
 
+  // ? Not entirely sure i pushed the sitemetrics onto a separate array.
   sites = [];
   for (var site in siteMetrics) {
     sites.push(siteMetrics[site]);
   }
 
+  // TODO: min and max not being defined on first run.
   var min = d3.min(sites, function(d) {
     return d[metric];
   });
   var max = d3.max(sites, function(d) {
     return d[metric];
   });
-
   console.log(min, max);
+
+  var colorScheme = document.getElementById('color-scheme-select').value;
+  var colorRange = [];
+  switch (colorScheme) {
+    case("sequential"):
+    colorRange = ['blue', 'orange'];
+      break;
+    case("diverging"):
+      colorRange = ['#fc8d59', '#99d594'];
+      break;
+    default:
+      colorRange = ['grey', 'black'];
+  }
 
   var colourRange = d3
     .scaleLinear()
     .domain([min, max])
-    .range(['blue', 'orange']);
+    .range(colorRange);
 
   return colourRange;
 }
@@ -933,8 +947,8 @@ function createColourScale(metric, siteMetrics) {
  */
 function updateGraph(siteMetrics) {
 
-  //default metric colouring set to elev.
-  var metricColour = createColourScale('elev', siteMetrics);
+  var metricColour = createColorRange(siteMetrics);
+  var colourMetric = document.getElementById("meta-select").value;
 
   var dataSet = [];
   for (var site in siteMetrics) {
@@ -1023,7 +1037,9 @@ function updateGraph(siteMetrics) {
         .attr('r', 7)
         .attr('opacity', 0.15)
         .attr('fill', function(d) {
-          return metricColour(d.meta.elev);
+          //TODO: Create a function to get the select dropdown values. For here and onchange.
+          //console.log(d.meta[metric]);
+          return metricColour(d.meta[colourMetric]);
         })
         .on('mouseover', function(d) {
           d3
@@ -1274,8 +1290,15 @@ visControl.update = function(siteValues) {
     <button onclick="toggleGraph()">Toggle Graph</button>
     <label> Colour by: 
       <select id="meta-select" onChange="selectColorChange(this.value)" >
+        <option selected value="elev">elev</option>
         <option value="y">Y</option>
         <option value="x">X</option>
+      </select>
+    </label>
+    <label> Colour type: 
+      <select id="color-scheme-select" onChange="selectColorChange(this.value)" >
+        <option selected value="sequential">Sequential</option>
+        <option value="diverging">Diverging</option>
       </select>
     </label>`
     ;
@@ -1283,34 +1306,16 @@ visControl.update = function(siteValues) {
 //console.log(visControl);
 
 function selectColorChange(e) {
-  console.log(e);
 
-  var metricColour = createColourScale(e, siteMetrics)
+  var metric = document.getElementById("meta-select").value;
 
-  /*
-  .attr('fill', function(d) {
-    return metricColour(d.elev);
-  })
-  */
-
-  /*
-  var circles = d3.selectAll(".enter");
-  console.log(circles);
-  circles
-    .transition()
-    .duration(200)
-      .attr('fill', function(d) {
-        return metricColour(e);
-      });
-  */
+  var metricColour = createColorRange(siteMetrics)
 
   console.log(siteMetrics);
 
   var circles = d3.selectAll(".enter")
     .attr("fill", function(d) {
-      //console.log(d.meta[e]);
-      //console.log(metricColour(d.meta[e]));
-      return metricColour(d.meta[e])
+      return metricColour(d.meta[metric])
     })
   console.log(circles);
   
