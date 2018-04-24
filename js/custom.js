@@ -912,6 +912,7 @@ function createColorRange(siteMetrics) {
   }
 
   // TODO: min and max not being defined on first run.
+  // todo: min and max are based on all site values. Not just search result values.
   var min = d3.min(sites, function(d) {
     return d[metric];
   });
@@ -927,7 +928,7 @@ function createColorRange(siteMetrics) {
     colorRange = ['blue', 'orange'];
       break;
     case("diverging"):
-      colorRange = ['#fc8d59', '#99d594'];
+      colorRange = ['#2c7bb6', '#d7191c'];
       break;
     default:
       colorRange = ['grey', 'black'];
@@ -947,6 +948,8 @@ function createColorRange(siteMetrics) {
  */
 function updateGraph(siteMetrics) {
 
+  // todo: fix the naming here...
+  // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   var metricColour = createColorRange(siteMetrics);
   var colourMetric = document.getElementById("meta-select").value;
 
