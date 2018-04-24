@@ -905,14 +905,12 @@ function createColorRange(siteMetrics) {
   console.log(siteMetrics);
   console.log(metric, colorScheme);
 
-  // ? Not entirely sure i pushed the sitemetrics onto a separate array.
+  // ? Not entirely sure why I pushed the sitemetrics onto a separate array.
   sites = [];
   for (var site in siteMetrics) {
     sites.push(siteMetrics[site]);
   }
 
-  // TODO: min and max not being defined on first run.
-  // todo: min and max are based on all site values. Not just search result values.
   var min = d3.min(sites, function(d) {
     return d[metric];
   });
@@ -936,6 +934,8 @@ function createColorRange(siteMetrics) {
 
   var colourRange = d3
     .scaleLinear()
+    // ? Not sure if interpolate is best visibility choice.
+    .interpolate(d3.interpolateRgb)
     .domain([min, max])
     .range(colorRange);
 
@@ -1038,7 +1038,7 @@ function updateGraph(siteMetrics) {
         .attr('id', d => d.siteId)
         .attr('cy', y(d.key))
         .attr('r', 7)
-        .attr('opacity', 0.15)
+        .attr('opacity', 0.3)
         .attr('fill', function(d) {
           //TODO: Create a function to get the select dropdown values. For here and onchange.
           //console.log(d.meta[metric]);
@@ -1286,6 +1286,7 @@ visControl.onAdd = function(map) {
 
 visControl.update = function(siteValues) {
   //using ECMA script 6 template literal using backticks.
+  // todo: use map function to list the site meta fields for the options.
   this._div.innerHTML =
     `<div id="chart" style="display: none;">
     </div>
