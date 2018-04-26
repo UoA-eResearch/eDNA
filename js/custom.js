@@ -917,7 +917,7 @@ function createColorRange(siteMetrics) {
   var max = d3.max(sites, function(d) {
     return d[metric];
   });
-  console.log(min, max);
+  console.log("visualization plot min, max:", min, max);
 
   var colorScheme = document.getElementById('color-scheme-select').value;
   var colorRange = [];
@@ -1284,10 +1284,54 @@ visControl.onAdd = function(map) {
   return this._div;
 };
 
-visControl.update = function(siteValues) {
+visControl.update = function() {
   //using ECMA script 6 template literal using backticks.
   // todo: use map function to list the site meta fields for the options.
-  this._div.innerHTML =
+
+  // todo: Make this function called after the window.meta has been processed and (possibly) filtered
+  // otherwise it will have no idea what siteMetric keys to add as select options.
+
+  // if siteMetrics not null then generate option elements from site meta keys.
+  if (siteMetrics != null) {
+    console.log("site metrics found. Filling select element based on meta keys");
+    this._div.innerHeight = 
+    `<div id="chart" style="display: none;">
+    </div>
+    <br />
+    <button onclick="toggleGraph()">Toggle Graph</button>
+    <label> Colour by: 
+      <select id="meta-select" onChange="selectColorChange(this.value)" >
+      </select>
+    </label>
+    <label> Colour type: 
+      <select id="color-scheme-select" onChange="selectColorChange(this.value)" >
+        <option selected value="sequential">Sequential</option>
+        <option value="diverging">Diverging</option>
+      </select>
+    </label>`
+    ;
+
+    //filling "colour by" options based on meta data keys:
+
+    // get any sample to look at. Just grabbing first:
+    var site = siteMetrics[Object.keys(siteMetrics)[0]];
+    for (var metric in site) {
+      if (isNaN(site[metric])) {
+        console.log(site[metric], " not valid number");
+      }
+      else {
+        console.log(site[metric], " valid number");
+        //if valid metric then add to options.
+        document.getElementById("meta-select").innerHTML += `
+          <option selected value=${metric}>${metric}</option>
+        `;
+      }
+    }
+    
+    
+  }
+  else {
+    this._div.innerHTML =
     `<div id="chart" style="display: none;">
     </div>
     <br />
@@ -1306,6 +1350,7 @@ visControl.update = function(siteValues) {
       </select>
     </label>`
     ;
+  }
 }
 //console.log(visControl);
 
@@ -1465,6 +1510,8 @@ Papa.parse('Gavin_water_data_2010.tsv', {
       dynamicTyping: true,
       complete: function(meta) {
         handleResults(results, meta);
+        visControl.update(siteMetrics);
+        console.log(siteMetrics);
       }
     });
   }
