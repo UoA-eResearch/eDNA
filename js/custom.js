@@ -1314,6 +1314,10 @@ visControl.update = function() {
     //filling "colour by" options based on meta data keys:
 
     // get any sample to look at. Just grabbing first:
+
+    // todo: Not auto-filling the colouring options at the moment.
+    // todo: This block auto fills the options according to valid number meta fields.
+    /*
     var site = siteMetrics[Object.keys(siteMetrics)[0]];
     for (var metric in site) {
       if (isNaN(site[metric])) {
@@ -1327,8 +1331,7 @@ visControl.update = function() {
         `;
       }
     }
-    
-    
+    */
   }
   else {
     this._div.innerHTML =
@@ -1339,8 +1342,10 @@ visControl.update = function() {
     <label> Colour by: 
       <select id="meta-select" onChange="selectColorChange(this.value)" >
         <option selected value="elev">elev</option>
-        <option value="y">Y</option>
-        <option value="x">X</option>
+        <option selected value="mid_pH">Mid pH</option>
+        <option selected value="mean_C_percent">Mean carbon concentration</option>
+        <option value="prec_mean">Mean Precipitation</option>
+        <option value="ave_logNconcen">Average log Nitrogen concentration</option>
       </select>
     </label>
     <label> Colour type: 
