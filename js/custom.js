@@ -942,6 +942,12 @@ function createColorRange(siteMetrics) {
   return colourRange;
 }
 
+// todo: Add jitter function to randomly offset plots. Right now applying to row
+// todo: Make it apply to individual plots.
+let jitter = (upper, lower) => {
+  return (Math.random() * (upper - (lower)) + (lower));
+};
+
 /**
  * Converts siteMetrics to an easier format for d3 use. Updates existing datapoints, enters new additional datapoints
  * @param {*} siteMetrics 
@@ -1030,13 +1036,17 @@ function updateGraph(siteMetrics) {
 
       circle.exit().remove();
 
-      //add new
+      //Enter statement
       circle
         .enter()
         .append('circle')
         .attr('class', 'enter')
         .attr('id', d => d.siteId)
-        .attr('cy', y(d.key))
+        //.attr('cy', y(d.key))
+        .attr('cy', function(circle) {
+          // * If no jitter wanted then set jitter 0, 0.
+          return y(circle.Metric) + jitter(10, -10);
+        })
         .attr('r', 7)
         .attr('opacity', 0.3)
         .attr('fill', function(d) {
