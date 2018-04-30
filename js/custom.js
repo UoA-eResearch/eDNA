@@ -942,9 +942,12 @@ function createColorRange(siteMetrics) {
   return colourRange;
 }
 
-// todo: Add jitter function to randomly offset plots. Right now applying to row
-// todo: Make it apply to individual plots.
-let jitter = (upper, lower) => {
+/**
+ * Returns a random amount between upper and lower.
+ * @param {*} upper 
+ * @param {*} lower 
+ */
+let randomRange = (upper, lower) => {
   return (Math.random() * (upper - (lower)) + (lower));
 };
 
@@ -1045,7 +1048,7 @@ function updateGraph(siteMetrics) {
         //.attr('cy', y(d.key))
         .attr('cy', function(circle) {
           // * If no jitter wanted then set jitter 0, 0.
-          return y(circle.Metric) + jitter(10, -10);
+          return y(circle.Metric) + randomRange(10, -10);
         })
         .attr('r', 7)
         .attr('opacity', 0.3)
@@ -1059,12 +1062,12 @@ function updateGraph(siteMetrics) {
             .select(this.parentNode.parentNode)
             .selectAll('#' + d.siteId)
             .transition()
-            .attr('r', 14)
-            .duration(250);
+              .attr('r', 14)
+              .duration(250);
           tooltip
             .transition()
-            .style('opacity', 0.9)
-            .duration(250);
+              .style('opacity', 0.9)
+              .duration(250);
           tooltip
             .html(
               '<strong>' +
@@ -1149,15 +1152,15 @@ function updateGraph(siteMetrics) {
         })
         .merge(circle)
         .transition()
-        .duration(1500)
-        .attr('cx', function(d) {
-          var cx;
-          if (max == min) {
-            cx = 0;
-          } else {
-            cx = (d.value - min) / (max - min);
-          }
-          return x(cx);
+          .duration(1500)
+          .attr('cx', function(d) {
+            var cx;
+            if (max == min) {
+              cx = 0;
+            } else {
+              cx = (d.value - min) / (max - min);
+            }
+            return x(cx);
         });
 
       //adding mean circles
@@ -1171,9 +1174,9 @@ function updateGraph(siteMetrics) {
         .style('fill', 'none')
         .style('opacity', 0)
         .transition()
-        .duration(1500)
-        .style('opacity', 0.75)
-        .attr('cx', x((mean - min) / (max - min)));
+          .duration(1500)
+          .style('opacity', 0.75)
+          .attr('cx', x((mean - min) / (max - min)));
     }); //.each() end.
 
   var remove = update.exit().remove();
@@ -1378,9 +1381,11 @@ function selectColorChange(e) {
   console.log(siteMetrics);
 
   var circles = d3.selectAll(".enter")
-    .attr("fill", function(d) {
-      return metricColour(d.meta[metric])
-    })
+    .transition()
+    .duration(400)
+      .attr("fill", function(d) {
+        return metricColour(d.meta[metric])
+      })
   console.log(circles);
   
 }
