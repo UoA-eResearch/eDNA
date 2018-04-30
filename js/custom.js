@@ -899,11 +899,11 @@ function calculateSiteMetrics(siteMetrics) {
  * @param {*} siteMetrics 
  */
 function createColorRange(siteMetrics) {
+  // todo: Sometimes doesn't work with long named meta fields.
   
   var metric = document.getElementById('meta-select').value;
 
   console.log(siteMetrics);
-  console.log(metric, colorScheme);
 
   // ? Not entirely sure why I pushed the sitemetrics onto a separate array.
   sites = [];
