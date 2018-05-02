@@ -1262,10 +1262,8 @@ var layerMenu = L.control
   input.addTo(map);
   //function for input change 
   function changeSliderValue(value) {
-    // test: updating slider handle position with input field value.
+    //slider slider.slider refers to the handle. 
     slider.slider.value = value;
-    console.log(slider);
-    // test: end
     slider._expand();
     slider._sliderValue.innerHTML = value;
     detailLevel = value;
