@@ -868,8 +868,9 @@ function disableHighlightLayer(layer) {
 }
 
 /**
- * Calculates site metric max abundance, richness and shannon entropy then calls updateGraph. 
- * Different from calculateGridMaxes which targets cell aggregated data.
+ * Calculates site metric max abundance, richness and shannon entropy for chart
+ * visualization then calls updateGraph. 
+ * Different from calculateGridMaxes which targets cell-aggregated data.
  * @param {siteMetrics} siteMetrics 
  */
 function calculateSiteMetrics(siteMetrics) {
@@ -1253,12 +1254,18 @@ var layerMenu = L.control
   });
   input.onAdd = (map) => {
     this._div = L.DomUtil.create('div', 'info');
-    this._div.innerHTML = '<label for="grid-input">Grid </label><input id="grid-input" size="3" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
+    // todo: Shrink down the input field to 4/5 numbers.
+    // todo: Update input field changes to grid slider handle position.'
+    this._div.innerHTML = '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
     return this._div;
   };
   input.addTo(map);
   //function for input change 
   function changeSliderValue(value) {
+    // test: updating slider handle position with input field value.
+    slider.slider.value = value;
+    console.log(slider);
+    // test: end
     slider._expand();
     slider._sliderValue.innerHTML = value;
     detailLevel = value;
