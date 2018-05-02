@@ -1255,7 +1255,6 @@ var layerMenu = L.control
   input.onAdd = (map) => {
     this._div = L.DomUtil.create('div', 'info');
     // todo: Shrink down the input field to 4/5 numbers.
-    // todo: Update input field changes to grid slider handle position.'
     this._div.innerHTML = '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
     return this._div;
   };
@@ -1333,8 +1332,8 @@ visControl.update = function() {
 
     // get any sample to look at. Just grabbing first:
 
-    // todo: Not auto-filling the colouring options at the moment.
-    // todo: This block auto fills the options according to valid number meta fields.
+    // * Not auto-filling the colouring options at the moment.
+    // * This block auto fills the options according to valid number meta fields.
     /*
     var site = siteMetrics[Object.keys(siteMetrics)[0]];
     for (var metric in site) {
