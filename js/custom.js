@@ -1170,8 +1170,9 @@ function updateGraph(siteMetrics) {
         .append('circle')
         .attr('class', 'enter-mean')
         .attr('cy', y(d.key))
-        .attr('r', 12)
+        .attr('r', 15)
         .style('stroke', 'grey')
+        .style('stroke-width', 2)
         .style('fill', 'none')
         .style('opacity', 0)
         .transition()
@@ -1351,6 +1352,8 @@ visControl.update = function() {
     */
   }
   else {
+    console.log(siteMetrics);
+
     this._div.innerHTML =
     `<div id="chart" style="display: none;">
     </div>
@@ -1363,6 +1366,8 @@ visControl.update = function() {
         <option selected value="mean_C_percent">Mean carbon concentration</option>
         <option value="prec_mean">Mean Precipitation</option>
         <option value="ave_logNconcen">Average log Nitrogen concentration</option>
+        <option value="water2">Water 2</option>
+        <option value="freshwater">Freshwater</option>
       </select>
     </label>
     <label> Colour type: 
