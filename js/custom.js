@@ -1545,3 +1545,15 @@ Papa.parse('Gavin_water_data_2010.tsv', {
     });
   }
 });
+
+myRequest = new Request('http://localhost:8000/vis?term=Thaumarchaeota');
+
+function onlyUnique(value, index, self) {
+  return self.indexOf(value) == index;
+}
+
+fetch(myRequest).then(response => {
+  response.json().then(results => {
+     results.data
+  })
+})
