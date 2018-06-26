@@ -1540,20 +1540,31 @@ Papa.parse('Gavin_water_data_2010.tsv', {
       complete: function(meta) {
         handleResults(results, meta);
         visControl.update(siteMetrics);
-        console.log(siteMetrics);
       }
     });
   }
 });
 
-myRequest = new Request('http://localhost:8000/vis?term=Thaumarchaeota');
 
-function onlyUnique(value, index, self) {
-  return self.indexOf(value) == index;
-}
+// NOTE:NOTE:NOTE: Should I:
+// 1. cronjob update the data/metadata every day or something and work from those? 
+// 2. Or should I request from the DB for every new page load?
+// 3. Or make a query with the specific result set every time the filter is updated?
+// 4. Logically the former makes more sense
 
+// function onlyUnique(value, index, self) {
+//   return self.indexOf(value) == index;
+// }
+
+// results structure:  [{"": name, site: value, ...}, {"": name, site: value, ...}]
+// query all the OTUS.
+  //iterate all the OTUS and subquery all the sites
+    //use both those keys to grab the abundance value of that.
+
+// TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
+myRequest = new Request('http://localhost:8000/vis?term=ta');
 fetch(myRequest).then(response => {
   response.json().then(results => {
-     results.data
+     console.log(results.data);
   })
 })
