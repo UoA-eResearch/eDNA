@@ -895,7 +895,7 @@ function calculateSiteMetrics(siteMetrics) {
       -1 * (siteValue / totalValue) * Math.log(siteValue / totalValue);
     siteMetrics[site].shannonDiversity = shannonDiversity;
   }
-  console.log(siteMetrics);
+  // console.log(siteMetrics);
 
   updateGraph(siteMetrics);
 }
@@ -966,9 +966,6 @@ function updateGraph(siteMetrics) {
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   var metricColour = createColorRange(siteMetrics);
   var colourMetric = document.getElementById("meta-select").value;
-
-  console.log(siteMetrics);
-
   var dataSet = [];
   for (var site in siteMetrics) {
     var siteMetric = siteMetrics[site];
@@ -1013,7 +1010,7 @@ function updateGraph(siteMetrics) {
       return d.Metric;
     })
     .entries(dataSet);
-  console.log(nestedData);
+  // console.log(nestedData);
 
   //within the svg, within the g tags, select the class datapoints
   var update = g.selectAll('.datapoints').data(nestedData, function(d) {
