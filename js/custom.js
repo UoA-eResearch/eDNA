@@ -885,17 +885,18 @@ function calculateSiteMetrics(siteMetrics) {
   var totalCount = 0;
   var totalValue = 0;
   for (var site in siteMetrics) {
-    totalValue += siteMetrics[site].abundance;
+    console.log(site);
+    totalValue += siteMetrics[site].count;
     totalCount += siteMetrics[site].richness;
   }
   //calculate ShannonIndex for each site.
   for (var site in siteMetrics) {
-    var siteValue = siteMetrics[site].abundance;
+    var siteValue = siteMetrics[site].count;
     var shannonDiversity =
       -1 * (siteValue / totalValue) * Math.log(siteValue / totalValue);
     siteMetrics[site].shannonDiversity = shannonDiversity;
   }
-  //console.log(siteMetrics);
+  console.log(siteMetrics);
 
   updateGraph(siteMetrics);
 }
@@ -994,7 +995,8 @@ function updateGraph(siteMetrics) {
     var siteAbundance = {
       siteId: siteMetric.site,
       Metric: 'Sequence abundance',
-      value: siteMetric.abundance,
+      // TEMP:FIXME: bpa count abundance mismatch
+      value: siteMetric.count,
       meta: siteMetric
     };
     dataSet.push(siteAbundance);
