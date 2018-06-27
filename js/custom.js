@@ -65,8 +65,10 @@ function getSiteWeights(filters) {
       if (k != '') {
         //Extracts the measurements (e.g. alpine=.32, gravel=.5)
         // from a particular site, stores in site var.
-        
-        var site = window.meta[k.toUpperCase()];
+        // FIXME:START: Need to make a change to the casing earlier on to avoid this problem.
+        k = k.toUpperCase();
+        // FIXME:END:
+        var site = window.meta[k];
         //declare bool defaulting to false
         var match = false;
         //if no filters it will always be match
@@ -106,6 +108,9 @@ function getSiteWeights(filters) {
           //console.log(siteMetrics);
           //Warrick: Add to the corresponding grid as well.
           var cellIndex = cellSiteDict[k];
+          if (cellIndex == null) {
+            console.log(k);
+          }
           grid.cells[cellIndex].count++;
           grid.cells[cellIndex].value += e[k];
 
@@ -964,6 +969,8 @@ function updateGraph(siteMetrics) {
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   var metricColour = createColorRange(siteMetrics);
   var colourMetric = document.getElementById("meta-select").value;
+
+  console.log(siteMetrics);
 
   var dataSet = [];
   for (var site in siteMetrics) {
