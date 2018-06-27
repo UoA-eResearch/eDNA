@@ -91,11 +91,11 @@ function getSiteWeights(filters) {
           //add values to sitemetrics {} dictionary for visualization.
           if (siteMetrics[k] == null) {
             siteMetrics[k] = site;
-            siteMetrics[k].abundance = e[k];
+            siteMetrics[k].count = e[k];
             siteMetrics[k].richness = 1;
             siteMetrics[k].species = [species];
           } else {
-            siteMetrics[k].abundance += e[k];
+            siteMetrics[k].count += e[k];
             siteMetrics[k].richness++;
             if (siteMetrics[k].species.indexOf(species) == -1) {
               siteMetrics[k].species.push(species);
@@ -127,11 +127,11 @@ function getSiteWeights(filters) {
   }
   $('#numberResults').text(n_points);
   
-  //console.log(grid);
-  //console.log(sites);
+  console.log(grid);
+  console.log(sites);
+  console.log(siteMetrics);
 
   calculateSiteMetrics(siteMetrics);
-  //console.log(siteMetrics);
 
   //warrick: integrating filtered results with grid view.
   DrawGrid(grid);
@@ -1565,23 +1565,25 @@ var hashComponents = decodeURIComponent(
   window.location.hash.replace('#', '')
 ).split(',');
 //parse the water data
-Papa.parse('Gavin_water_data_2010.tsv', {
-  download: true,
-  header: true,
-  dynamicTyping: true,
+// Papa.parse('Gavin_water_data_2010.tsv', {
+//   download: true,
+//   header: true,
+//   dynamicTyping: true,
   //once water data parsed, parse waterdata metadata and pass them both into handleResults.
-  complete: function(results) {
-    Papa.parse('Gavin_water_data_2010_metadata.tsv', {
-      download: true,
-      header: true,
-      dynamicTyping: true,
-      complete: function(meta) {
-        console.log(results);
-        console.log(meta);
-        handleResults(results, meta);
-        visControl.update(siteMetrics);
-      }
-    });
-  }
-});
+//   complete: function(results) {
+//     Papa.parse('Gavin_water_data_2010_metadata.tsv', {
+//       download: true,
+//       header: true,
+//       dynamicTyping: true,
+//       complete: function(meta) {
+//         console.log(results);
+//         console.log(meta);
+//         handleResults(results, meta);
+//         visControl.update(siteMetrics);
+//       }
+//     });
+//   }
+// });
+
+// TEMP:END: COMMENTING OUT THE .TSV PARSER
 
