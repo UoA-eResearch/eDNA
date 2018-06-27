@@ -885,7 +885,6 @@ function calculateSiteMetrics(siteMetrics) {
   var totalCount = 0;
   var totalValue = 0;
   for (var site in siteMetrics) {
-    console.log(site);
     totalValue += siteMetrics[site].count;
     totalCount += siteMetrics[site].richness;
   }
@@ -911,9 +910,6 @@ function createColorRange(siteMetrics) {
   // todo: Sometimes doesn't work with long named meta fields.
   
   var metric = document.getElementById('meta-select').value;
-
-  console.log(siteMetrics);
-
   // ? Not entirely sure why I pushed the sitemetrics onto a separate array.
   sites = [];
   for (var site in siteMetrics) {
@@ -1374,8 +1370,8 @@ visControl.update = function() {
     <label> Colour by: 
       <select id="meta-select" onChange="selectColorChange(this.value)" >
         <option selected value="elev">elev</option>
-        <option selected value="mid_pH">Mid pH</option>
-        <option selected value="mean_C_percent">Mean carbon concentration</option>
+        <option value="mid_pH">Mid pH</option>
+        <option value="mean_C_percent">Mean carbon concentration</option>
         <option value="prec_mean">Mean Precipitation</option>
         <option value="ave_logNconcen">Average log Nitrogen concentration</option>
         <option value="water2">Water 2</option>
@@ -1552,7 +1548,7 @@ if (mode == "pie") {
     //use both those keys to grab the abundance value of that.
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
-abundanceRequest = new Request('http://localhost:8000/edna/abundance?term=bia');
+abundanceRequest = new Request('http://localhost:8000/edna/abundance?term=a');
 fetch(abundanceRequest).then(response => {
   response.json().then(abundanceResults => {
     abundanceData = abundanceResults;
