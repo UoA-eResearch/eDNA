@@ -242,6 +242,7 @@ function handleResults(results, meta) {
   for (var i in meta.data) {
     var site = meta.data[i];
     //Converts the long lat coordinates to cartesian.
+    // TODO: Change this reprojection to match the new coord system
     var reprojected = proj4('EPSG:2193', 'WGS84', site);
     //Creates new entry of capitalized metadata id: cartesian coordinates.
     metaDict[site['site'].toUpperCase()] = reprojected;
@@ -1209,6 +1210,7 @@ bounds._southWest.lng -= 10;
 map.setMaxBounds(bounds);
 //Defines how the proj4 function is to convert.
 //in this case proj4 is being set up to convert longlat to cartesian.
+// TODO: coordinate conversion: Change EPSG:2193 to EPSG:4326? To match the bulk convert.
 proj4.defs(
   'EPSG:2193',
   '+proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 +x_0=1600000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
@@ -1523,28 +1525,6 @@ if (mode == "pie") {
 }
 */
 
-var hashComponents = decodeURIComponent(
-  window.location.hash.replace('#', '')
-).split(',');
-//parse the water data
-Papa.parse('Gavin_water_data_2010.tsv', {
-  download: true,
-  header: true,
-  dynamicTyping: true,
-  //once water data parsed, parse waterdata metadata and pass them both into handleResults.
-  complete: function(results) {
-    Papa.parse('Gavin_water_data_2010_metadata.tsv', {
-      download: true,
-      header: true,
-      dynamicTyping: true,
-      complete: function(meta) {
-        handleResults(results, meta);
-        visControl.update(siteMetrics);
-      }
-    });
-  }
-});
-
 
 // NOTE:NOTE:NOTE: Should I:
 // 1. cronjob update the data/metadata every day or something and work from those? 
@@ -1562,9 +1542,46 @@ Papa.parse('Gavin_water_data_2010.tsv', {
     //use both those keys to grab the abundance value of that.
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
-myRequest = new Request('http://localhost:8000/vis?term=ta');
-fetch(myRequest).then(response => {
-  response.json().then(results => {
-     console.log(results.data);
+abundanceRequest = new Request('http://localhost:8000/edna/abundance?term=bia');
+fetch(abundanceRequest).then(response => {
+  response.json().then(abundanceResults => {
+    abundanceData = abundanceResults;
+    metadataRequest = new Request('http://localhost:8000/edna/metadata?term=A');
+    fetch(metadataRequest).then(metaResponse => {
+      metaResponse.json().then(metaResults => {
+        siteData = metaResults;
+        console.log(siteData);
+        handleResults(abundanceData, siteData);
+        visControl.update(siteMetrics);
+      })
+    })
   })
 })
+
+
+// TEMP:START: COMMENTING OUT THE .TSV PARSER
+// Loading in from local .tsv files.
+var hashComponents = decodeURIComponent(
+  window.location.hash.replace('#', '')
+).split(',');
+//parse the water data
+Papa.parse('Gavin_water_data_2010.tsv', {
+  download: true,
+  header: true,
+  dynamicTyping: true,
+  //once water data parsed, parse waterdata metadata and pass them both into handleResults.
+  complete: function(results) {
+    Papa.parse('Gavin_water_data_2010_metadata.tsv', {
+      download: true,
+      header: true,
+      dynamicTyping: true,
+      complete: function(meta) {
+        console.log(results);
+        console.log(meta);
+        handleResults(results, meta);
+        visControl.update(siteMetrics);
+      }
+    });
+  }
+});
+
