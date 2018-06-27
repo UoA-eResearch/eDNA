@@ -65,7 +65,8 @@ function getSiteWeights(filters) {
       if (k != '') {
         //Extracts the measurements (e.g. alpine=.32, gravel=.5)
         // from a particular site, stores in site var.
-        var site = window.meta[k];
+        
+        var site = window.meta[k.toUpperCase()];
         //declare bool defaulting to false
         var match = false;
         //if no filters it will always be match
@@ -127,9 +128,9 @@ function getSiteWeights(filters) {
   }
   $('#numberResults').text(n_points);
   
-  console.log(grid);
-  console.log(sites);
-  console.log(siteMetrics);
+  // console.log(grid);
+  // console.log(sites);
+  // console.log(siteMetrics);
 
   calculateSiteMetrics(siteMetrics);
 
