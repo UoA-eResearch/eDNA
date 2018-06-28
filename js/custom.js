@@ -55,7 +55,7 @@ function getSiteWeights(filters) {
 
   //loop through parsed global result data.
   for (var i in window.results.data) {
-    //e = contains species name + the bacteria's counts for all sites.
+    // waterdata row entry
     var e = window.results.data[i];
     //Extracts the species name from "" field of window.results
     var species = e[''];
@@ -81,11 +81,13 @@ function getSiteWeights(filters) {
           //returns a bool. Takes in the parameters f=dropdown options, species=the species name
           // and the site from the metadata.
           match = checkFragment(f, species, site);
+          // console.log(match);
           if (match) break;
         }
         //if the bacteria + current site combo returns a match + the current bacteria with current site
         //has a bacteria reading over 0 then:
         if (match && e[k] > 0) {
+          console.log('e[k] over 0');
           //if site currently contains no values/(maybe a value that isn't 1?) then give it a value of 0
           if (!sites[k]) sites[k] = 0;
           //add the value found at bacteria-e's site-k value.
@@ -124,7 +126,6 @@ function getSiteWeights(filters) {
             cell.cellSpecies[species].count++;
             cell.cellSpecies[species].value += e[k];
           }
-
           //increment the n_points which is the total amount of sites the bacteria is found at.
           n_points++;
         }
@@ -214,6 +215,7 @@ function getFilterData() {
     //add the url params to the options 2d array. with the id: param and text: param.
     options.push({ id: k, text: k });
   }
+  console.log(data);
   for (var k in data) {
     options.push({ id: k, text: k, title: 'Number of points: ' + data[k] });
   }
@@ -911,6 +913,8 @@ function createColorRange(siteMetrics) {
   
   var metric = document.getElementById('meta-select').value;
   // ? Not entirely sure why I pushed the sitemetrics onto a separate array.
+  console.log(siteMetrics);
+  console.log(metric);
   sites = [];
   for (var site in siteMetrics) {
     sites.push(siteMetrics[site]);
@@ -1367,7 +1371,7 @@ visControl.update = function() {
     <label> Colour by: 
       <select id="meta-select" onChange="selectColorChange(this.value)" >
         <option selected value="elev">elev</option>
-        <option value="mid_pH">Mid pH</option>
+        <option value="mid_ph">Mid pH</option>
         <option value="mean_C_percent">Mean carbon concentration</option>
         <option value="prec_mean">Mean Precipitation</option>
         <option value="ave_logNconcen">Average log Nitrogen concentration</option>
@@ -1545,11 +1549,11 @@ if (mode == "pie") {
     //use both those keys to grab the abundance value of that.
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
-abundanceRequest = new Request('http://localhost:8000/edna/abundance?term=a');
+abundanceRequest = new Request('http://localhost:8000/edna/abundance?term=');
 fetch(abundanceRequest).then(response => {
   response.json().then(abundanceResults => {
     abundanceData = abundanceResults;
-    metadataRequest = new Request('http://localhost:8000/edna/metadata?term=A');
+    metadataRequest = new Request('http://localhost:8000/edna/metadata?term=');
     fetch(metadataRequest).then(metaResponse => {
       metaResponse.json().then(metaResults => {
         siteData = metaResults;
