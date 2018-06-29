@@ -87,7 +87,7 @@ function getSiteWeights(filters) {
         //if the bacteria + current site combo returns a match + the current bacteria with current site
         //has a bacteria reading over 0 then:
         if (match && e[k] > 0) {
-          console.log('e[k] over 0');
+          // console.log('e[k] over 0');
           //if site currently contains no values/(maybe a value that isn't 1?) then give it a value of 0
           if (!sites[k]) sites[k] = 0;
           //add the value found at bacteria-e's site-k value.
@@ -111,7 +111,7 @@ function getSiteWeights(filters) {
           //Warrick: Add to the corresponding grid as well.
           var cellIndex = cellSiteDict[k];
           if (cellIndex == null) {
-            console.log(k);
+            // console.log(k);
           }
           grid.cells[cellIndex].count++;
           grid.cells[cellIndex].value += e[k];
@@ -215,7 +215,7 @@ function getFilterData() {
     //add the url params to the options 2d array. with the id: param and text: param.
     options.push({ id: k, text: k });
   }
-  console.log(data);
+  // console.log(data);
   for (var k in data) {
     options.push({ id: k, text: k, title: 'Number of points: ' + data[k] });
   }
@@ -913,8 +913,8 @@ function createColorRange(siteMetrics) {
   
   var metric = document.getElementById('meta-select').value;
   // ? Not entirely sure why I pushed the sitemetrics onto a separate array.
-  console.log(siteMetrics);
-  console.log(metric);
+  // console.log(siteMetrics);
+  // console.log(metric);
   sites = [];
   for (var site in siteMetrics) {
     sites.push(siteMetrics[site]);
@@ -1404,8 +1404,7 @@ function selectColorChange(e) {
       .attr("fill", function(d) {
         return metricColour(d.meta[metric])
       })
-  console.log(circles);
-  
+  // console.log(circles);
 }
 
 /**
@@ -1549,21 +1548,29 @@ if (mode == "pie") {
     //use both those keys to grab the abundance value of that.
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
-abundanceRequest = new Request('http://localhost:8000/edna/abundance?term=');
-fetch(abundanceRequest).then(response => {
-  response.json().then(abundanceResults => {
-    abundanceData = abundanceResults;
-    metadataRequest = new Request('http://localhost:8000/edna/metadata?term=');
-    fetch(metadataRequest).then(metaResponse => {
-      metaResponse.json().then(metaResults => {
-        siteData = metaResults;
-        console.log(siteData);
-        handleResults(abundanceData, siteData);
-        visControl.update(siteMetrics);
+try {
+  abundanceRequest = new Request('http://130.216.216.51:8000/edna/abundance?term=');
+  fetch(abundanceRequest).then(response => {
+    response.json().then(abundanceResults => {
+      abundanceData = abundanceResults;
+      metadataRequest = new Request('http://130.216.216.51:8000/edna/metadata?term=');
+      fetch(metadataRequest).then(metaResponse => {
+        metaResponse.json().then(metaResults => {
+          siteData = metaResults;
+          // console.log(siteData);
+          // console.log(abundanceData);
+          handleResults(abundanceData, siteData);
+          visControl.update(siteMetrics);
+        })
       })
     })
   })
-})
+}
+catch (err) {
+  // back up in case the request fails.
+  console.log(err);
+  loadFromFile();
+}
 
 
 // TEMP:START: COMMENTING OUT THE .TSV PARSER
@@ -1571,26 +1578,25 @@ fetch(abundanceRequest).then(response => {
 var hashComponents = decodeURIComponent(
   window.location.hash.replace('#', '')
 ).split(',');
-//parse the water data
-// Papa.parse('Gavin_water_data_2010.tsv', {
-//   download: true,
-//   header: true,
-//   dynamicTyping: true,
-  //once water data parsed, parse waterdata metadata and pass them both into handleResults.
-//   complete: function(results) {
-//     Papa.parse('Gavin_water_data_2010_metadata.tsv', {
-//       download: true,
-//       header: true,
-//       dynamicTyping: true,
-//       complete: function(meta) {
-//         console.log(results);
-//         console.log(meta);
-//         handleResults(results, meta);
-//         visControl.update(siteMetrics);
-//       }
-//     });
-//   }
-// });
-
-// TEMP:END: COMMENTING OUT THE .TSV PARSER
-
+// parse the water data
+function loadFromFile(){
+  Papa.parse('Gavin_water_data_2010.tsv', {
+    download: true,
+    header: true,
+    dynamicTyping: true,
+    // once water data parsed, parse waterdata metadata and pass them both into handleResults.
+    complete: function(results) {
+      Papa.parse('Gavin_water_data_2010_metadata.tsv', {
+        download: true,
+        header: true,
+        dynamicTyping: true,
+        complete: function(meta) {
+          // console.log(results);
+          // console.log(meta);
+          handleResults(results, meta);
+          visControl.update(siteMetrics);
+        }
+      });
+    }
+  });
+}
