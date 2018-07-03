@@ -248,15 +248,18 @@ function handleResults(results, meta) {
   //loops through meta data passed in.
   var metaDict = {};
   for (var i in meta.data) {
-    var site = meta.data[i];
-    //Converts the long lat coordinates to cartesian.
-    // TODO: Change this reprojection to match the new coord system
-    var reprojected = proj4('EPSG:2193', 'WGS84', site);
-    //Creates new entry of capitalized metadata id: cartesian coordinates.
-    metaDict[site['site'].toUpperCase()] = reprojected;
+    // var site = meta.data[i];
+    // //Converts the long lat coordinates to cartesian.
+    // // TODO: Change this reprojection to match the new coord system
+    // var reprojected = proj4('EPSG:2193', 'WGS84', site);
+    // //Creates new entry of capitalized metadata id: cartesian coordinates.
+    // metaDict[site['site'].toUpperCase()] = reprojected;
+    var site = meta.data[i]
+    metaDict[site['site'].toUpperCase()] = site;
   }
   //makes meta dictionary global
   window.meta = metaDict;
+  console.log(window.meta);
   //instantiates the filter search bar
   $('#filter').select2({
     placeholder: 'Type to filter by classification and metadata',
@@ -1548,37 +1551,39 @@ if (mode == "pie") {
     //use both those keys to grab the abundance value of that.
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
-try {
-  abundanceRequest = new Request('http://130.216.216.51:8000/edna/abundance?term=');
-  fetch(abundanceRequest).then(response => {
-    response.json().then(abundanceResults => {
-      abundanceData = abundanceResults;
-      metadataRequest = new Request('http://130.216.216.51:8000/edna/metadata?term=');
-      fetch(metadataRequest).then(metaResponse => {
-        metaResponse.json().then(metaResults => {
-          siteData = metaResults;
-          // console.log(siteData);
-          // console.log(abundanceData);
-          handleResults(abundanceData, siteData);
-          visControl.update(siteMetrics);
-        })
-      })
-    })
-  })
-}
-catch (err) {
-  // back up in case the request fails.
-  console.log(err);
-  loadFromFile();
-}
+// TEMP:START: Commenting out request method while working on coordinates
+// try {
+//   abundanceRequest = new Request('http://130.216.216.51:8000/edna/abundance?term=');
+//   fetch(abundanceRequest).then(response => {
+//     response.json().then(abundanceResults => {
+//       abundanceData = abundanceResults;
+//       metadataRequest = new Request('http://130.216.216.51:8000/edna/metadata?term=');
+//       fetch(metadataRequest).then(metaResponse => {
+//         metaResponse.json().then(metaResults => {
+//           siteData = metaResults;
+//           // console.log(siteData);
+//           // console.log(abundanceData);
+//           handleResults(abundanceData, siteData);
+//           visControl.update(siteMetrics);
+//         })
+//       })
+//     })
+//   })
+// }
+// catch (err) {
+//   // back up in case the request fails.
+//   console.log(err);
+//   loadFromFile();
+// }
+loadFromFile();
+// TEMP:END:
 
 
-// TEMP:START: COMMENTING OUT THE .TSV PARSER
-// Loading in from local .tsv files.
 var hashComponents = decodeURIComponent(
   window.location.hash.replace('#', '')
 ).split(',');
-// parse the water data
+
+// Loads from local .tsv files. Called if the request throws an error
 function loadFromFile(){
   Papa.parse('Gavin_water_data_2010.tsv', {
     download: true,
@@ -1586,7 +1591,7 @@ function loadFromFile(){
     dynamicTyping: true,
     // once water data parsed, parse waterdata metadata and pass them both into handleResults.
     complete: function(results) {
-      Papa.parse('Gavin_water_data_2010_metadata.tsv', {
+      Papa.parse('../Gavin_water_data_2010_metadata_converted.tsv', {
         download: true,
         header: true,
         dynamicTyping: true,
