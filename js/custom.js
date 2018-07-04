@@ -1552,30 +1552,37 @@ if (mode == "pie") {
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
 // TEMP:START: Commenting out request method while working on coordinates
-// try {
-//   abundanceRequest = new Request('http://130.216.216.51:8000/edna/abundance?term=');
-//   fetch(abundanceRequest).then(response => {
-//     response.json().then(abundanceResults => {
-//       abundanceData = abundanceResults;
-//       metadataRequest = new Request('http://130.216.216.51:8000/edna/metadata?term=');
-//       fetch(metadataRequest).then(metaResponse => {
-//         metaResponse.json().then(metaResults => {
-//           siteData = metaResults;
-//           // console.log(siteData);
-//           // console.log(abundanceData);
-//           handleResults(abundanceData, siteData);
-//           visControl.update(siteMetrics);
-//         })
-//       })
-//     })
-//   })
-// }
-// catch (err) {
-//   // back up in case the request fails.
-//   console.log(err);
-//   loadFromFile();
-// }
-loadFromFile();
+try {
+  abundanceRequest = new Request('http://130.216.216.51:8000/edna/abundance?term=');
+  fetch(abundanceRequest).then(response => {
+    if (response.status != 200) {
+      console.log("Abundance request failed, loading local metadata file");
+      loadFromFile();
+    }
+    response.json().then(abundanceResults => {
+      abundanceData = abundanceResults;
+      metadataRequest = new Request('http://130.216.216.51:8000/edna/metadata?term=');
+      fetch(metadataRequest).then(metaResponse => {
+        if (metaResponse.status != 200) {
+          console.log("Meta request failed, loading local metadata file");
+          loadFromFile();
+        }
+        metaResponse.json().then(metaResults => {
+          siteData = metaResults;
+          // console.log(siteData);
+          // console.log(abundanceData);
+          handleResults(abundanceData, siteData);
+          visControl.update(siteMetrics);
+        })
+      })
+    })
+  })
+}
+catch (err) {
+  // back up in case the request fails.
+  console.log(err);
+  loadFromFile();
+}
 // TEMP:END:
 
 
@@ -1585,7 +1592,7 @@ var hashComponents = decodeURIComponent(
 
 // Loads from local .tsv files. Called if the request throws an error
 function loadFromFile(){
-  Papa.parse('Gavin_water_data_2010.tsv', {
+  Papa.parse('abundance_data_removed_duplicates.tsv', {
     download: true,
     header: true,
     dynamicTyping: true,
