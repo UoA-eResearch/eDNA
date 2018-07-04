@@ -1591,7 +1591,7 @@ function loadFromFile(){
     dynamicTyping: true,
     // once water data parsed, parse waterdata metadata and pass them both into handleResults.
     complete: function(results) {
-      Papa.parse('../Gavin_water_data_2010_metadata_converted.tsv', {
+      Papa.parse('../Gavin_water_data_2010_metadata_converted_swapped.tsv', {
         download: true,
         header: true,
         dynamicTyping: true,
