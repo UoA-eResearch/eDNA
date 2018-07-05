@@ -255,6 +255,7 @@ function handleResults(results, meta) {
     // //Creates new entry of capitalized metadata id: cartesian coordinates.
     // metaDict[site['site'].toUpperCase()] = reprojected;
     var site = meta.data[i]
+
     metaDict[site['site'].toUpperCase()] = site;
   }
   //makes meta dictionary global
@@ -1553,7 +1554,7 @@ if (mode == "pie") {
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
 // TEMP:START: Commenting out request method while working on coordinates
 try {
-  abundanceRequest = new Request('http://130.216.216.51:8000/edna/abundance?term=');
+  abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/abundance?term=');
   fetch(abundanceRequest).then(response => {
     if (response.status != 200) {
       console.log("Abundance request failed, loading local metadata file");
@@ -1561,7 +1562,7 @@ try {
     }
     response.json().then(abundanceResults => {
       abundanceData = abundanceResults;
-      metadataRequest = new Request('http://130.216.216.51:8000/edna/metadata?term=');
+      metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/metadata?term=');
       fetch(metadataRequest).then(metaResponse => {
         if (metaResponse.status != 200) {
           console.log("Meta request failed, loading local metadata file");
