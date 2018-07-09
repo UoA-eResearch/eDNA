@@ -1553,35 +1553,41 @@ if (mode == "pie") {
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
 // TEMP:START: Commenting out request method while working on coordinates
-try {
-  abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/abundance?term=');
-  fetch(abundanceRequest).then(response => {
-    if (response.status != 200) {
-      console.log("Abundance request failed, loading local metadata file");
-      loadFromFile();
-    }
-    response.json().then(abundanceResults => {
-      abundanceData = abundanceResults;
-      metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/metadata?term=');
-      fetch(metadataRequest).then(metaResponse => {
-        if (metaResponse.status != 200) {
-          console.log("Meta request failed, loading local metadata file");
-          loadFromFile();
-        }
-        metaResponse.json().then(metaResults => {
-          siteData = metaResults;
-          // console.log(siteData);
-          // console.log(abundanceData);
-          handleResults(abundanceData, siteData);
-          visControl.update(siteMetrics);
+useDatabase = false;
+if (useDatabase) {
+  try {
+    abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/abundance?term=');
+    fetch(abundanceRequest).then(response => {
+      if (response.status != 200) {
+        console.log("Abundance request failed, loading local metadata file");
+        loadFromFile();
+      }
+      response.json().then(abundanceResults => {
+        abundanceData = abundanceResults;
+        metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/metadata?term=');
+        fetch(metadataRequest).then(metaResponse => {
+          if (metaResponse.status != 200) {
+            console.log("Meta request failed, loading local metadata file");
+            loadFromFile();
+          }
+          metaResponse.json().then(metaResults => {
+            siteData = metaResults;
+            // console.log(siteData);
+            // console.log(abundanceData);
+            handleResults(abundanceData, siteData);
+            visControl.update(siteMetrics);
+          })
         })
       })
     })
-  })
+  }
+  catch (err) {
+    // back up in case the request fails.
+    console.log(err);
+    loadFromFile();
+  }
 }
-catch (err) {
-  // back up in case the request fails.
-  console.log(err);
+else {
   loadFromFile();
 }
 // TEMP:END:
@@ -1593,13 +1599,13 @@ var hashComponents = decodeURIComponent(
 
 // Loads from local .tsv files. Called if the request throws an error
 function loadFromFile(){
-  Papa.parse('abundance_data_removed_duplicates.tsv', {
+  Papa.parse('active-abundance-data.tsv', {
     download: true,
     header: true,
     dynamicTyping: true,
     // once water data parsed, parse waterdata metadata and pass them both into handleResults.
     complete: function(results) {
-      Papa.parse('Gavin_water_data_2010_metadata_converted_swapped.tsv', {
+      Papa.parse('active-meta-data.tsv', {
         download: true,
         header: true,
         dynamicTyping: true,
