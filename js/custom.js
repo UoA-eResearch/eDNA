@@ -1553,7 +1553,7 @@ if (mode == "pie") {
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
 // TEMP:START: Commenting out request method while working on coordinates
-useDatabase = false;
+useDatabase = true;
 if (useDatabase) {
   try {
     abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/abundance?term=');
