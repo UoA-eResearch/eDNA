@@ -1553,42 +1553,83 @@ if (mode == "pie") {
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
 // TEMP:START: Commenting out request method while working on coordinates
-useDatabase = true;
+var useDatabase = true;
+var lightRequest = true;
 if (useDatabase) {
-  try {
-    abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/abundance?term=');
-    fetch(abundanceRequest).then(response => {
-      if (response.status != 200) {
-        console.log("Abundance request failed, loading local metadata file");
-        loadFromFile();
-      }
-      response.json().then(abundanceResults => {
-        abundanceData = abundanceResults;
+  if (lightRequest) {
+    console.time();
+    fetch('http://localhost:8000/edna/test').then(response => {
+      response.json().then(result =>{
+        data = result.data
+        abundance_dict = {
+          'data':{}
+        }
+        abundance_dict.data = data.otus.map((otu, otuIndex) => {
+          entry = {
+            "": otu
+          };
+          result.data.sites.map((site, siteIndex) => {
+            // assumes the response abundances array ordered by otu.id then by sample_context.id
+            entry[site] = data.abundances[(siteIndex * otuIndex) + siteIndex]
+          });
+          return entry;
+        });
+        console.timeEnd();
+        console.log(data);
+        console.log(abundance_dict);
         metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/metadata?term=');
         fetch(metadataRequest).then(metaResponse => {
-          if (metaResponse.status != 200) {
-            console.log("Meta request failed, loading local metadata file");
-            loadFromFile();
-          }
           metaResponse.json().then(metaResults => {
             siteData = metaResults;
             // console.log(siteData);
-            // console.log(abundanceData);
-            handleResults(abundanceData, siteData);
+            // console.log(abundance_dict);
+            handleResults(abundance_dict, siteData);
             visControl.update(siteMetrics);
           })
-        })
+        });
       })
     })
   }
-  catch (err) {
-    // back up in case the request fails.
-    console.log(err);
-    loadFromFile();
+  else {
+    try {
+      console.time();
+      abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/abundance?term=');
+      fetch(abundanceRequest).then(response => {
+        response.json().then(abundanceResults => {
+          console.timeEnd();
+          abundanceData = abundanceResults;
+          metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/metadata?term=');
+          fetch(metadataRequest).then(metaResponse => {
+            metaResponse.json().then(metaResults => {
+              siteData = metaResults;
+              // console.log(siteData);
+              // console.log(abundanceData);
+              handleResults(abundanceData, siteData);
+              visControl.update(siteMetrics);
+            })
+          })
+        })
+      })
+    }
+    catch (err) {
+      // back up in case the request fails.
+      console.log(err);
+      loadFromFile();
+    }
   }
 }
 else {
   loadFromFile();
+}
+
+function getRequestData(url){
+  request = new Request(url);
+  fetch(request).then(response => {
+    response.json().then(result =>{
+      console.log(result);
+      return result;
+    })
+  })
 }
 // TEMP:END:
 
@@ -1610,7 +1651,7 @@ function loadFromFile(){
         header: true,
         dynamicTyping: true,
         complete: function(meta) {
-          // console.log(results);
+          console.log(results);
           // console.log(meta);
           handleResults(results, meta);
           visControl.update(siteMetrics);
