@@ -55,20 +55,17 @@ function getSiteWeights(filters) {
 
   //loop through parsed global result data.
   for (var i in window.results.data) {
-    // waterdata row entry
-    var e = window.results.data[i];
+    var taxon_row = window.results.data[i];
     //Extracts the species name from "" field of window.results
-    var species = e[''];
-    //v for every field in the data row
-    for (var k in e) {
+    var species = taxon_row[''];
+    for (var taxon_column in taxon_row) {
       //Skip the bacteria name field, only process site lines.
-      if (k != '') {
+      if (taxon_column != '') {
         //Extracts the measurements (e.g. alpine=.32, gravel=.5)
         // from a particular site, stores in site var.
-        // FIXME:START: Need to make a change to the casing earlier on to avoid this problem.
-        k = k.toUpperCase();
-        // FIXME:END:
-        var site = window.meta[k];
+        // FIXME: Need to make a change to the casing earlier on to avoid this problem.
+        taxon_column = taxon_column.toUpperCase();
+        var site = window.meta[taxon_column];
         //declare bool defaulting to false
         var match = false;
         //if no filters it will always be match
@@ -86,47 +83,44 @@ function getSiteWeights(filters) {
         }
         //if the bacteria + current site combo returns a match + the current bacteria with current site
         //has a bacteria reading over 0 then:
-        if (match && e[k] > 0) {
+        if (match && taxon_row[taxon_column] > 0) {
           // console.log('e[k] over 0');
           //if site currently contains no values/(maybe a value that isn't 1?) then give it a value of 0
-          if (!sites[k]) sites[k] = 0;
+          if (!sites[taxon_column]) sites[taxon_column] = 0;
           //add the value found at bacteria-e's site-k value.
-          sites[k] += e[k];
+          sites[taxon_column] += taxon_row[taxon_column];
 
           //add values to sitemetrics {} dictionary for visualization.
-          if (siteMetrics[k] == null) {
-            siteMetrics[k] = site;
-            siteMetrics[k].count = e[k];
-            siteMetrics[k].richness = 1;
-            siteMetrics[k].species = [{
-              [species]: e[k],
-            }];
+          if (siteMetrics[taxon_column] == null) {
+            siteMetrics[taxon_column] = site;
+            siteMetrics[taxon_column].count = taxon_row[taxon_column];
+            siteMetrics[taxon_column].richness = 1;
+            siteMetrics[taxon_column].species = [species];
           } else {
-            siteMetrics[k].count += e[k];
-            siteMetrics[k].richness++;
-            if (siteMetrics[k].species.indexOf(species) == -1) {
-              siteMetrics[k].species.push(species);
+            siteMetrics[taxon_column].count += taxon_row[taxon_column];
+            siteMetrics[taxon_column].richness++;
+            if (siteMetrics[taxon_column].species.indexOf(species) == -1) {
+              siteMetrics[taxon_column].species.push(species);
             }
           }
-
           //console.log(siteMetrics);
           //Warrick: Add to the corresponding grid as well.
-          var cellIndex = cellSiteDict[k];
+          var cellIndex = cellSiteDict[taxon_column];
           if (cellIndex == null) {
             // console.log(k);
           }
           grid.cells[cellIndex].count++;
-          grid.cells[cellIndex].value += e[k];
+          grid.cells[cellIndex].value += taxon_row[taxon_column];
 
           var cell = grid.cells[cellIndex];
           if (cell.cellSpecies[species] == null) {
             cell.cellSpecies[species] = {
               count: 1,
-              value: e[k]
+              value: taxon_row[taxon_column]
             };
           } else {
             cell.cellSpecies[species].count++;
-            cell.cellSpecies[species].value += e[k];
+            cell.cellSpecies[species].value += taxon_row[taxon_column];
           }
           //increment the n_points which is the total amount of sites the bacteria is found at.
           n_points++;
