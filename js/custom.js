@@ -877,7 +877,7 @@ function disableHighlightLayer(layer) {
 }
 
 /**
- * Calculates shannon entropy for chart
+ * Calculates site metric max abundance, richness and shannon entropy for chart
  * visualization then calls updateGraph. 
  * Different from calculateGridMaxes which targets cell-aggregated data.
  * @param {siteMetrics} siteMetrics 
@@ -892,7 +892,7 @@ function calculateSiteMetrics(siteMetrics) {
       site.shannonDiversity += (speciesAbundance/site.count) * Math.log(speciesAbundance/site.count);
     }
     site.shannonDiversity *= -1;
-    console.log("site:" + site_index + " " +  " shannon score " + site.shannonDiversity);
+    // console.log("site:" + site_index + " " +  " shannon score " + site.shannonDiversity);
   }
   updateGraph(siteMetrics);
 }
@@ -996,7 +996,7 @@ function updateGraph(siteMetrics) {
     var siteAlpha = {
       siteId: siteMetric.site,
       Metric: 'Effective alpha diversity',
-      value: siteMetric.species.length,
+      value: Object.keys(siteMetric.species).length,
       meta: siteMetric
     };
     dataSet.push(siteAlpha);
