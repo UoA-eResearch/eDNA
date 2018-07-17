@@ -95,12 +95,12 @@ function getSiteWeights(filters) {
             siteMetrics[taxon_column] = site;
             siteMetrics[taxon_column].count = taxon_row[taxon_column];
             siteMetrics[taxon_column].richness = 1;
-            siteMetrics[taxon_column].species = [species];
+            siteMetrics[taxon_column].species = [species, taxon_row[taxon_column]];
           } else {
             siteMetrics[taxon_column].count += taxon_row[taxon_column];
             siteMetrics[taxon_column].richness++;
-            if (siteMetrics[taxon_column].species.indexOf(species) == -1) {
-              siteMetrics[taxon_column].species.push(species);
+            if (siteMetrics[taxon_column].species.indexOf([species, taxon_row[taxon_column]]) == -1) {
+              siteMetrics[taxon_column].species.push([species, taxon_row[taxon_column]]);
             }
           }
           //console.log(siteMetrics);
