@@ -892,6 +892,7 @@ function calculateSiteMetrics(siteMetrics) {
       site.shannonDiversity += (speciesAbundance/site.count) * Math.log(speciesAbundance/site.count);
     }
     site.shannonDiversity *= -1;
+    site.effectiveAlpha =  Math.exp(site.shannonDiversity);
     // console.log("site:" + site_index + " " +  " shannon score " + site.shannonDiversity);
   }
   updateGraph(siteMetrics);
@@ -996,7 +997,7 @@ function updateGraph(siteMetrics) {
     var siteAlpha = {
       siteId: siteMetric.site,
       Metric: 'Effective alpha diversity',
-      value: Object.keys(siteMetric.species).length,
+      value: siteMetric.effectiveAlpha, 
       meta: siteMetric
     };
     dataSet.push(siteAlpha);
