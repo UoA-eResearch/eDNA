@@ -57,7 +57,7 @@ function getSiteWeights(filters) {
   for (var i in window.results.data) {
     var taxon_row = window.results.data[i];
     //Extracts the species name from "" field of window.results
-    var species = taxon_row[''];
+    var taxon_name = taxon_row[''];
     for (var taxon_column in taxon_row) {
       //Skip the bacteria name field, only process site lines.
       if (taxon_column != '') {
@@ -77,7 +77,7 @@ function getSiteWeights(filters) {
           //searches the filter using the delimiters '&&' '>' '<'
           //returns a bool. Takes in the parameters f=dropdown options, species=the species name
           // and the site from the metadata.
-          match = checkFragment(f, species, site);
+          match = checkFragment(f, taxon_name, site);
           // console.log(match);
           if (match) break;
         }
@@ -95,14 +95,14 @@ function getSiteWeights(filters) {
             siteMetrics[taxon_column] = site;
             siteMetrics[taxon_column].count = taxon_row[taxon_column];
             siteMetrics[taxon_column].richness = 1;
-            siteMetrics[taxon_column].species = [species, taxon_row[taxon_column]];
+            // siteMetrics[taxon_column].species = [species, taxon_row[taxon_column]];
+            siteMetrics[taxon_column].species = {};
           } else {
             siteMetrics[taxon_column].count += taxon_row[taxon_column];
             siteMetrics[taxon_column].richness++;
-            if (siteMetrics[taxon_column].species.indexOf([species, taxon_row[taxon_column]]) == -1) {
-              siteMetrics[taxon_column].species.push([species, taxon_row[taxon_column]]);
-            }
           }
+          // TEMP: Adding key, value for species assuming there's only one entry for a species in the data.
+          siteMetrics[taxon_column].species[taxon_name] = taxon_row[taxon_column];
           //console.log(siteMetrics);
           //Warrick: Add to the corresponding grid as well.
           var cellIndex = cellSiteDict[taxon_column];
@@ -113,14 +113,14 @@ function getSiteWeights(filters) {
           grid.cells[cellIndex].value += taxon_row[taxon_column];
 
           var cell = grid.cells[cellIndex];
-          if (cell.cellSpecies[species] == null) {
-            cell.cellSpecies[species] = {
+          if (cell.cellSpecies[taxon_name] == null) {
+            cell.cellSpecies[taxon_name] = {
               count: 1,
               value: taxon_row[taxon_column]
             };
           } else {
-            cell.cellSpecies[species].count++;
-            cell.cellSpecies[species].value += taxon_row[taxon_column];
+            cell.cellSpecies[taxon_name].count++;
+            cell.cellSpecies[taxon_name].value += taxon_row[taxon_column];
           }
           //increment the n_points which is the total amount of sites the bacteria is found at.
           n_points++;
@@ -256,7 +256,7 @@ function handleResults(results, meta) {
   }
   //makes meta dictionary global
   window.meta = metaDict;
-  console.log(window.meta);
+  // console.log(window.meta);
   //instantiates the filter search bar
   $('#filter').select2({
     placeholder: 'Type to filter by classification and metadata',
@@ -877,44 +877,23 @@ function disableHighlightLayer(layer) {
 }
 
 /**
- * Calculates site metric max abundance, richness and shannon entropy for chart
+ * Calculates shannon entropy for chart
  * visualization then calls updateGraph. 
  * Different from calculateGridMaxes which targets cell-aggregated data.
  * @param {siteMetrics} siteMetrics 
  */
 function calculateSiteMetrics(siteMetrics) {
-  //Get sum count and value for shannon calculations.
-  var totalCount = 0;
-  var totalValue = 0;
-  for (var site in siteMetrics) {
-    totalValue += siteMetrics[site].count;
-    totalCount += siteMetrics[site].richness;
-  }
-  console.log(siteMetrics);
-  //calculate ShannonIndex for each site.
-  // sum += species richness/ total site richness * ln(species richness/total site richness)
-  // sum * -1;
-  // I did a one off shannon diversity of one site's diversity in relation to the entirety of all the points diversity.
-
-  //so it needs to be:
-  /*
-  // Add the count/richness/abundance to the species table possibly or precalculate this shit in the database.
-  for (site in SiteMetrics) {
-    for (organism in site.species) {
-      orgShannon += (organism.abundance / sampleAbundanceSum) * Math.log(organism.abundance/ sampleAbundanceSum);
+  for (var site_index in siteMetrics){
+    var site = siteMetrics[site_index];
+    site.shannonDiversity = 0;
+    for (var taxon_name in site.species) {
+      speciesAbundance = site.species[taxon_name];
+      // shannon value for an individual species relative to a site/sample. Adds them to the sum
+      site.shannonDiversity += (speciesAbundance/site.count) * Math.log(speciesAbundance/site.count);
     }
-    siteMetrics[site].shannonDiversity = sampleShannonIndex = -1 * orgShannon; 
+    site.shannonDiversity *= -1;
+    console.log("site:" + site_index + " " +  " shannon score " + site.shannonDiversity);
   }
-
-  */
-  for (var site in siteMetrics) {
-    var siteValue = siteMetrics[site].count;
-    var shannonDiversity =
-      -1 * (siteValue / totalValue) * Math.log(siteValue / totalValue);
-    siteMetrics[site].shannonDiversity = shannonDiversity;
-  }
-  // console.log(siteMetrics);
-
   updateGraph(siteMetrics);
 }
 
