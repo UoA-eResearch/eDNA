@@ -98,7 +98,9 @@ function getSiteWeights(filters) {
             siteMetrics[k] = site;
             siteMetrics[k].count = e[k];
             siteMetrics[k].richness = 1;
-            siteMetrics[k].species = [species];
+            siteMetrics[k].species = [{
+              [species]: e[k],
+            }];
           } else {
             siteMetrics[k].count += e[k];
             siteMetrics[k].richness++;
@@ -887,14 +889,30 @@ function disableHighlightLayer(layer) {
  * @param {siteMetrics} siteMetrics 
  */
 function calculateSiteMetrics(siteMetrics) {
-  //Get sum count and value for calculations.
+  //Get sum count and value for shannon calculations.
   var totalCount = 0;
   var totalValue = 0;
   for (var site in siteMetrics) {
     totalValue += siteMetrics[site].count;
     totalCount += siteMetrics[site].richness;
   }
+  console.log(siteMetrics);
   //calculate ShannonIndex for each site.
+  // sum += species richness/ total site richness * ln(species richness/total site richness)
+  // sum * -1;
+  // I did a one off shannon diversity of one site's diversity in relation to the entirety of all the points diversity.
+
+  //so it needs to be:
+  /*
+  // Add the count/richness/abundance to the species table possibly or precalculate this shit in the database.
+  for (site in SiteMetrics) {
+    for (organism in site.species) {
+      orgShannon += (organism.abundance / sampleAbundanceSum) * Math.log(organism.abundance/ sampleAbundanceSum);
+    }
+    siteMetrics[site].shannonDiversity = sampleShannonIndex = -1 * orgShannon; 
+  }
+
+  */
   for (var site in siteMetrics) {
     var siteValue = siteMetrics[site].count;
     var shannonDiversity =
@@ -1553,7 +1571,7 @@ if (mode == "pie") {
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
 // TEMP:START: Commenting out request method while working on coordinates
-var useDatabase = true;
+var useDatabase = false;
 var lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
@@ -1603,7 +1621,7 @@ if (useDatabase) {
             metaResponse.json().then(metaResults => {
               siteData = metaResults;
               // console.log(siteData);
-              // console.log(abundanceData);
+              console.log(abundanceData);
               handleResults(abundanceData, siteData);
               visControl.update(siteMetrics);
             })
