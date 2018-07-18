@@ -1539,7 +1539,7 @@ if (mode == "pie") {
     //use both those keys to grab the abundance value of that.
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
-var useDatabase = true;
+var useDatabase = false;
 var lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
