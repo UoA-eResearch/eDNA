@@ -1545,7 +1545,7 @@ if (mode == "pie") {
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
 // TEMP:START: Commenting out request method while working on coordinates
-var useDatabase = false;
+var useDatabase = true;
 var lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
@@ -1553,21 +1553,23 @@ if (useDatabase) {
     fetch('http://localhost:8000/edna/test').then(response => {
       response.json().then(result =>{
         data = result.data
-        abundance_dict = {
-          'data':{}
-        }
-        abundance_dict.data = data.otus.map((otu, otuIndex) => {
-          entry = {
-            "": otu
-          };
-          result.data.sites.map((site, siteIndex) => {
-            // assumes the response abundances array ordered by otu.id then by sample_context.id
-            entry[site] = data.abundances[(siteIndex * otuIndex) + siteIndex]
-          });
-          return entry;
-        });
-        console.timeEnd();
         console.log(data);
+        abundance_dict = {
+          'data':[]
+        }
+        // console.log(data.abundances[10488]);
+        abundance_dict.data = data.otus.map((otu, otuIndex) => {
+          otuEntry = {
+            '': otu,
+          }
+          data.sites.map((site, siteIndex) => {
+            abundanceIndex = (otuIndex * data.sites.length) + siteIndex;
+            // console.log(abundanceIndex);
+            otuEntry[site] = data.abundances[abundanceIndex];
+          })
+          return otuEntry;
+        })
+        console.timeEnd();
         console.log(abundance_dict);
         metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/metadata?term=');
         fetch(metadataRequest).then(metaResponse => {
