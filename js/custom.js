@@ -1532,11 +1532,6 @@ if (mode == "pie") {
 // 1. cronjob update the data/metadata every day or something and work from those? 
 // 2. Or should I request from the DB for every new page load?
 // 3. Or make a query with the specific result set every time the filter is updated?
-// 4. Logically the former makes more sense
-
-// function onlyUnique(value, index, self) {
-//   return self.indexOf(value) == index;
-// }
 
 // results structure:  [{"": name, site: value, ...}, {"": name, site: value, ...}]
 // query all the OTUS.
@@ -1544,11 +1539,13 @@ if (mode == "pie") {
     //use both those keys to grab the abundance value of that.
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
-// TEMP:START: Commenting out request method while working on coordinates
 var useDatabase = true;
 var lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
+    // requirements for light request to work:
+    // 1. Ordering of the abundances needs to be otu_id ASC, sample_id ASC
+    // 2. Number of entries in Sample_OTU table entries must be equal to number of (OTU table entries * Sample_Context table entries)     
     console.time();
     fetch('http://localhost:8000/edna/test').then(response => {
       response.json().then(result =>{
@@ -1557,16 +1554,15 @@ if (useDatabase) {
         abundance_dict = {
           'data':[]
         }
-        // console.log(data.abundances[10488]);
         abundance_dict.data = data.otus.map((otu, otuIndex) => {
           otuEntry = {
             '': otu,
           }
           data.sites.map((site, siteIndex) => {
             abundanceIndex = (otuIndex * data.sites.length) + siteIndex;
-            // console.log(abundanceIndex);
             otuEntry[site] = data.abundances[abundanceIndex];
           })
+          // console.log(abundance_dict);
           return otuEntry;
         })
         console.timeEnd();
@@ -1585,6 +1581,7 @@ if (useDatabase) {
     })
   }
   else {
+    // w: Returns the data as nested dictionaries. Json is much larger than the light request but processes server side rather than client side.
     try {
       console.time();
       abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/abundance?term=');
