@@ -35,7 +35,6 @@ function checkFragment(f, species, site) {
   return false;
 }
 
-var cellSiteDict = {};
 var siteMetrics;
 //Called by handeResults
 function getSiteWeights(filters) {
@@ -45,7 +44,7 @@ function getSiteWeights(filters) {
   //warrick Clears grid layer values, gives them an index.
   var grid = MakeGrid(map, detailLevel);
   ClearGrid(grid);
-  cellSiteDict = MakeGridIndex(grid);
+  gridCellLookup = MakeGridIndex(grid);
 
   //console.log(grid);
   //set bool for all the grids that don't have a site.
@@ -64,7 +63,6 @@ function getSiteWeights(filters) {
         //Extracts the measurements (e.g. alpine=.32, gravel=.5)
         // from a particular site, stores in site var.
         // FIXME: Need to make a change to the casing earlier on to avoid this problem.
-        taxon_column = taxon_column.toUpperCase();
         var site = window.meta[taxon_column];
         //declare bool defaulting to false
         var match = false;
@@ -93,13 +91,11 @@ function getSiteWeights(filters) {
           //add values to sitemetrics {} dictionary for visualization.
           if (siteMetrics[taxon_column] == null) {
             CreateSiteMetric();
-          } else {
-            AddValuesToSiteMetric();
           }
-          // TEMP: Adding key, value for species assuming there's only one entry for a species in the data.
-          siteMetrics[taxon_column].species[taxon_name] = taxon_row[taxon_column];
+          AddValuesToSiteMetric();
+          
           //Warrick: Add to the corresponding grid as well.
-          var cellIndex = cellSiteDict[taxon_column];
+          var cellIndex = gridCellLookup[taxon_column];
           if (cellIndex == null) {
             // console.log(k);
           }
@@ -135,12 +131,14 @@ function getSiteWeights(filters) {
   function AddValuesToSiteMetric() {
     siteMetrics[taxon_column].count += taxon_row[taxon_column];
     siteMetrics[taxon_column].richness++;
+    // Adding key, value for species assuming there's only one entry for a species in the data.
+    siteMetrics[taxon_column].species[taxon_name] = taxon_row[taxon_column];
   }
 
   function CreateSiteMetric() {
     siteMetrics[taxon_column] = site;
-    siteMetrics[taxon_column].count = taxon_row[taxon_column];
-    siteMetrics[taxon_column].richness = 1;
+    siteMetrics[taxon_column].count = 0;
+    siteMetrics[taxon_column].richness = 0;
     siteMetrics[taxon_column].species = {};
   }
 }
@@ -1091,7 +1089,7 @@ function updateGraph(siteMetrics) {
             var circle = d3.select(this);
             var site = circle.attr('id');
             //Uses grid cell look-up to zoom to
-            var featureIndex = cellSiteDict[site];
+            var featureIndex = gridCellLookup[site];
             //console.log(featureIndex);
 
             //e>layers>feature>properties> index == featureIndex. Then highlight.
@@ -1121,7 +1119,7 @@ function updateGraph(siteMetrics) {
             var site = circle.attr('id');
             //Uses grid cell look-up to zoom to
             //TODO: feature index doesn't match up with popup content index. Reduce grid to only include sampled cells.
-            var featureIndex = cellSiteDict[site];
+            var featureIndex = gridCellLookup[site];
 
             //e>layers>feature>properties> index == featureIndex. Then highlight.
             map.eachLayer(function (layer) {
@@ -1138,7 +1136,7 @@ function updateGraph(siteMetrics) {
           //Uses grid cell look-up to zoom to
 
           //TODO: feature index doesn't match up with popup content index. Reduce grid to only include sampled cells.
-          var featureIndex = cellSiteDict[site];
+          var featureIndex = gridCellLookup[site];
 
           //e>layers>feature>properties> index == featureIndex. Then highlight.
           map.eachLayer(function(layer) {
