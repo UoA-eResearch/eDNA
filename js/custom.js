@@ -242,18 +242,13 @@ function handleResults(results, meta) {
   window.results = results;
   //console.log(meta);
   //loops through meta data passed in.
+  console.time();
   var metaDict = {};
   for (var i in meta.data) {
-    // var site = meta.data[i];
-    // //Converts the long lat coordinates to cartesian.
-    // // TODO: Change this reprojection to match the new coord system
-    // var reprojected = proj4('EPSG:2193', 'WGS84', site);
-    // //Creates new entry of capitalized metadata id: cartesian coordinates.
-    // metaDict[site['site'].toUpperCase()] = reprojected;
     var site = meta.data[i]
-
-    metaDict[site['site'].toUpperCase()] = site;
+    metaDict[site['site']] = site;
   }
+  console.timeEnd();
   //makes meta dictionary global
   window.meta = metaDict;
   // console.log(window.meta);
@@ -1550,7 +1545,7 @@ if (useDatabase) {
     fetch('https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered').then(response => {
       response.json().then(result =>{
         data = result.data
-        console.log(data);
+        // console.log(data);
         abundance_dict = {
           'data':[]
         }
@@ -1612,18 +1607,6 @@ if (useDatabase) {
 else {
   loadFromFile();
 }
-
-function getRequestData(url){
-  request = new Request(url);
-  fetch(request).then(response => {
-    response.json().then(result =>{
-      console.log(result);
-      return result;
-    })
-  })
-}
-// TEMP:END:
-
 
 var hashComponents = decodeURIComponent(
   window.location.hash.replace('#', '')
