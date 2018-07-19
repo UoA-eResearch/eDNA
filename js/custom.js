@@ -52,7 +52,7 @@ function getSiteWeights(filters) {
 
   //Site metrics: Adding dictionary of site metrics for calculations.
   siteMetrics = {};
-
+  console.time()
   //loop through parsed global result data.
   for (var i in window.results.data) {
     var taxon_row = window.results.data[i];
@@ -92,13 +92,9 @@ function getSiteWeights(filters) {
 
           //add values to sitemetrics {} dictionary for visualization.
           if (siteMetrics[taxon_column] == null) {
-            siteMetrics[taxon_column] = site;
-            siteMetrics[taxon_column].count = taxon_row[taxon_column];
-            siteMetrics[taxon_column].richness = 1;
-            siteMetrics[taxon_column].species = {};
+            CreateSiteMetric();
           } else {
-            siteMetrics[taxon_column].count += taxon_row[taxon_column];
-            siteMetrics[taxon_column].richness++;
+            AddValuesToSiteMetric();
           }
           // TEMP: Adding key, value for species assuming there's only one entry for a species in the data.
           siteMetrics[taxon_column].species[taxon_name] = taxon_row[taxon_column];
@@ -127,6 +123,7 @@ function getSiteWeights(filters) {
     }
   }
   $('#numberResults').text(n_points);
+  console.timeEnd()
   // console.log(grid);
   // console.log(sites);
   // console.log(siteMetrics);
@@ -134,6 +131,18 @@ function getSiteWeights(filters) {
   //warrick: integrating filtered results with grid view.
   DrawGrid(grid);
   return sites;
+
+  function AddValuesToSiteMetric() {
+    siteMetrics[taxon_column].count += taxon_row[taxon_column];
+    siteMetrics[taxon_column].richness++;
+  }
+
+  function CreateSiteMetric() {
+    siteMetrics[taxon_column] = site;
+    siteMetrics[taxon_column].count = taxon_row[taxon_column];
+    siteMetrics[taxon_column].richness = 1;
+    siteMetrics[taxon_column].species = {};
+  }
 }
 
 /**
@@ -237,13 +246,11 @@ function handleResults(results, meta) {
   window.results = results;
   //console.log(meta);
   //loops through meta data passed in.
-  console.time();
   var metaDict = {};
   for (var i in meta.data) {
     var site = meta.data[i]
     metaDict[site['site']] = site;
   }
-  console.timeEnd();
   //makes meta dictionary global
   window.meta = metaDict;
   // console.log(window.meta);
