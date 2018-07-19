@@ -60,9 +60,7 @@ function getSiteWeights(filters) {
     for (var taxon_column in taxon_row) {
       //Skip the bacteria name field, only process site lines.
       if (taxon_column != '') {
-        //Extracts the measurements (e.g. alpine=.32, gravel=.5)
-        // from a particular site, stores in site var.
-        // FIXME: Need to make a change to the casing earlier on to avoid this problem.
+        // site contains the full meta row for a site.
         var site = window.meta[taxon_column];
         //declare bool defaulting to false
         var match = false;
@@ -79,40 +77,24 @@ function getSiteWeights(filters) {
           // console.log(match);
           if (match) break;
         }
-        //if the bacteria + current site combo returns a match + the current bacteria with current site
         //has a bacteria reading over 0 then:
         if (match && taxon_row[taxon_column] > 0) {
-          // console.log('e[k] over 0');
           //if site currently contains no values/(maybe a value that isn't 1?) then give it a value of 0
-          if (!sites[taxon_column]) sites[taxon_column] = 0;
-          //add the value found at bacteria-e's site-k value.
+          if (!sites[taxon_column]) {
+            sites[taxon_column] = 0;
+          } 
+          // Add sample-otu value to sites dictionary
           sites[taxon_column] += taxon_row[taxon_column];
-
           //add values to sitemetrics {} dictionary for visualization.
           if (siteMetrics[taxon_column] == null) {
-            CreateSiteMetric();
+            createSiteMetric();
           }
-          AddValuesToSiteMetric();
-          
-          //Warrick: Add to the corresponding grid as well.
-          var cellIndex = gridCellLookup[taxon_column];
-          if (cellIndex == null) {
-            // console.log(k);
-          }
-          grid.cells[cellIndex].count++;
-          grid.cells[cellIndex].value += taxon_row[taxon_column];
-
-          var cell = grid.cells[cellIndex];
-          if (cell.cellSpecies[taxon_name] == null) {
-            cell.cellSpecies[taxon_name] = {
-              count: 1,
-              value: taxon_row[taxon_column]
-            };
-          } else {
-            cell.cellSpecies[taxon_name].count++;
-            cell.cellSpecies[taxon_name].value += taxon_row[taxon_column];
-          }
-          //increment the n_points which is the total amount of sites the bacteria is found at.
+          addValuesToSiteMetric();
+          // Adds the values into the grid object used to create the leaflet features/squares.
+          const cellIndex = gridCellLookup[taxon_column];
+          const gridCell = grid.cells[cellIndex];
+          addValuesToGridCell(gridCell);
+          // increment the n_points which is displayed below search filter
           n_points++;
         }
       }
@@ -124,18 +106,40 @@ function getSiteWeights(filters) {
   // console.log(sites);
   // console.log(siteMetrics);
   calculateSiteMetrics(siteMetrics);
-  //warrick: integrating filtered results with grid view.
-  DrawGrid(grid);
+  drawGrid(grid);
   return sites;
 
-  function AddValuesToSiteMetric() {
+  function addValuesToGridCell(gridCell) {
+    gridCell.count++;
+    gridCell.value += taxon_row[taxon_column];
+    if (gridCell.cellSpecies[taxon_name] == null) {
+      createGridCellSpecies();
+    }
+    else {
+      addValueToGridCellSpecies();
+    }
+
+    function addValueToGridCellSpecies() {
+      gridCell.cellSpecies[taxon_name].count++;
+      gridCell.cellSpecies[taxon_name].value += taxon_row[taxon_column];
+    }
+
+    function createGridCellSpecies() {
+      gridCell.cellSpecies[taxon_name] = {
+        count: 1,
+        value: taxon_row[taxon_column]
+      };
+    }
+  }
+
+  function addValuesToSiteMetric() {
     siteMetrics[taxon_column].count += taxon_row[taxon_column];
     siteMetrics[taxon_column].richness++;
     // Adding key, value for species assuming there's only one entry for a species in the data.
     siteMetrics[taxon_column].species[taxon_name] = taxon_row[taxon_column];
   }
 
-  function CreateSiteMetric() {
+  function createSiteMetric() {
     siteMetrics[taxon_column] = site;
     siteMetrics[taxon_column].count = 0;
     siteMetrics[taxon_column].richness = 0;
@@ -242,7 +246,6 @@ function getFilterData() {
 function handleResults(results, meta) {
   //creates global var results
   window.results = results;
-  //console.log(meta);
   //loops through meta data passed in.
   var metaDict = {};
   for (var i in meta.data) {
@@ -251,17 +254,12 @@ function handleResults(results, meta) {
   }
   //makes meta dictionary global
   window.meta = metaDict;
-  // console.log(window.meta);
   //instantiates the filter search bar
   $('#filter').select2({
     placeholder: 'Type to filter by classification and metadata',
-    //allows multiple tag filters at once.
     multiple: true,
-    //allows clearing of the box instantly
     allowClear: true,
-    //Gets all the data and metadata possible searches and pushes them to the select drop down.
     data: getFilterData(),
-    //allows addition of custom tags to the options.
     tags: true,
     createTag: function(params) {
       //console.log(params);
@@ -281,17 +279,15 @@ function handleResults(results, meta) {
   $('#filter').change(function() {
     window.location.hash = encodeURIComponent($(this).val());
     var filters = $(this).select2('data');
-    //console.log(filters);
-    //gets the results from the filters.
     //note: need to change it so siteweights are everywhere at a fixed lonlat.
     var siteWeights = getSiteWeights(filters);
-    //console.log(siteWeights);
     var maxWeight = 0;
     for (var site in siteWeights) {
       var w = siteWeights[site];
       if (w > maxWeight) maxWeight = w;
     }
     //grid data layer creation
+    // TODO: combined heat layer site coordinates and site-weights with others
     var latlngs = [];
     for (var site in siteWeights) {
       var siteMeta = window.meta[site];
@@ -440,7 +436,7 @@ function MakeGridIndex(grid) {
  * Generates popup content for the individual cell layers.
  * @param {*} grid 
  */
-function DrawGrid(grid) {
+function drawGrid(grid) {
   var cells = grid.cells;
   var gridMaxes = CalculateGridMaxes(cells);
 
@@ -575,6 +571,62 @@ function DrawGrid(grid) {
 
   //test
   //console.log(gridSitesLayer);
+
+  function CellSitesStyle(feature) {
+    return {
+      fillColor: GetFillColor(feature.properties.weightedSites),
+      weight: 1,
+      opacity: GetOutlineOpacity(
+        feature.properties.weightedSites,
+        feature.properties.hasSamples
+      ),
+      color: GetOutlineColour(feature.properties.hasSamples),
+      fillOpacity: GetFillOpacity(
+        feature.properties.weightedSites,
+        feature.properties.hasSamples
+      )
+    };
+  }
+  
+  /**
+   * returns feature style based on feature properties value/abundance.
+   * @param {*} feature 
+   */
+  function CellValueStyle(feature) {
+    return {
+      fillColor: GetFillColor(feature.properties.weightedValue),
+      weight: 1,
+      opacity: GetOutlineOpacity(
+        feature.properties.weightedValue,
+        feature.properties.hasSamples
+      ),
+      color: GetOutlineColour(feature.properties.hasSamples),
+      fillOpacity: GetFillOpacity(
+        feature.properties.weightedValue,
+        feature.properties.hasSamples
+      )
+    };
+  }
+  
+  /**
+   * returns feature style based on feature properties count/richness.
+   * @param {*} feature 
+   */
+  function CellCountStyle(feature) {
+    return {
+      fillColor: GetFillColor(feature.properties.weightedCount),
+      weight: 1,
+      opacity: GetOutlineOpacity(
+        feature.properties.weightedCount,
+        feature.properties.hasSamples
+      ),
+      color: GetOutlineColour(feature.properties.hasSamples),
+      fillOpacity: GetFillOpacity(
+        feature.properties.weightedCount,
+        feature.properties.hasSamples
+      )
+    };
+  }
 }
 
 /**
@@ -589,7 +641,6 @@ function onEachFeature(feature, layer) {
       maxHeight: 150
     });
   }
-
   layer.on({
     mouseover: handleMouseOver,
     mouseout: handleMouseOut,
@@ -604,14 +655,10 @@ function onEachFeature(feature, layer) {
  */
 function handleCellClick(e) {
   var layer = e.target;
-
   console.log('layer index is ' + layer.feature.properties.index);
-
   var speciesInCell = layer.feature.properties.speciesInCell;
-
   var speciesAmount = Object.keys(speciesInCell).length;
   console.log('Number of unique classifications in cell: ' + speciesAmount);
-
   //get total value for shannon index calculation
   var totalValue = 0;
   for (var species in speciesInCell) {
@@ -619,7 +666,6 @@ function handleCellClick(e) {
     totalValue += speciesData.value;
   }
   console.log('total abundance of cell: ' + totalValue);
-
   //calculate metrics for species within the cell
   for (var species in speciesInCell) {
     speciesData = speciesInCell[species];
@@ -673,61 +719,7 @@ function handleMouseOut(e) {
  * which is the amount of unique sites within the cell.
  * @param {*} feature 
  */
-function CellSitesStyle(feature) {
-  return {
-    fillColor: GetFillColor(feature.properties.weightedSites),
-    weight: 1,
-    opacity: GetOutlineOpacity(
-      feature.properties.weightedSites,
-      feature.properties.hasSamples
-    ),
-    color: GetOutlineColour(feature.properties.hasSamples),
-    fillOpacity: GetFillOpacity(
-      feature.properties.weightedSites,
-      feature.properties.hasSamples
-    )
-  };
-}
 
-/**
- * returns feature style based on feature properties value/abundance.
- * @param {*} feature 
- */
-function CellValueStyle(feature) {
-  return {
-    fillColor: GetFillColor(feature.properties.weightedValue),
-    weight: 1,
-    opacity: GetOutlineOpacity(
-      feature.properties.weightedValue,
-      feature.properties.hasSamples
-    ),
-    color: GetOutlineColour(feature.properties.hasSamples),
-    fillOpacity: GetFillOpacity(
-      feature.properties.weightedValue,
-      feature.properties.hasSamples
-    )
-  };
-}
-
-/**
- * returns feature style based on feature properties count/richness.
- * @param {*} feature 
- */
-function CellCountStyle(feature) {
-  return {
-    fillColor: GetFillColor(feature.properties.weightedCount),
-    weight: 1,
-    opacity: GetOutlineOpacity(
-      feature.properties.weightedCount,
-      feature.properties.hasSamples
-    ),
-    color: GetOutlineColour(feature.properties.hasSamples),
-    fillOpacity: GetFillOpacity(
-      feature.properties.weightedCount,
-      feature.properties.hasSamples
-    )
-  };
-}
 
 /**
  * Provides aggregate calculation for richness and adds it to the gridCell data.
