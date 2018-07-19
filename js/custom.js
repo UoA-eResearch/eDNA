@@ -95,7 +95,6 @@ function getSiteWeights(filters) {
             siteMetrics[taxon_column] = site;
             siteMetrics[taxon_column].count = taxon_row[taxon_column];
             siteMetrics[taxon_column].richness = 1;
-            // siteMetrics[taxon_column].species = [species, taxon_row[taxon_column]];
             siteMetrics[taxon_column].species = {};
           } else {
             siteMetrics[taxon_column].count += taxon_row[taxon_column];
@@ -103,7 +102,6 @@ function getSiteWeights(filters) {
           }
           // TEMP: Adding key, value for species assuming there's only one entry for a species in the data.
           siteMetrics[taxon_column].species[taxon_name] = taxon_row[taxon_column];
-          //console.log(siteMetrics);
           //Warrick: Add to the corresponding grid as well.
           var cellIndex = cellSiteDict[taxon_column];
           if (cellIndex == null) {
@@ -129,13 +127,10 @@ function getSiteWeights(filters) {
     }
   }
   $('#numberResults').text(n_points);
-  
   // console.log(grid);
   // console.log(sites);
   // console.log(siteMetrics);
-
   calculateSiteMetrics(siteMetrics);
-
   //warrick: integrating filtered results with grid view.
   DrawGrid(grid);
   return sites;
