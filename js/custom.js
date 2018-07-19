@@ -1539,7 +1539,7 @@ if (mode == "pie") {
     //use both those keys to grab the abundance value of that.
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
-var useDatabase = false;
+var useDatabase = true;
 var lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
@@ -1547,7 +1547,7 @@ if (useDatabase) {
     // 1. Ordering of the abundances needs to be otu_id ASC, sample_id ASC
     // 2. Number of entries in Sample_OTU table entries must be equal to number of (OTU table entries * Sample_Context table entries)     
     console.time();
-    fetch('http://localhost:8000/edna/test').then(response => {
+    fetch('https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered').then(response => {
       response.json().then(result =>{
         data = result.data
         console.log(data);
@@ -1567,7 +1567,7 @@ if (useDatabase) {
         })
         console.timeEnd();
         console.log(abundance_dict);
-        metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/metadata?term=');
+        metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
         fetch(metadataRequest).then(metaResponse => {
           metaResponse.json().then(metaResults => {
             siteData = metaResults;
@@ -1584,12 +1584,12 @@ if (useDatabase) {
     // w: Returns the data as nested dictionaries. Json is much larger than the light request but processes server side rather than client side.
     try {
       console.time();
-      abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/abundance?term=');
+      abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/abundance?term=');
       fetch(abundanceRequest).then(response => {
         response.json().then(abundanceResults => {
           console.timeEnd();
           abundanceData = abundanceResults;
-          metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/metadata?term=');
+          metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
           fetch(metadataRequest).then(metaResponse => {
             metaResponse.json().then(metaResults => {
               siteData = metaResults;
