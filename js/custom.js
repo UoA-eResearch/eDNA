@@ -42,9 +42,9 @@ function getSiteWeights(filters) {
   n_points = 0;
 
   //warrick Clears grid layer values, gives them an index.
-  var grid = MakeGrid(map, detailLevel);
+  var grid = makeGrid(map, detailLevel);
   ClearGrid(grid);
-  gridCellLookup = MakeGridIndex(grid);
+  gridCellLookup = MakeGridLookup(grid);
 
   //console.log(grid);
   //set bool for all the grids that don't have a site.
@@ -313,7 +313,7 @@ function handleResults(results, meta) {
  * @param {*} map 
  * @param {*} detailLevel 
  */
-function MakeGrid(map, detailLevel) {
+function makeGrid(detailLevel) {
   //Hard coded bounds and offsets.
   start = [164.71222, -33.977509];
   var gridStart = start;
@@ -327,33 +327,15 @@ function MakeGrid(map, detailLevel) {
   var latOffset = (northWest.lat - southWest.lat) / detailLevel;
   var lngOffset = (northEast.lng - northWest.lng) / detailLevel;
   //hard coded bounds and offsets end.
-
   var gridCells = [];
   for (var i = 0; i < detailLevel; i++) {
     for (var j = 0; j < detailLevel; j++) {
-      //create rectangle polygon.
-      var topLeft = [start[0], start[1]];
-      var topRight = [start[0] + lngOffset, start[1]];
-      var bottomRight = [start[0] + lngOffset, start[1] - latOffset];
-      var bottomLeft = [start[0], start[1] - latOffset];
-
-      var cell = [topLeft, topRight, bottomRight, bottomLeft];
-      var key = i * detailLevel + j;
-
-      cell = {
-        coordinates: cell,
-        count: 0,
-        value: 0,
-        cellSpecies: {},
-        cellSites: [],
-        hasSamples: false
-      };
+      cell = makeCell();
       gridCells.push(cell);
-      start = [start[0] + lngOffset, start[1]];
+      incrementCellTopLeftLng();
     }
-    start = [start[0] - lngOffset * detailLevel, start[1] - latOffset];
+    decrementCellTopLeftLat();
   }
-
   var grid = {
     start: gridStart,
     lngOffset: lngOffset,
@@ -362,6 +344,34 @@ function MakeGrid(map, detailLevel) {
     cells: gridCells
   };
   return grid;
+
+  function decrementCellTopLeftLat() {
+    cellTopLeft = [cellTopLeft[0] - lngOffset * detailLevel, cellTopLeft[1] - latOffset];
+  }
+
+  function incrementCellTopLeftLng() {
+    cellTopLeft = [cellTopLeft[0] + lngOffset, cellTopLeft[1]];
+  }
+
+  /**
+   * Takes the current 2 index values along with grid settings to create a polygon with calculated coordinates and some default values.
+   */
+  function makeCell() {
+    var topLeft = [cellTopLeft[0], cellTopLeft[1]];
+    var topRight = [cellTopLeft[0] + lngOffset, cellTopLeft[1]];
+    var bottomRight = [cellTopLeft[0] + lngOffset, cellTopLeft[1] - latOffset];
+    var bottomLeft = [cellTopLeft[0], cellTopLeft[1] - latOffset];
+    var cellCoordinates = [topLeft, topRight, bottomRight, bottomLeft];
+    cell = {
+      coordinates: cellCoordinates,
+      count: 0,
+      value: 0,
+      cellSpecies: {},
+      cellSites: [],
+      hasSamples: false
+    };
+    return cell;
+  }
 }
 
 /**
@@ -385,7 +395,7 @@ function ClearGrid(grid) {
  * Creates the grid lookup object/dictionary used for filling in the grid and calculating it's position.
  * @param {*} grid 
  */
-function MakeGridIndex(grid) {
+function MakeGridLookup(grid) {
   var siteCellDict = {};
   var gridStart = grid.start;
   var lngOffset = grid.lngOffset;
@@ -1213,7 +1223,7 @@ window.circles = [];
 
 var detailLevel = 60;
 //warrick map additions
-var grid = MakeGrid(map, detailLevel);
+var grid = makeGrid(map, detailLevel);
 
 //shows the scale of the map
 var scaleIndicator = L.control.scale().addTo(map);
@@ -1344,8 +1354,7 @@ visControl.update = function() {
     */
   }
   else {
-    console.log(siteMetrics);
-
+    // console.log(siteMetrics);
     this._div.innerHTML =
     `<div id="chart" style="display: none;">
     </div>
@@ -1371,23 +1380,19 @@ visControl.update = function() {
     ;
   }
 }
-//console.log(visControl);
 
+/** 
+ * Selects all .enter elements and changes fill to the current option of the meta-select element.
+  */
 function selectColorChange(e) {
-
   var metric = document.getElementById("meta-select").value;
-
   var metricColour = createColorRange(siteMetrics)
-
-  console.log(siteMetrics);
-
-  var circles = d3.selectAll(".enter")
+  d3.selectAll(".enter")
     .transition()
     .duration(400)
       .attr("fill", function(d) {
         return metricColour(d.meta[metric])
       })
-  // console.log(circles);
 }
 
 /**
@@ -1396,17 +1401,8 @@ function selectColorChange(e) {
 function toggleGraph() {
   //TODO: Add ability to reduce size by a factor.
   var graph = $('#chart').toggle('slow');
-
-   //for minimizing the width based on window size.
-   /*
-    chart
-    .transition()
-        .duration(1000)
-        .attr("width", function() {
-            return (main.attr("width") / 3);
-    });
-    */
 }
+
 visControl.addTo(map);
 
 //Adding d3 visualization
@@ -1482,40 +1478,7 @@ var tooltip = d3
   .attr('class', 'tooltip')
   .style('opacity', 0);
 
-// Nick's grid & pie mode.
-/*
-if (mode == "grid") {
-    var colors = ['#fee8c8', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#b30000', '#7f0000'];
-    var shape = new L.PatternCircle({
-        x: 5,
-        y: 5,
-        radius: 5,
-        fill: true
-    });
-    var pattern = new L.Pattern({width: 15, height: 15});
-    pattern.addShape(shape);
-    pattern.addTo(map);
-    var customLayer = L.geoJson(null, {
-        style: {
-            stroke: false,
-            fillPattern: pattern,
-        }
-    });
-    var nz = omnivore.kml('nz-coastlines-and-islands-polygons-topo-1500k.kml', null, customLayer).addTo(map);
-}
-if (mode == "pie") {
-    map.on('zoomend', function () {
-        for (var i in window.circles) {
-            window.circles[i].setOptions({
-                width: map.getZoom() * 2
-            });
-        }
-    });
-}
-*/
-
-
-// NOTE:NOTE:NOTE: Should I:
+// NOTE: Should I:
 // 1. cronjob update the data/metadata every day or something and work from those? 
 // 2. Or should I request from the DB for every new page load?
 // 3. Or make a query with the specific result set every time the filter is updated?
@@ -1530,70 +1493,10 @@ var useDatabase = true;
 var lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
-    // requirements for light request to work:
-    // 1. Ordering of the abundances needs to be otu_id ASC, sample_id ASC
-    // 2. Number of entries in Sample_OTU table entries must be equal to number of (OTU table entries * Sample_Context table entries)     
-    console.time();
-    fetch('https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered').then(response => {
-      response.json().then(result =>{
-        data = result.data
-        // console.log(data);
-        abundance_dict = {
-          'data':[]
-        }
-        abundance_dict.data = data.otus.map((otu, otuIndex) => {
-          otuEntry = {
-            '': otu,
-          }
-          data.sites.map((site, siteIndex) => {
-            abundanceIndex = (otuIndex * data.sites.length) + siteIndex;
-            otuEntry[site] = data.abundances[abundanceIndex];
-          })
-          // console.log(abundance_dict);
-          return otuEntry;
-        })
-        console.timeEnd();
-        console.log(abundance_dict);
-        metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
-        fetch(metadataRequest).then(metaResponse => {
-          metaResponse.json().then(metaResults => {
-            siteData = metaResults;
-            // console.log(siteData);
-            // console.log(abundance_dict);
-            handleResults(abundance_dict, siteData);
-            visControl.update(siteMetrics);
-          })
-        });
-      })
-    })
+    loadUnsortedData();
   }
   else {
-    // w: Returns the data as nested dictionaries. Json is much larger than the light request but processes server side rather than client side.
-    try {
-      console.time();
-      abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/abundance?term=');
-      fetch(abundanceRequest).then(response => {
-        response.json().then(abundanceResults => {
-          console.timeEnd();
-          abundanceData = abundanceResults;
-          metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
-          fetch(metadataRequest).then(metaResponse => {
-            metaResponse.json().then(metaResults => {
-              siteData = metaResults;
-              // console.log(siteData);
-              console.log(abundanceData);
-              handleResults(abundanceData, siteData);
-              visControl.update(siteMetrics);
-            })
-          })
-        })
-      })
-    }
-    catch (err) {
-      // back up in case the request fails.
-      console.log(err);
-      loadFromFile();
-    }
+    loadSortedData();
   }
 }
 else {
@@ -1604,8 +1507,75 @@ var hashComponents = decodeURIComponent(
   window.location.hash.replace('#', '')
 ).split(',');
 
-// Loads from local .tsv files. Called if the request throws an error
+function loadSortedData() {
+  // Returns the data as nested dictionaries. Json is much larger than the light request but processes server side rather than client side.
+  try {
+    console.time();
+    abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/abundance?term=');
+    fetch(abundanceRequest).then(response => {
+      response.json().then(abundanceResults => {
+        console.timeEnd();
+        abundanceData = abundanceResults;
+        metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
+        fetch(metadataRequest).then(metaResponse => {
+          metaResponse.json().then(metaResults => {
+            siteData = metaResults;
+            // console.log(siteData);
+            console.log(abundanceData);
+            handleResults(abundanceData, siteData);
+            visControl.update(siteMetrics);
+          });
+        });
+      });
+    });
+  }
+  catch (err) {
+    console.log(err);
+    loadFromFile();
+  }
+}
+
+function loadUnsortedData() {
+  // requirements for light request to work:
+  // 1. Ordering of the abundances needs to be otu_id ASC, sample_id ASC
+  // 2. Number of entries in Sample_OTU table entries must be equal to number of (OTU table entries * Sample_Context table entries)     
+  console.time();
+  fetch('https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered').then(response => {
+    response.json().then(result => {
+      data = result.data;
+      // console.log(data);
+      abundance_dict = {
+        'data': []
+      };
+      abundance_dict.data = data.otus.map((otu, otuIndex) => {
+        otuEntry = {
+          '': otu,
+        };
+        data.sites.map((site, siteIndex) => {
+          abundanceIndex = (otuIndex * data.sites.length) + siteIndex;
+          otuEntry[site] = data.abundances[abundanceIndex];
+        });
+        // console.log(abundance_dict);
+        return otuEntry;
+      });
+      console.timeEnd();
+      console.log(abundance_dict);
+      metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
+      fetch(metadataRequest).then(metaResponse => {
+        metaResponse.json().then(metaResults => {
+          siteData = metaResults;
+          // console.log(siteData);
+          // console.log(abundance_dict);
+          handleResults(abundance_dict, siteData);
+          visControl.update(siteMetrics);
+        });
+      });
+    });
+  });
+}
+
 function loadFromFile(){
+  // Loads from local .tsv files. Called if the request throws an error
   Papa.parse('active-abundance-data.tsv', {
     download: true,
     header: true,
