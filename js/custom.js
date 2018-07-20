@@ -43,8 +43,8 @@ function getSiteWeights(filters) {
 
   //warrick Clears grid layer values, gives them an index.
   var grid = makeGrid(map, detailLevel);
-  ClearGrid(grid);
-  gridCellLookup = MakeGridLookup(grid);
+  clearGrid(grid);
+  gridCellLookup = makeGridLookup(grid);
 
   //console.log(grid);
   //set bool for all the grids that don't have a site.
@@ -313,13 +313,13 @@ function handleResults(results, meta) {
  * @param {*} map 
  * @param {*} detailLevel 
  */
-function makeGrid(detailLevel) {
+function makeGrid(map, detailLevel) {
   //Hard coded bounds and offsets.
-  start = [164.71222, -33.977509];
-  var gridStart = start;
+  let cellStart = [164.71222, -33.977509];
+  const gridStart = cellStart;
   var end = [178.858982, -49.66352];
 
-  var hardBounds = L.latLngBounds(start, end);
+  var hardBounds = L.latLngBounds(gridStart, end);
   northWest = hardBounds.getNorthWest();
   northEast = hardBounds.getNorthEast();
   southWest = hardBounds.getSouthWest();
@@ -327,15 +327,18 @@ function makeGrid(detailLevel) {
   var latOffset = (northWest.lat - southWest.lat) / detailLevel;
   var lngOffset = (northEast.lng - northWest.lng) / detailLevel;
   //hard coded bounds and offsets end.
+
   var gridCells = [];
   for (var i = 0; i < detailLevel; i++) {
     for (var j = 0; j < detailLevel; j++) {
-      cell = makeCell();
+      //create rectangle polygon.
+      var cell = makeCell();
       gridCells.push(cell);
-      incrementCellTopLeftLng();
+      cellStart = incrementLng(cellStart, lngOffset);
     }
-    decrementCellTopLeftLat();
+    cellStart = resetLngDecrementLat();
   }
+
   var grid = {
     start: gridStart,
     lngOffset: lngOffset,
@@ -345,25 +348,22 @@ function makeGrid(detailLevel) {
   };
   return grid;
 
-  function decrementCellTopLeftLat() {
-    cellTopLeft = [cellTopLeft[0] - lngOffset * detailLevel, cellTopLeft[1] - latOffset];
+  function incrementLng() {
+    return [cellStart[0] + lngOffset, cellStart[1]];
   }
 
-  function incrementCellTopLeftLng() {
-    cellTopLeft = [cellTopLeft[0] + lngOffset, cellTopLeft[1]];
+  function resetLngDecrementLat() {
+    return [cellStart[0] - lngOffset * detailLevel, cellStart[1] - latOffset];
   }
 
-  /**
-   * Takes the current 2 index values along with grid settings to create a polygon with calculated coordinates and some default values.
-   */
   function makeCell() {
-    var topLeft = [cellTopLeft[0], cellTopLeft[1]];
-    var topRight = [cellTopLeft[0] + lngOffset, cellTopLeft[1]];
-    var bottomRight = [cellTopLeft[0] + lngOffset, cellTopLeft[1] - latOffset];
-    var bottomLeft = [cellTopLeft[0], cellTopLeft[1] - latOffset];
-    var cellCoordinates = [topLeft, topRight, bottomRight, bottomLeft];
+    let topLeft = [cellStart[0], cellStart[1]];
+    let topRight = [cellStart[0] + lngOffset, cellStart[1]];
+    let bottomRight = [cellStart[0] + lngOffset, cellStart[1] - latOffset];
+    let bottomLeft = [cellStart[0], cellStart[1] - latOffset];
+    let cell = [topLeft, topRight, bottomRight, bottomLeft];
     cell = {
-      coordinates: cellCoordinates,
+      coordinates: cell,
       count: 0,
       value: 0,
       cellSpecies: {},
@@ -378,7 +378,7 @@ function makeGrid(detailLevel) {
  * Clears the values in the grid.
  * @param {*} grid 
  */
-function ClearGrid(grid) {
+function clearGrid(grid) {
   for (var cell in grid.cells) {
     if (cell.count != 0) {
       cell.count = 0;
@@ -395,7 +395,7 @@ function ClearGrid(grid) {
  * Creates the grid lookup object/dictionary used for filling in the grid and calculating it's position.
  * @param {*} grid 
  */
-function MakeGridLookup(grid) {
+function makeGridLookup(grid) {
   var siteCellDict = {};
   var gridStart = grid.start;
   var lngOffset = grid.lngOffset;
@@ -1489,7 +1489,7 @@ var tooltip = d3
     //use both those keys to grab the abundance value of that.
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
-var useDatabase = true;
+var useDatabase = false;
 var lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
