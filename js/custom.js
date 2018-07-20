@@ -445,6 +445,7 @@ function makeGridLookup(grid) {
  * @param {*} grid 
  */
 function drawGrid(grid) {
+  //TODO: refactor this
   var cells = grid.cells;
   var gridMaxes = CalculateGridMaxes(cells);
 
@@ -523,10 +524,6 @@ function drawGrid(grid) {
         speciesInCell[species].value +
         '<br /><br />';
     }
-
-    //TODO: cellPolygon and popupcontent id's are out of sync. Maybe make cell polygon nested somehow.
-    //TODO: Alternative make when making the gridCells that the feature index is based off. Reduce the array down to just
-    //TODO: the cells that have samples then it should match.
     var cellPolygon = {
       type: 'Feature',
       properties: {
