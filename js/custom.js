@@ -310,7 +310,6 @@ function handleResults(results, meta) {
 
 /**
  * Makes grid array for cells. Each cell starts off with only containing coordinates.
- * @param {*} map 
  * @param {*} detailLevel 
  */
 function makeGrid(detailLevel) {
@@ -426,14 +425,13 @@ function makeGridLookup(grid) {
       grid.cells[siteCellIndex].hasSamples = true;
 
       //if site count unfiltered.
-      if ($.inArray(siteName, grid.cells[siteCellIndex].cellSites) == -1) {
+      if (!siteName in grid.cells[siteCellIndex].cellSites) {
         grid.cells[siteCellIndex].cellSites.push(siteName);
       }
     } else {
       continue;
     }
   }
-  //console.log(siteCellDict);
   return siteCellDict;
 }
 
