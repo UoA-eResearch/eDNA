@@ -397,42 +397,40 @@ function clearGrid(grid) {
  * @param {*} grid 
  */
 function makeGridLookup(grid) {
-  var siteCellDict = {};
-  var gridStart = grid.start;
-  var lngOffset = grid.lngOffset;
-  var latOffset = grid.latOffset;
-  var detailLevel = grid.detailLevel;
+  let gridLookup = {};
+  const gridStart = grid.start;
+  const lngOffset = grid.lngOffset;
+  const latOffset = grid.latOffset;
+  const detailLevel = grid.detailLevel;
 
-  for (var siteName in window.meta) {
-    var site = window.meta[siteName];
-    if (siteCellDict[siteName] == null) {
+  for (let siteName in window.meta) {
+    let site = window.meta[siteName];
+    if (gridLookup[siteName] == null) {
       var siteLng = site.x;
       var siteLat = site.y;
-
-      var lngDiff = Math.abs(siteLng) - Math.abs(gridStart[0]);
-      var colIndex = Math.floor(lngDiff / lngOffset);
-
-      var latDiff = Math.abs(siteLat) - Math.abs(gridStart[1]);
-      var rowIndex = Math.floor(latDiff / latOffset);
-
-      var siteCellIndex = rowIndex * detailLevel + colIndex;
-      //console.log(siteCellIndex);
-
-      siteCellDict[siteName] = siteCellIndex;
-      //only-sampled-grids: add haSamples bool
-
-      //Set the grids that contain samples to true. Not search-dependent.
-      grid.cells[siteCellIndex].hasSamples = true;
-
-      //if site count unfiltered.
-      if (!siteName in grid.cells[siteCellIndex].cellSites) {
-        grid.cells[siteCellIndex].cellSites.push(siteName);
+      let gridCellIndex = calculateGridIndexFromCoordinates();
+      gridLookup[siteName] = gridCellIndex;
+      // Sets hasSamples to true from default false as a site is a sample.
+      // Also reduces processing uneccessary polygons
+      grid.cells[gridCellIndex].hasSamples = true;
+      if (!siteName in grid.cells[gridCellIndex].cellSites) {
+        grid.cells[gridCellIndex].cellSites.push(siteName);
       }
-    } else {
-      continue;
     }
   }
-  return siteCellDict;
+  return gridLookup;
+
+  /**
+   * Assumes coordinate system is WGS84. Uses rounding to find the index.
+   */
+  function calculateGridIndexFromCoordinates() {
+    let lngDiff = Math.abs(siteLng) - Math.abs(gridStart[0]);
+    let colIndex = Math.floor(lngDiff / lngOffset);
+    let latDiff = Math.abs(siteLat) - Math.abs(gridStart[1]);
+    let rowIndex = Math.floor(latDiff / latOffset);
+    let gridCellIndex = rowIndex * detailLevel + colIndex;
+    return gridCellIndex;
+  }
 }
 
 /**
