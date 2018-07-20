@@ -42,7 +42,7 @@ function getSiteWeights(filters) {
   n_points = 0;
 
   //warrick Clears grid layer values, gives them an index.
-  var grid = makeGrid(map, detailLevel);
+  var grid = makeGrid(detailLevel);
   clearGrid(grid);
   gridCellLookup = makeGridLookup(grid);
 
@@ -313,22 +313,24 @@ function handleResults(results, meta) {
  * @param {*} map 
  * @param {*} detailLevel 
  */
-function makeGrid(map, detailLevel) {
+function makeGrid(detailLevel) {
   //Hard coded bounds and offsets.
-  let cellStart = [164.71222, -33.977509];
-  const gridStart = cellStart;
-  var end = [178.858982, -49.66352];
+  const gridStart = [164.71222, -33.977509];
+  const gridEnd = [178.858982, -49.66352];
 
-  var hardBounds = L.latLngBounds(gridStart, end);
+  var hardBounds = L.latLngBounds(gridStart, gridEnd);
   northWest = hardBounds.getNorthWest();
   northEast = hardBounds.getNorthEast();
   southWest = hardBounds.getSouthWest();
   southEast = hardBounds.getSouthEast();
-  var latOffset = (northWest.lat - southWest.lat) / detailLevel;
-  var lngOffset = (northEast.lng - northWest.lng) / detailLevel;
-  //hard coded bounds and offsets end.
+  const latOffset = (northWest.lat - southWest.lat) / detailLevel;
+  const lngOffset = (northEast.lng - northWest.lng) / detailLevel;
+  // The bounds method seems to make the rectangle less distorted
+  // const latOffset = (gridStart[1] - gridEnd[1]) / detailLevel;
+  // const lngOffset = (gridEnd[0] - gridStart[0]) / detailLevel;
 
   var gridCells = [];
+  let cellStart = gridStart;
   for (var i = 0; i < detailLevel; i++) {
     for (var j = 0; j < detailLevel; j++) {
       //create rectangle polygon.
@@ -1223,7 +1225,7 @@ window.circles = [];
 
 var detailLevel = 60;
 //warrick map additions
-var grid = makeGrid(map, detailLevel);
+var grid = makeGrid(detailLevel);
 
 //shows the scale of the map
 var scaleIndicator = L.control.scale().addTo(map);
