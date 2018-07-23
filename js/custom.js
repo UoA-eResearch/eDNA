@@ -132,7 +132,7 @@ function getSiteWeights(filters) {
   }
 
   function addValuesToSiteMetric() {
-    siteMetrics[taxon_column].count += taxon_row[taxon_column];
+    siteMetrics[taxon_column].abundance += taxon_row[taxon_column];
     siteMetrics[taxon_column].richness++;
     // Adding key, value for species assuming there's only one entry for a species in the data.
     siteMetrics[taxon_column].species[taxon_name] = taxon_row[taxon_column];
@@ -140,7 +140,7 @@ function getSiteWeights(filters) {
 
   function createSiteMetric() {
     siteMetrics[taxon_column] = site;
-    siteMetrics[taxon_column].count = 0;
+    siteMetrics[taxon_column].abundance = 0;
     siteMetrics[taxon_column].richness = 0;
     siteMetrics[taxon_column].species = {};
   }
@@ -843,7 +843,7 @@ function calculateSiteMetrics(siteMetrics) {
     for (var taxon_name in site.species) {
       speciesAbundance = site.species[taxon_name];
       // shannon value for an individual species relative to a site/sample. Adds them to the sum
-      site.shannonDiversity += (speciesAbundance/site.count) * Math.log(speciesAbundance/site.count);
+      site.shannonDiversity += (speciesAbundance/site.abundance) * Math.log(speciesAbundance/site.abundance);
     }
     site.shannonDiversity *= -1;
     site.effectiveAlpha =  Math.exp(site.shannonDiversity);
@@ -943,7 +943,7 @@ function updateGraph(siteMetrics) {
       siteId: siteMetric.site,
       Metric: 'Sequence abundance',
       // TEMP:FIXME: bpa count abundance mismatch
-      value: siteMetric.count,
+      value: siteMetric.abundance,
       meta: siteMetric
     };
     dataSet.push(siteAbundance);
