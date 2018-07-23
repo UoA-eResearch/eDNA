@@ -117,11 +117,8 @@ function getSiteWeights(filters) {
     else {
       addValueToGridCellSpecies();
     }
-    console.log(taxon_column);
-    console.log(cell.cellSites);
     if (!cell.cellSites.includes(taxon_column)) {
       cell.cellSites.push(taxon_column);
-      console.log('pushed site.');
     }
 
     function addValueToGridCellSpecies() {
@@ -440,6 +437,7 @@ function drawGrid(grid) {
   console.log(gridMaxes);
   const maxRichness = gridMaxes.richness;
   const maxAbundance = gridMaxes.abundance;
+  console.log(maxAbundance, maxRichness);
   const maxSiteCount = gridMaxes.siteCount;
   let features = [];
   let cellId = 0;
@@ -470,8 +468,8 @@ function drawGrid(grid) {
       continue;
     }
     console.log(cell);
-    const weightedCount = cell.richness / maxRichness;
-    const weightedValue = cell.value / maxAbundance;
+    const weightedRichness = cell.richness / maxRichness;
+    const weightedAbundance = cell.abundance / maxAbundance;
     const weightedSites = cell.cellSites.length / maxSiteCount;
     //Add cell statistics within popup.
     //Cell coordinates
@@ -515,10 +513,10 @@ function drawGrid(grid) {
       type: 'Feature',
       properties: {
         index: i,
-        weightedValue: weightedValue,
-        weightedCount: weightedCount,
-        speciesInCell: speciesInCell,
-        weightedSites: weightedSites,
+        weightedAbundance,
+        weightedRichness,
+        speciesInCell,
+        weightedSites,
         cellSites: cell.cellSites,
         hasSamples: cell.hasSamples,
         popupContent: popupContent
@@ -586,15 +584,15 @@ function drawGrid(grid) {
    */
   function CellValueStyle(feature) {
     return {
-      fillColor: GetFillColor(feature.properties.weightedValue),
+      fillColor: GetFillColor(feature.properties.weightedAbundance),
       weight: 1,
       opacity: GetOutlineOpacity(
-        feature.properties.weightedValue,
-        feature.properties.hasSamples
+        feature.properties.weightedAbundance,
+        feature.properties.weightedAbundance
       ),
       color: GetOutlineColour(),
       fillOpacity: GetFillOpacity(
-        feature.properties.weightedValue,
+        feature.properties.weightedAbundance,
         feature.properties.hasSamples
       )
     };
@@ -606,15 +604,15 @@ function drawGrid(grid) {
    */
   function CellCountStyle(feature) {
     return {
-      fillColor: GetFillColor(feature.properties.weightedCount),
+      fillColor: GetFillColor(feature.properties.weightedRichness),
       weight: 1,
       opacity: GetOutlineOpacity(
-        feature.properties.weightedCount,
+        feature.properties.weightedRichness,
         feature.properties.hasSamples
       ),
       color: GetOutlineColour(),
       fillOpacity: GetFillOpacity(
-        feature.properties.weightedCount,
+        feature.properties.weightedRichness,
         feature.properties.hasSamples
       )
     };
