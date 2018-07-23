@@ -365,8 +365,10 @@ function makeGrid(detailLevel) {
     let cell = [topLeft, topRight, bottomRight, bottomLeft];
     cell = {
       coordinates: cell,
-      count: 0,
-      value: 0,
+      maxAbundance:0,
+      abundance: 0,
+      richness: 0,
+      maxRichness:0,
       cellSpecies: {},
       cellSites: [],
       hasSamples: false
@@ -761,6 +763,8 @@ function CalculateGridMaxes(gridCells) {
     abundance: abundance,
     siteCount: siteCount
   };
+  console.log(richness);
+  console.log(gridMaxes);
   return gridMaxes;
 }
 
@@ -940,7 +944,7 @@ function createColorRange(siteMetrics) {
 }
 
 /**
- * Returns a random amount between upper and lower.
+ * Returns a random amount between upper and lower. For jittering the plots.
  * @param {*} upper 
  * @param {*} lower 
  */
