@@ -109,8 +109,8 @@ function getSiteWeights(filters) {
   return sites;
 
   function addValuesToGridCell(gridCell) {
-    gridCell.count++;
-    gridCell.value += taxon_row[taxon_column];
+    gridCell.richness++;
+    gridCell.abundance += taxon_row[taxon_column];
     if (gridCell.cellSpecies[taxon_name] == null) {
       createGridCellSpecies();
     }
@@ -442,18 +442,13 @@ function drawGrid(grid) {
   //Generating geojson
   for (var i in gridCells) {
     var cell = gridCells[i];
-
-    var cellAbundance = cell.abundance;
-
     //if grid doesn't contain any sites then don't add to map.
     if (!cell.hasSamples) {
       continue;
     }
-
     var weightedCount = cell.richness / maxRichness;
     var weightedValue = cell.value / maxAbundance;
     var weightedSites = cell.cellSites.length / maxSiteCount;
-
     //Add cell statistics within popup.
     //Cell coordinates
     var popupContent =
@@ -464,7 +459,7 @@ function drawGrid(grid) {
       cell.richness +
       '<br />' +
       '<strong>Cell Abundance: </strong>' +
-      cell.value +
+      cell.abundance +
       '<br />' +
       '<strong>Cell Site Count: </strong>' +
       cell.cellSites.length +
@@ -725,7 +720,6 @@ function CalculateGridMaxes(gridCells) {
     if (cell.cellSites.length > siteCount) {
       siteCount = cell.cellSites.length;
     }
-    totalCount += cell.count;
   }
   //console.log("max count ", maxCount, "max value ", maxValue);
   var gridMaxes = {
