@@ -365,10 +365,8 @@ function makeGrid(detailLevel) {
     let cell = [topLeft, topRight, bottomRight, bottomLeft];
     cell = {
       coordinates: cell,
-      maxAbundance:0,
       abundance: 0,
       richness: 0,
-      maxRichness:0,
       cellSpecies: {},
       cellSites: [],
       hasSamples: false
