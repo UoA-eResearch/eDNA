@@ -567,7 +567,7 @@ function drawGrid(grid) {
         feature.properties.weightedSites,
         feature.properties.hasSamples
       ),
-      color: GetOutlineColour(feature.properties.hasSamples),
+      color: GetOutlineColour(),
       fillOpacity: GetFillOpacity(
         feature.properties.weightedSites,
         feature.properties.hasSamples
@@ -580,8 +580,6 @@ function drawGrid(grid) {
    * @param {*} feature 
    */
   function CellValueStyle(feature) {
-    let outLineOpacity = 0.15;
-
     return {
       fillColor: GetFillColor(feature.properties.weightedValue),
       weight: 1,
@@ -589,7 +587,7 @@ function drawGrid(grid) {
         feature.properties.weightedValue,
         feature.properties.hasSamples
       ),
-      color: GetOutlineColour(feature.properties.hasSamples),
+      color: GetOutlineColour(),
       fillOpacity: GetFillOpacity(
         feature.properties.weightedValue,
         feature.properties.hasSamples
@@ -609,7 +607,7 @@ function drawGrid(grid) {
         feature.properties.weightedCount,
         feature.properties.hasSamples
       ),
-      color: GetOutlineColour(feature.properties.hasSamples),
+      color: GetOutlineColour(),
       fillOpacity: GetFillOpacity(
         feature.properties.weightedCount,
         feature.properties.hasSamples
@@ -750,9 +748,8 @@ function GetOutlineOpacity(hasSamples) {
 /**
  * Returns value for outline color. Currently hardcoded to 0.15.
  * Currently used to centralize style changes across multiple layers.
- * @param {*} hasSamples 
  */
-function GetOutlineColour(hasSamples) {
+function GetOutlineColour() {
   return '#000000';
 }
 
