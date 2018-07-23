@@ -440,7 +440,7 @@ function drawGrid(grid) {
   let features = [];
   let cellId = 0;
 
-  // to make writing html easier.
+  // returns string in strong html tags
   const strongLine = (s) => {
     return (
       '<strong>' +
@@ -450,6 +450,7 @@ function drawGrid(grid) {
     );
   }
 
+  // returns header in bold, string in regular text
   const strongHeader = (h, s) => {
     return (
       '<strong>' +
@@ -485,20 +486,21 @@ function drawGrid(grid) {
         cell.coordinates[0][1] +
         ' to ' +
         cell.coordinates[2][1]
-      );
+      ) +
+      '<br />';
     cellId++;
     const speciesInCell = cell.cellSpecies;
     //console.log(speciesInCell);
 
     //list all sites within the cell.
-    popupContent += '<strong>Sites in cell: </strong><br />' + '<ul>';
+    popupContent += strongLine('Sites in cell: ') + '<ul>';
     for (let site in cell.cellSites) {
       popupContent += '<li>' + cell.cellSites[site] + '</li>';
     }
     popupContent += '</ul><br />';
 
     //lists all the species within a cell.
-    popupContent += '<strong>Search results in cell: </strong><br /><br />';
+    popupContent +=  strongLine('Search results in cell: ') +' <br />';
     for (let species in speciesInCell) {
       popupContent +=
         strongLine(species) +
@@ -506,7 +508,7 @@ function drawGrid(grid) {
         strongHeader('Abundance in cell', speciesInCell[species].value) +
         '<br />';
     }
-    var cellPolygon = {
+    const cellPolygon = {
       type: 'Feature',
       properties: {
         index,
@@ -530,7 +532,7 @@ function drawGrid(grid) {
     features: features
   };
   //Clear count layer and add new one to layergroup.
-  var gridRichnessLayer = L.geoJSON(featureCollection, {
+  const gridRichnessLayer = L.geoJSON(featureCollection, {
     style: CellCountStyle,
     onEachFeature: onEachFeature
   });
@@ -538,7 +540,7 @@ function drawGrid(grid) {
   gridRichnessLayerGroup.addLayer(gridRichnessLayer);
 
   //Clear count layer, add new one to layergroup.
-  var gridAbundanceLayer = L.geoJSON(featureCollection, {
+  const gridAbundanceLayer = L.geoJSON(featureCollection, {
     style: CellValueStyle,
     onEachFeature: onEachFeature
   });
@@ -546,24 +548,18 @@ function drawGrid(grid) {
   gridAbundanceLayerGroup.addLayer(gridAbundanceLayer);
 
   //Clear site count layer, add new one to layergroup.
-  var gridSitesLayer = L.geoJSON(featureCollection, {
+  const gridSitesLayer = L.geoJSON(featureCollection, {
     style: CellSitesStyle,
     onEachFeature: onEachFeature
   });
   gridSitesLayerGroup.clearLayers();
   gridSitesLayerGroup.addLayer(gridSitesLayer);
 
-  //test
-  //console.log(gridSitesLayer);
-
   function CellSitesStyle(feature) {
     return {
       fillColor: GetFillColor(feature.properties.weightedSites),
       weight: 1,
-      opacity: GetOutlineOpacity(
-        feature.properties.weightedSites,
-        feature.properties.hasSamples
-      ),
+      opacity: getOutlineOpacity(),
       color: GetOutlineColour(),
       fillOpacity: GetFillOpacity(
         feature.properties.weightedSites,
@@ -580,10 +576,7 @@ function drawGrid(grid) {
     return {
       fillColor: GetFillColor(feature.properties.weightedAbundance),
       weight: 1,
-      opacity: GetOutlineOpacity(
-        feature.properties.weightedAbundance,
-        feature.properties.weightedAbundance
-      ),
+      opacity: getOutlineOpacity(),
       color: GetOutlineColour(),
       fillOpacity: GetFillOpacity(
         feature.properties.weightedAbundance,
@@ -600,10 +593,7 @@ function drawGrid(grid) {
     return {
       fillColor: GetFillColor(feature.properties.weightedRichness),
       weight: 1,
-      opacity: GetOutlineOpacity(
-        feature.properties.weightedRichness,
-        feature.properties.hasSamples
-      ),
+      opacity: getOutlineOpacity(),
       color: GetOutlineColour(),
       fillOpacity: GetFillOpacity(
         feature.properties.weightedRichness,
@@ -643,25 +633,6 @@ function handleCellClick(e) {
   var speciesInCell = layer.feature.properties.speciesInCell;
   var speciesAmount = Object.keys(speciesInCell).length;
   console.log('Number of unique classifications in cell: ' + speciesAmount);
-  //get total value for shannon index calculation
-  var totalValue = 0;
-  for (var species in speciesInCell) {
-    var speciesData = speciesInCell[species];
-    totalValue += speciesData.value;
-  }
-  console.log('total abundance of cell: ' + totalValue);
-  //calculate metrics for species within the cell
-  for (var species in speciesInCell) {
-    speciesData = speciesInCell[species];
-    var speciesShannonIndex =
-      -1 *
-      (speciesData.value /
-        totalValue *
-        Math.log(speciesData.value / totalValue));
-    var speciesRichness = speciesData.count;
-    var speciesAbundance = speciesData.value;
-    //console.log(species, speciesShannonIndex, speciesRichness, speciesAbundance);
-  }
 }
 
 /**
@@ -670,7 +641,6 @@ function handleCellClick(e) {
  */
 function handleMouseOver(e) {
   var layer = e.target;
-  //console.log(layer.feature.properties.cellSites);
   var siteList = layer.feature.properties.cellSites;
   for (site in siteList) {
     var circle = d3.selectAll('#' + siteList[site]);
@@ -704,14 +674,12 @@ function handleMouseOut(e) {
  * @param {*} gridCells 
  */
 function CalculateGridMaxes(gridCells) {
-  //console.log(cells);
-  var richness = 0;
-  var abundance = 0;
-  var siteCount = 0;
-  for (var i in gridCells) {
-    var cell = gridCells[i];
-    //Summing sites within cell. Add the data to the cell.
-    var cellRichness = Object.keys(cell.cellSpecies).length;
+  let richness = 0;
+  let abundance = 0;
+  let siteCount = 0;
+  for (let i in gridCells) {
+    const cell = gridCells[i];
+    const cellRichness = Object.keys(cell.cellSpecies).length;
     cell.richness = cellRichness;
     if (cell.richness > richness) {
       richness = cellRichness;
@@ -725,9 +693,9 @@ function CalculateGridMaxes(gridCells) {
   }
   //console.log("max count ", maxCount, "max value ", maxValue);
   var gridMaxes = {
-    richness: richness,
-    abundance: abundance,
-    siteCount: siteCount
+    richness,
+    abundance,
+    siteCount
   };
   return gridMaxes;
 }
@@ -735,9 +703,8 @@ function CalculateGridMaxes(gridCells) {
 /**
  * Returns value for outline opacity. Currently hardcoded to 0.15.
  * Currently used to centralize style changes across multiple layers.
- * @param {*} hasSamples 
  */
-function GetOutlineOpacity(hasSamples) {
+function getOutlineOpacity() {
     return 0.15;
 }
 
@@ -828,7 +795,7 @@ function disableHighlightLayer(layer) {
   //console.log(properties);
   layer.setStyle({
     weight: 1,
-    opacity: GetOutlineOpacity(properties.hasSamples),
+    opacity: getOutlineOpacity(properties.hasSamples),
   });
 }
 
