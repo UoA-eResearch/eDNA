@@ -580,6 +580,8 @@ function drawGrid(grid) {
    * @param {*} feature 
    */
   function CellValueStyle(feature) {
+    let outLineOpacity = 0.15;
+
     return {
       fillColor: GetFillColor(feature.properties.weightedValue),
       weight: 1,
@@ -702,13 +704,6 @@ function handleMouseOut(e) {
 }
 
 /**
- * returns feature style based on feature properties cellSites length
- * which is the amount of unique sites within the cell.
- * @param {*} feature 
- */
-
-
-/**
  * Provides aggregate calculation for richness and adds it to the gridCell data.
  * Calculates and returns the maximums for cell richness, abundance and shannon entropy within the grid.
  * @param {*} gridCells 
@@ -718,10 +713,8 @@ function CalculateGridMaxes(gridCells) {
   var richness = 0;
   var abundance = 0;
   var siteCount = 0;
-  var totalCount = 0;
   for (var i in gridCells) {
     var cell = gridCells[i];
-
     //Summing sites within cell. Add the data to the cell.
     var cellRichness = Object.keys(cell.cellSpecies).length;
     cell.richness = cellRichness;
@@ -736,15 +729,12 @@ function CalculateGridMaxes(gridCells) {
     }
     totalCount += cell.count;
   }
-  //console.log("max count ", maxCount, "max value ", maxValue, "total count ", totalCount);
-
+  //console.log("max count ", maxCount, "max value ", maxValue);
   var gridMaxes = {
     richness: richness,
     abundance: abundance,
     siteCount: siteCount
   };
-  console.log(richness);
-  console.log(gridMaxes);
   return gridMaxes;
 }
 
@@ -808,15 +798,13 @@ function GetFillColor(d) {
  * @param {*} layer 
  */
 function highlightFeatureClick(layer) {
-  var layer = e.target;
-
+  let layer = e.target;
   layer.setStyle({
     weight: 5,
     color: '#666',
     dashArray: '',
     fillOpacity: 0.7
   });
-
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
     layer.bringToFront();
   }
@@ -832,7 +820,6 @@ function highlightLayer(layer) {
     weight: 5,
     opacity: 0.9
   });
-
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
     layer.bringToFront();
   }
@@ -1284,15 +1271,13 @@ visControl.onAdd = function(map) {
 };
 
 visControl.update = function() {
-  //using ECMA script 6 template literal using backticks.
   // todo: use map function to list the site meta fields for the options.
-
   // todo: Make this function called after the window.meta has been processed and (possibly) filtered
   // otherwise it will have no idea what siteMetric keys to add as select options.
-
   // if siteMetrics not null then generate option elements from site meta keys.
   if (siteMetrics != null) {
     console.log("site metrics found. Filling select element based on meta keys");
+    //using ECMA script 6 template literal using backticks.
     this._div.innerHeight = 
     `<div id="chart" style="display: none;">
     </div>
