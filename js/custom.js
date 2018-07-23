@@ -316,7 +316,7 @@ function makeGrid(detailLevel) {
   const gridStart = [164.71222, -33.977509];
   const gridEnd = [178.858982, -49.66352];
 
-  var hardBounds = L.latLngBounds(gridStart, gridEnd);
+  const hardBounds = L.latLngBounds(gridStart, gridEnd);
   northWest = hardBounds.getNorthWest();
   northEast = hardBounds.getNorthEast();
   southWest = hardBounds.getSouthWest();
@@ -327,19 +327,19 @@ function makeGrid(detailLevel) {
   // const latOffset = (gridStart[1] - gridEnd[1]) / detailLevel;
   // const lngOffset = (gridEnd[0] - gridStart[0]) / detailLevel;
 
-  var gridCells = [];
+  let gridCells = [];
   let cellStart = gridStart;
   for (var i = 0; i < detailLevel; i++) {
     for (var j = 0; j < detailLevel; j++) {
       //create rectangle polygon.
       var cell = makeCell();
       gridCells.push(cell);
-      cellStart = incrementLng(cellStart, lngOffset);
+      cellStart = incrementLatitude();
     }
-    cellStart = resetLngDecrementLat();
+    cellStart = resetLongitudeDecrementLatitude();
   }
 
-  var grid = {
+  let grid = {
     start: gridStart,
     lngOffset: lngOffset,
     latOffset: latOffset,
@@ -348,11 +348,11 @@ function makeGrid(detailLevel) {
   };
   return grid;
 
-  function incrementLng() {
+  function incrementLatitude() {
     return [cellStart[0] + lngOffset, cellStart[1]];
   }
 
-  function resetLngDecrementLat() {
+  function resetLongitudeDecrementLatitude() {
     return [cellStart[0] - lngOffset * detailLevel, cellStart[1] - latOffset];
   }
 
