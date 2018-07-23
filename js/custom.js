@@ -108,23 +108,29 @@ function getSiteWeights(filters) {
   drawGrid(grid);
   return sites;
 
-  function addValuesToGridCell(gridCell) {
-    gridCell.richness++;
-    gridCell.abundance += taxon_row[taxon_column];
-    if (gridCell.cellSpecies[taxon_name] == null) {
+  function addValuesToGridCell(cell) {
+    cell.richness++;
+    cell.abundance += taxon_row[taxon_column];
+    if (cell.cellSpecies[taxon_name] == null) {
       createGridCellSpecies();
     }
     else {
       addValueToGridCellSpecies();
     }
+    console.log(taxon_column);
+    console.log(cell.cellSites);
+    if (!cell.cellSites.includes(taxon_column)) {
+      cell.cellSites.push(taxon_column);
+      console.log('pushed site.');
+    }
 
     function addValueToGridCellSpecies() {
-      gridCell.cellSpecies[taxon_name].count++;
-      gridCell.cellSpecies[taxon_name].value += taxon_row[taxon_column];
+      cell.cellSpecies[taxon_name].count++;
+      cell.cellSpecies[taxon_name].value += taxon_row[taxon_column];
     }
 
     function createGridCellSpecies() {
-      gridCell.cellSpecies[taxon_name] = {
+      cell.cellSpecies[taxon_name] = {
         count: 1,
         value: taxon_row[taxon_column]
       };
@@ -329,10 +335,10 @@ function makeGrid(detailLevel) {
 
   let gridCells = [];
   let cellStart = gridStart;
-  for (var i = 0; i < detailLevel; i++) {
-    for (var j = 0; j < detailLevel; j++) {
+  for (let i = 0; i < detailLevel; i++) {
+    for (let j = 0; j < detailLevel; j++) {
       //create rectangle polygon.
-      var cell = makeCell();
+      const cell = makeCell();
       gridCells.push(cell);
       cellStart = incrementLatitude();
     }
@@ -386,8 +392,9 @@ function makeGridLookup(grid) {
   const detailLevel = grid.detailLevel;
 
   for (let siteName in window.meta) {
-    let site = window.meta[siteName];
+    const site = window.meta[siteName];
     if (gridLookup[siteName] == null) {
+      // siteLat/Lng so it can be in scope for the subfunction.
       var siteLng = site.x;
       var siteLat = site.y;
       let gridCellIndex = calculateGridIndexFromCoordinates();
@@ -428,39 +435,50 @@ function makeGridLookup(grid) {
  */
 function drawGrid(grid) {
   //TODO: refactor this
-  var cells = grid.cells;
-  var gridMaxes = CalculateGridMaxes(cells);
+  const cells = grid.cells;
+  const gridMaxes = CalculateGridMaxes(cells);
+  console.log(gridMaxes);
+  const maxRichness = gridMaxes.richness;
+  const maxAbundance = gridMaxes.abundance;
+  const maxSiteCount = gridMaxes.siteCount;
+  let features = [];
+  let cellId = 0;
 
-  var maxRichness = gridMaxes.richness;
-  var maxAbundance = gridMaxes.abundance;
-  var maxSiteCount = gridMaxes.siteCount;
+  // to make writing html easier.
+  const strongLine = (s) => {
+    return (
+      '<strong>' +
+        s +
+        '</strong>' +
+        '<br />'
+    );
+  }
 
+  const strongHeader = (h, s) => {
+    return (
+      '<strong>' +
+      h +
+      ': </strong> ' +
+      s +
+      '<br />');
+  }
 
-  var features = [];
-  var gridCells = grid.cells;
-  var cellId = 0;
-  //Generating geojson
-  for (var i in gridCells) {
-    var cell = gridCells[i];
+  for (let i in cells) {
+    const cell = cells[i];
     //if grid doesn't contain any sites then don't add to map.
     if (!cell.hasSamples) {
       continue;
     }
-    var weightedCount = cell.richness / maxRichness;
-    var weightedValue = cell.value / maxAbundance;
-    var weightedSites = cell.cellSites.length / maxSiteCount;
+    console.log(cell);
+    const weightedCount = cell.richness / maxRichness;
+    const weightedValue = cell.value / maxAbundance;
+    const weightedSites = cell.cellSites.length / maxSiteCount;
     //Add cell statistics within popup.
     //Cell coordinates
-    var popupContent =
-      '<strong>Cell id:</strong> ' +
-      cellId +
-      '<br />' +
-      '<strong>Cell Richness:</strong> ' +
-      cell.richness +
-      '<br />' +
-      '<strong>Cell Abundance: </strong>' +
-      cell.abundance +
-      '<br />' +
+    let popupContent =
+      strongHeader('Cell id', cellId) +
+      strongHeader('Cell Richness', cell.abundance) +
+      strongHeader('Cell Abundance', cell.richness) +
       '<strong>Cell Site Count: </strong>' +
       cell.cellSites.length +
       '<br />' +
@@ -474,32 +492,24 @@ function drawGrid(grid) {
       ' to ' +
       cell.coordinates[2][1] +
       '<br /><br />';
-
     cellId++;
-    var speciesInCell = cell.cellSpecies;
+    const speciesInCell = cell.cellSpecies;
     //console.log(speciesInCell);
 
     //list all sites within the cell.
     popupContent += '<strong>Sites in cell: </strong><br />' + '<ul>';
-    for (var site in cell.cellSites) {
+    for (let site in cell.cellSites) {
       popupContent += '<li>' + cell.cellSites[site] + '</li>';
     }
     popupContent += '</ul><br />';
 
     //lists all the species within a cell.
     popupContent += '<strong>Search results in cell: </strong><br /><br />';
-    for (species in speciesInCell) {
+    for (let species in speciesInCell) {
       popupContent +=
-        '<strong>' +
-        species +
-        '</strong>' +
-        '<br />' +
-        '<strong>Cell frequency:</strong> ' +
-        speciesInCell[species].count +
-        '<br />' +
-        '<strong>Cell abundance:</strong> ' +
-        speciesInCell[species].value +
-        '<br /><br />';
+        strongLine(species) +
+        strongLine(speciesInCell[species].count) +
+        strongLine(speciesInCell[species].value);
     }
     var cellPolygon = {
       type: 'Feature',
@@ -714,8 +724,8 @@ function CalculateGridMaxes(gridCells) {
     if (cell.richness > richness) {
       richness = cellRichness;
     }
-    if (cell.value > abundance) {
-      abundance = cell.value;
+    if (cell.abundance > abundance) {
+      abundance = cell.abundance;
     }
     if (cell.cellSites.length > siteCount) {
       siteCount = cell.cellSites.length;
