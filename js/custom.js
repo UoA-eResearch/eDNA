@@ -434,10 +434,8 @@ function drawGrid(grid) {
   //TODO: refactor this
   const cells = grid.cells;
   const gridMaxes = CalculateGridMaxes(cells);
-  console.log(gridMaxes);
   const maxRichness = gridMaxes.richness;
   const maxAbundance = gridMaxes.abundance;
-  console.log(maxAbundance, maxRichness);
   const maxSiteCount = gridMaxes.siteCount;
   let features = [];
   let cellId = 0;
@@ -461,13 +459,12 @@ function drawGrid(grid) {
       '<br />');
   }
 
-  for (let i in cells) {
-    const cell = cells[i];
+  for (let index in cells) {
+    const cell = cells[index];
     //if grid doesn't contain any sites then don't add to map.
     if (!cell.hasSamples) {
       continue;
     }
-    console.log(cell);
     const weightedRichness = cell.richness / maxRichness;
     const weightedAbundance = cell.abundance / maxAbundance;
     const weightedSites = cell.cellSites.length / maxSiteCount;
@@ -477,19 +474,18 @@ function drawGrid(grid) {
       strongHeader('Cell id', cellId) +
       strongHeader('Cell Richness', cell.abundance) +
       strongHeader('Cell Abundance', cell.richness) +
-      '<strong>Cell Site Count: </strong>' +
-      cell.cellSites.length +
-      '<br />' +
-      '<strong>Lng:</strong>  ' +
-      cell.coordinates[0][0] +
-      ' to ' +
-      cell.coordinates[2][0] +
-      '<br />' +
-      '<strong>Lat:</strong>  ' +
-      cell.coordinates[0][1] +
-      ' to ' +
-      cell.coordinates[2][1] +
-      '<br /><br />';
+      strongHeader('Cell Site Count', cell.cellSites.length) +
+      strongHeader(
+        'Longitude', cell.coordinates[0][0] +
+        ' to ' +
+        cell.coordinates[2][0]
+      ) +
+      strongHeader(
+        'Latitude', 
+        cell.coordinates[0][1] +
+        ' to ' +
+        cell.coordinates[2][1]
+      );
     cellId++;
     const speciesInCell = cell.cellSpecies;
     //console.log(speciesInCell);
@@ -506,13 +502,14 @@ function drawGrid(grid) {
     for (let species in speciesInCell) {
       popupContent +=
         strongLine(species) +
-        strongLine(speciesInCell[species].count) +
-        strongLine(speciesInCell[species].value);
+        strongHeader('Frequency in cell', speciesInCell[species].count) +
+        strongHeader('Abundance in cell', speciesInCell[species].value) +
+        '<br />';
     }
     var cellPolygon = {
       type: 'Feature',
       properties: {
-        index: i,
+        index,
         weightedAbundance,
         weightedRichness,
         speciesInCell,
@@ -528,28 +525,25 @@ function drawGrid(grid) {
     };
     features.push(cellPolygon);
   }
-  //console.log(features);
-
-  var featureCollection = {
+  let featureCollection = {
     type: 'FeatureCollection',
     features: features
   };
-
   //Clear count layer and add new one to layergroup.
-  var gridCountLayer = L.geoJSON(featureCollection, {
+  var gridRichnessLayer = L.geoJSON(featureCollection, {
     style: CellCountStyle,
     onEachFeature: onEachFeature
   });
-  gridCountLayerGroup.clearLayers();
-  gridCountLayerGroup.addLayer(gridCountLayer);
+  gridRichnessLayerGroup.clearLayers();
+  gridRichnessLayerGroup.addLayer(gridRichnessLayer);
 
   //Clear count layer, add new one to layergroup.
-  var gridValueLayer = L.geoJSON(featureCollection, {
+  var gridAbundanceLayer = L.geoJSON(featureCollection, {
     style: CellValueStyle,
     onEachFeature: onEachFeature
   });
-  gridValueLayerGroup.clearLayers();
-  gridValueLayerGroup.addLayer(gridValueLayer);
+  gridAbundanceLayerGroup.clearLayers();
+  gridAbundanceLayerGroup.addLayer(gridAbundanceLayer);
 
   //Clear site count layer, add new one to layergroup.
   var gridSitesLayer = L.geoJSON(featureCollection, {
@@ -1194,16 +1188,16 @@ var grid = makeGrid(detailLevel);
 var scaleIndicator = L.control.scale().addTo(map);
 
 //instantiating empty layer control layers to be filled later
-var gridCountLayerGroup = L.layerGroup();
-var gridValueLayerGroup = L.layerGroup();
+var gridRichnessLayerGroup = L.layerGroup();
+var gridAbundanceLayerGroup = L.layerGroup();
 var gridSitesLayerGroup = L.layerGroup();
 var heatLayerGroup = L.layerGroup();
 var baseMaps = {
   Base: tileLayer
 };
 var overlays = {
-  'Grid: Abundance': gridValueLayerGroup,
-  'Grid: Richness': gridCountLayerGroup,
+  'Grid: Abundance': gridAbundanceLayerGroup,
+  'Grid: Richness': gridRichnessLayerGroup,
   'Heat: Abundance': heatLayerGroup,
   'Grid: Site Count': gridSitesLayerGroup
 };
