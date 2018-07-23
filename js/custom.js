@@ -337,7 +337,7 @@ function makeGrid(detailLevel) {
       //create rectangle polygon.
       const cell = makeCell();
       gridCells.push(cell);
-      cellStart = incrementLatitude();
+      cellStart = incrementLongitude();
     }
     cellStart = resetLongitudeDecrementLatitude();
   }
@@ -351,7 +351,7 @@ function makeGrid(detailLevel) {
   };
   return grid;
 
-  function incrementLatitude() {
+  function incrementLongitude() {
     return [cellStart[0] + lngOffset, cellStart[1]];
   }
 
