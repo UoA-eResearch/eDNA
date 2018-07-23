@@ -43,7 +43,6 @@ function getSiteWeights(filters) {
 
   //warrick Clears grid layer values, gives them an index.
   var grid = makeGrid(detailLevel);
-  clearGrid(grid);
   gridCellLookup = makeGridLookup(grid);
 
   //console.log(grid);
@@ -373,23 +372,6 @@ function makeGrid(detailLevel) {
     };
     return cell;
   }
-}
-
-/**
- * Clears the values in the grid.
- * @param {*} grid 
- */
-function clearGrid(grid) {
-  for (var cell in grid.cells) {
-    if (cell.count != 0) {
-      cell.count = 0;
-    }
-    if (cell.value != 0) {
-      cell.value = 0;
-    }
-    cell.speciesDict = {};
-  }
-  cell.cellSpecies = {};
 }
 
 /**
