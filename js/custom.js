@@ -35,7 +35,6 @@ function checkFragment(f, species, site) {
   return false;
 }
 
-var cellSiteDict = {};
 var siteMetrics;
 //Called by handeResults
 function getSiteWeights(filters) {
@@ -43,16 +42,15 @@ function getSiteWeights(filters) {
   n_points = 0;
 
   //warrick Clears grid layer values, gives them an index.
-  var grid = MakeGrid(map, detailLevel);
-  ClearGrid(grid);
-  cellSiteDict = MakeGridIndex(grid);
+  var grid = makeGrid(detailLevel);
+  gridCellLookup = makeGridLookup(grid);
 
   //console.log(grid);
   //set bool for all the grids that don't have a site.
 
   //Site metrics: Adding dictionary of site metrics for calculations.
   siteMetrics = {};
-
+  console.time()
   //loop through parsed global result data.
   for (var i in window.results.data) {
     var taxon_row = window.results.data[i];
@@ -61,10 +59,7 @@ function getSiteWeights(filters) {
     for (var taxon_column in taxon_row) {
       //Skip the bacteria name field, only process site lines.
       if (taxon_column != '') {
-        //Extracts the measurements (e.g. alpine=.32, gravel=.5)
-        // from a particular site, stores in site var.
-        // FIXME: Need to make a change to the casing earlier on to avoid this problem.
-        taxon_column = taxon_column.toUpperCase();
+        // site contains the full meta row for a site.
         var site = window.meta[taxon_column];
         //declare bool defaulting to false
         var match = false;
@@ -81,59 +76,77 @@ function getSiteWeights(filters) {
           // console.log(match);
           if (match) break;
         }
-        //if the bacteria + current site combo returns a match + the current bacteria with current site
         //has a bacteria reading over 0 then:
         if (match && taxon_row[taxon_column] > 0) {
-          // console.log('e[k] over 0');
           //if site currently contains no values/(maybe a value that isn't 1?) then give it a value of 0
-          if (!sites[taxon_column]) sites[taxon_column] = 0;
-          //add the value found at bacteria-e's site-k value.
+          if (!sites[taxon_column]) {
+            sites[taxon_column] = 0;
+          } 
+          // Add sample-otu value to sites dictionary
           sites[taxon_column] += taxon_row[taxon_column];
-
           //add values to sitemetrics {} dictionary for visualization.
           if (siteMetrics[taxon_column] == null) {
-            siteMetrics[taxon_column] = site;
-            siteMetrics[taxon_column].count = taxon_row[taxon_column];
-            siteMetrics[taxon_column].richness = 1;
-            siteMetrics[taxon_column].species = {};
-          } else {
-            siteMetrics[taxon_column].count += taxon_row[taxon_column];
-            siteMetrics[taxon_column].richness++;
+            createSiteMetric();
           }
-          // TEMP: Adding key, value for species assuming there's only one entry for a species in the data.
-          siteMetrics[taxon_column].species[taxon_name] = taxon_row[taxon_column];
-          //Warrick: Add to the corresponding grid as well.
-          var cellIndex = cellSiteDict[taxon_column];
-          if (cellIndex == null) {
-            // console.log(k);
-          }
-          grid.cells[cellIndex].count++;
-          grid.cells[cellIndex].value += taxon_row[taxon_column];
-
-          var cell = grid.cells[cellIndex];
-          if (cell.cellSpecies[taxon_name] == null) {
-            cell.cellSpecies[taxon_name] = {
-              count: 1,
-              value: taxon_row[taxon_column]
-            };
-          } else {
-            cell.cellSpecies[taxon_name].count++;
-            cell.cellSpecies[taxon_name].value += taxon_row[taxon_column];
-          }
-          //increment the n_points which is the total amount of sites the bacteria is found at.
+          addValuesToSiteMetric();
+          // Adds the values into the grid object used to create the leaflet features/squares.
+          const cellIndex = gridCellLookup[taxon_column];
+          const gridCell = grid.cells[cellIndex];
+          addValuesToGridCell(gridCell);
+          // increment the n_points which is displayed below search filter
           n_points++;
         }
       }
     }
   }
   $('#numberResults').text(n_points);
+  console.timeEnd()
   // console.log(grid);
   // console.log(sites);
   // console.log(siteMetrics);
   calculateSiteMetrics(siteMetrics);
-  //warrick: integrating filtered results with grid view.
-  DrawGrid(grid);
+  drawGrid(grid);
   return sites;
+
+  function addValuesToGridCell(cell) {
+    cell.richness++;
+    cell.abundance += taxon_row[taxon_column];
+    if (cell.cellSpecies[taxon_name] == null) {
+      createGridCellSpecies();
+    }
+    else {
+      addValueToGridCellSpecies();
+    }
+    if (!cell.cellSites.includes(taxon_column)) {
+      cell.cellSites.push(taxon_column);
+    }
+
+    function addValueToGridCellSpecies() {
+      cell.cellSpecies[taxon_name].count++;
+      cell.cellSpecies[taxon_name].value += taxon_row[taxon_column];
+    }
+
+    function createGridCellSpecies() {
+      cell.cellSpecies[taxon_name] = {
+        count: 1,
+        value: taxon_row[taxon_column]
+      };
+    }
+  }
+
+  function addValuesToSiteMetric() {
+    siteMetrics[taxon_column].abundance += taxon_row[taxon_column];
+    siteMetrics[taxon_column].richness++;
+    // Adding key, value for species assuming there's only one entry for a species in the data.
+    siteMetrics[taxon_column].species[taxon_name] = taxon_row[taxon_column];
+  }
+
+  function createSiteMetric() {
+    siteMetrics[taxon_column] = site;
+    siteMetrics[taxon_column].abundance = 0;
+    siteMetrics[taxon_column].richness = 0;
+    siteMetrics[taxon_column].species = {};
+  }
 }
 
 /**
@@ -235,28 +248,20 @@ function getFilterData() {
 function handleResults(results, meta) {
   //creates global var results
   window.results = results;
-  //console.log(meta);
   //loops through meta data passed in.
-  console.time();
   var metaDict = {};
   for (var i in meta.data) {
     var site = meta.data[i]
     metaDict[site['site']] = site;
   }
-  console.timeEnd();
   //makes meta dictionary global
   window.meta = metaDict;
-  // console.log(window.meta);
   //instantiates the filter search bar
   $('#filter').select2({
     placeholder: 'Type to filter by classification and metadata',
-    //allows multiple tag filters at once.
     multiple: true,
-    //allows clearing of the box instantly
     allowClear: true,
-    //Gets all the data and metadata possible searches and pushes them to the select drop down.
     data: getFilterData(),
-    //allows addition of custom tags to the options.
     tags: true,
     createTag: function(params) {
       //console.log(params);
@@ -276,17 +281,15 @@ function handleResults(results, meta) {
   $('#filter').change(function() {
     window.location.hash = encodeURIComponent($(this).val());
     var filters = $(this).select2('data');
-    //console.log(filters);
-    //gets the results from the filters.
     //note: need to change it so siteweights are everywhere at a fixed lonlat.
     var siteWeights = getSiteWeights(filters);
-    //console.log(siteWeights);
     var maxWeight = 0;
     for (var site in siteWeights) {
       var w = siteWeights[site];
       if (w > maxWeight) maxWeight = w;
     }
     //grid data layer creation
+    // TODO: combined heat layer site coordinates and site-weights with others
     var latlngs = [];
     for (var site in siteWeights) {
       var siteMeta = window.meta[site];
@@ -309,51 +312,37 @@ function handleResults(results, meta) {
 
 /**
  * Makes grid array for cells. Each cell starts off with only containing coordinates.
- * @param {*} map 
  * @param {*} detailLevel 
  */
-function MakeGrid(map, detailLevel) {
+function makeGrid(detailLevel) {
   //Hard coded bounds and offsets.
-  start = [164.71222, -33.977509];
-  var gridStart = start;
-  var end = [178.858982, -49.66352];
+  const gridStart = [164.71222, -33.977509];
+  const gridEnd = [178.858982, -49.66352];
 
-  var hardBounds = L.latLngBounds(start, end);
+  const hardBounds = L.latLngBounds(gridStart, gridEnd);
   northWest = hardBounds.getNorthWest();
   northEast = hardBounds.getNorthEast();
   southWest = hardBounds.getSouthWest();
   southEast = hardBounds.getSouthEast();
-  var latOffset = (northWest.lat - southWest.lat) / detailLevel;
-  var lngOffset = (northEast.lng - northWest.lng) / detailLevel;
-  //hard coded bounds and offsets end.
+  const latOffset = (northWest.lat - southWest.lat) / detailLevel;
+  const lngOffset = (northEast.lng - northWest.lng) / detailLevel;
+  // The bounds method seems to make the rectangle less distorted
+  // const latOffset = (gridStart[1] - gridEnd[1]) / detailLevel;
+  // const lngOffset = (gridEnd[0] - gridStart[0]) / detailLevel;
 
-  var gridCells = [];
-  for (var i = 0; i < detailLevel; i++) {
-    for (var j = 0; j < detailLevel; j++) {
+  let gridCells = [];
+  let cellStart = gridStart;
+  for (let i = 0; i < detailLevel; i++) {
+    for (let j = 0; j < detailLevel; j++) {
       //create rectangle polygon.
-      var topLeft = [start[0], start[1]];
-      var topRight = [start[0] + lngOffset, start[1]];
-      var bottomRight = [start[0] + lngOffset, start[1] - latOffset];
-      var bottomLeft = [start[0], start[1] - latOffset];
-
-      var cell = [topLeft, topRight, bottomRight, bottomLeft];
-      var key = i * detailLevel + j;
-
-      cell = {
-        coordinates: cell,
-        count: 0,
-        value: 0,
-        cellSpecies: {},
-        cellSites: [],
-        hasSamples: false
-      };
+      const cell = makeCell();
       gridCells.push(cell);
-      start = [start[0] + lngOffset, start[1]];
+      cellStart = incrementLongitude();
     }
-    start = [start[0] - lngOffset * detailLevel, start[1] - latOffset];
+    cellStart = resetLongitudeDecrementLatitude();
   }
 
-  var grid = {
+  let grid = {
     start: gridStart,
     lngOffset: lngOffset,
     latOffset: latOffset,
@@ -361,67 +350,73 @@ function MakeGrid(map, detailLevel) {
     cells: gridCells
   };
   return grid;
-}
 
-/**
- * Clears the values in the grid.
- * @param {*} grid 
- */
-function ClearGrid(grid) {
-  for (var cell in grid.cells) {
-    if (cell.count != 0) {
-      cell.count = 0;
-    }
-    if (cell.value != 0) {
-      cell.value = 0;
-    }
-    cell.speciesDict = {};
+  function incrementLongitude() {
+    return [cellStart[0] + lngOffset, cellStart[1]];
   }
-  cell.cellSpecies = {};
+
+  function resetLongitudeDecrementLatitude() {
+    return [cellStart[0] - lngOffset * detailLevel, cellStart[1] - latOffset];
+  }
+
+  function makeCell() {
+    let topLeft = [cellStart[0], cellStart[1]];
+    let topRight = [cellStart[0] + lngOffset, cellStart[1]];
+    let bottomRight = [cellStart[0] + lngOffset, cellStart[1] - latOffset];
+    let bottomLeft = [cellStart[0], cellStart[1] - latOffset];
+    let cell = [topLeft, topRight, bottomRight, bottomLeft];
+    cell = {
+      coordinates: cell,
+      abundance: 0,
+      richness: 0,
+      cellSpecies: {},
+      cellSites: [],
+      hasSamples: false
+    };
+    return cell;
+  }
 }
 
 /**
  * Creates the grid lookup object/dictionary used for filling in the grid and calculating it's position.
  * @param {*} grid 
  */
-function MakeGridIndex(grid) {
-  var siteCellDict = {};
-  var gridStart = grid.start;
-  var lngOffset = grid.lngOffset;
-  var latOffset = grid.latOffset;
-  var detailLevel = grid.detailLevel;
+function makeGridLookup(grid) {
+  let gridLookup = {};
+  const gridStart = grid.start;
+  const lngOffset = grid.lngOffset;
+  const latOffset = grid.latOffset;
+  const detailLevel = grid.detailLevel;
 
-  for (var siteName in window.meta) {
-    var site = window.meta[siteName];
-    if (siteCellDict[siteName] == null) {
+  for (let siteName in window.meta) {
+    const site = window.meta[siteName];
+    if (gridLookup[siteName] == null) {
+      // siteLat/Lng so it can be in scope for the subfunction.
       var siteLng = site.x;
       var siteLat = site.y;
-
-      var lngDiff = Math.abs(siteLng) - Math.abs(gridStart[0]);
-      var colIndex = Math.floor(lngDiff / lngOffset);
-
-      var latDiff = Math.abs(siteLat) - Math.abs(gridStart[1]);
-      var rowIndex = Math.floor(latDiff / latOffset);
-
-      var siteCellIndex = rowIndex * detailLevel + colIndex;
-      //console.log(siteCellIndex);
-
-      siteCellDict[siteName] = siteCellIndex;
-      //only-sampled-grids: add haSamples bool
-
-      //Set the grids that contain samples to true. Not search-dependent.
-      grid.cells[siteCellIndex].hasSamples = true;
-
-      //if site count unfiltered.
-      if ($.inArray(siteName, grid.cells[siteCellIndex].cellSites) == -1) {
-        grid.cells[siteCellIndex].cellSites.push(siteName);
+      let gridCellIndex = calculateGridIndexFromCoordinates();
+      gridLookup[siteName] = gridCellIndex;
+      // Sets hasSamples to true from default false as a site is a sample.
+      // Also reduces processing uneccessary polygons
+      grid.cells[gridCellIndex].hasSamples = true;
+      if (!siteName in grid.cells[gridCellIndex].cellSites) {
+        grid.cells[gridCellIndex].cellSites.push(siteName);
       }
-    } else {
-      continue;
     }
   }
-  //console.log(siteCellDict);
-  return siteCellDict;
+  return gridLookup;
+
+  /**
+   * Assumes coordinate system is WGS84. Uses rounding to find the index.
+   */
+  function calculateGridIndexFromCoordinates() {
+    let lngDiff = Math.abs(siteLng) - Math.abs(gridStart[0]);
+    let colIndex = Math.floor(lngDiff / lngOffset);
+    let latDiff = Math.abs(siteLat) - Math.abs(gridStart[1]);
+    let rowIndex = Math.floor(latDiff / latOffset);
+    let gridCellIndex = rowIndex * detailLevel + colIndex;
+    return gridCellIndex;
+  }
 }
 
 /**
@@ -435,97 +430,92 @@ function MakeGridIndex(grid) {
  * Generates popup content for the individual cell layers.
  * @param {*} grid 
  */
-function DrawGrid(grid) {
-  var cells = grid.cells;
-  var gridMaxes = CalculateGridMaxes(cells);
+function drawGrid(grid) {
+  //TODO: refactor this
+  const cells = grid.cells;
+  const gridMaxes = CalculateGridMaxes(cells);
+  const maxRichness = gridMaxes.richness;
+  const maxAbundance = gridMaxes.abundance;
+  const maxSiteCount = gridMaxes.siteCount;
+  let features = [];
+  let cellId = 0;
 
-  var maxRichness = gridMaxes.richness;
-  var maxAbundance = gridMaxes.abundance;
-  var maxSiteCount = gridMaxes.siteCount;
+  // returns string in strong html tags
+  const strongLine = (s) => {
+    return (
+      '<strong>' +
+        s +
+        '</strong>' +
+        '<br />'
+    );
+  }
 
+  // returns header in bold, string in regular text
+  const strongHeader = (h, s) => {
+    return (
+      '<strong>' +
+      h +
+      ': </strong> ' +
+      s +
+      '<br />');
+  }
 
-  var features = [];
-  var gridCells = grid.cells;
-  var cellId = 0;
-  //Generating geojson
-  for (var i in gridCells) {
-    var cell = gridCells[i];
-
-    var cellAbundance = cell.abundance;
-
+  for (let index in cells) {
+    const cell = cells[index];
     //if grid doesn't contain any sites then don't add to map.
     if (!cell.hasSamples) {
       continue;
     }
-
-    var weightedCount = cell.richness / maxRichness;
-    var weightedValue = cell.value / maxAbundance;
-    var weightedSites = cell.cellSites.length / maxSiteCount;
-
+    const weightedRichness = cell.richness / maxRichness;
+    const weightedAbundance = cell.abundance / maxAbundance;
+    const weightedSites = cell.cellSites.length / maxSiteCount;
     //Add cell statistics within popup.
     //Cell coordinates
-    var popupContent =
-      '<strong>Cell id:</strong> ' +
-      cellId +
-      '<br />' +
-      '<strong>Cell Richness:</strong> ' +
-      cell.richness +
-      '<br />' +
-      '<strong>Cell Abundance: </strong>' +
-      cell.value +
-      '<br />' +
-      '<strong>Cell Site Count: </strong>' +
-      cell.cellSites.length +
-      '<br />' +
-      '<strong>Lng:</strong>  ' +
-      cell.coordinates[0][0] +
-      ' to ' +
-      cell.coordinates[2][0] +
-      '<br />' +
-      '<strong>Lat:</strong>  ' +
-      cell.coordinates[0][1] +
-      ' to ' +
-      cell.coordinates[2][1] +
-      '<br /><br />';
-
+    let popupContent =
+      strongHeader('Cell id', cellId) +
+      strongHeader('Cell Richness', cell.abundance) +
+      strongHeader('Cell Abundance', cell.richness) +
+      strongHeader('Cell Site Count', cell.cellSites.length) +
+      strongHeader(
+        'Longitude', cell.coordinates[0][0] +
+        ' to ' +
+        cell.coordinates[2][0]
+      ) +
+      strongHeader(
+        'Latitude', 
+        cell.coordinates[0][1] +
+        ' to ' +
+        cell.coordinates[2][1]
+      ) +
+      '<br />';
     cellId++;
-    var speciesInCell = cell.cellSpecies;
+    const speciesInCell = cell.cellSpecies;
     //console.log(speciesInCell);
 
     //list all sites within the cell.
-    popupContent += '<strong>Sites in cell: </strong><br />' + '<ul>';
-    for (var site in cell.cellSites) {
+    popupContent += strongLine('Sites in cell: ') + '<ul>';
+    for (let site in cell.cellSites) {
       popupContent += '<li>' + cell.cellSites[site] + '</li>';
     }
     popupContent += '</ul><br />';
 
     //lists all the species within a cell.
-    popupContent += '<strong>Search results in cell: </strong><br /><br />';
-    for (species in speciesInCell) {
+    popupContent +=  strongLine('Search results in cell: ') +' <br />';
+    for (let species in speciesInCell) {
       popupContent +=
-        '<strong>' +
-        species +
-        '</strong>' +
-        '<br />' +
-        '<strong>Cell frequency:</strong> ' +
-        speciesInCell[species].count +
-        '<br />' +
-        '<strong>Cell abundance:</strong> ' +
-        speciesInCell[species].value +
-        '<br /><br />';
+        strongLine(species) +
+        strongHeader('Frequency in cell', speciesInCell[species].count) +
+        strongHeader('Abundance in cell', speciesInCell[species].value) +
+        '<br />';
     }
-
-    //TODO: cellPolygon and popupcontent id's are out of sync. Maybe make cell polygon nested somehow.
-    //TODO: Alternative make when making the gridCells that the feature index is based off. Reduce the array down to just
-    //TODO: the cells that have samples then it should match.
-    var cellPolygon = {
+    const cellPolygon = {
       type: 'Feature',
       properties: {
-        index: i,
-        weightedValue: weightedValue,
-        weightedCount: weightedCount,
-        speciesInCell: speciesInCell,
-        weightedSites: weightedSites,
+        index,
+        weightedAbundance,
+        weightedRichness,
+        speciesInCell,
+        weightedSites,
         cellSites: cell.cellSites,
         hasSamples: cell.hasSamples,
         popupContent: popupContent
@@ -537,39 +527,80 @@ function DrawGrid(grid) {
     };
     features.push(cellPolygon);
   }
-  //console.log(features);
-
-  var featureCollection = {
+  let featureCollection = {
     type: 'FeatureCollection',
     features: features
   };
-
   //Clear count layer and add new one to layergroup.
-  var gridCountLayer = L.geoJSON(featureCollection, {
+  const gridRichnessLayer = L.geoJSON(featureCollection, {
     style: CellCountStyle,
     onEachFeature: onEachFeature
   });
-  gridCountLayerGroup.clearLayers();
-  gridCountLayerGroup.addLayer(gridCountLayer);
+  gridRichnessLayerGroup.clearLayers();
+  gridRichnessLayerGroup.addLayer(gridRichnessLayer);
 
   //Clear count layer, add new one to layergroup.
-  var gridValueLayer = L.geoJSON(featureCollection, {
+  const gridAbundanceLayer = L.geoJSON(featureCollection, {
     style: CellValueStyle,
     onEachFeature: onEachFeature
   });
-  gridValueLayerGroup.clearLayers();
-  gridValueLayerGroup.addLayer(gridValueLayer);
+  gridAbundanceLayerGroup.clearLayers();
+  gridAbundanceLayerGroup.addLayer(gridAbundanceLayer);
 
   //Clear site count layer, add new one to layergroup.
-  var gridSitesLayer = L.geoJSON(featureCollection, {
+  const gridSitesLayer = L.geoJSON(featureCollection, {
     style: CellSitesStyle,
     onEachFeature: onEachFeature
   });
   gridSitesLayerGroup.clearLayers();
   gridSitesLayerGroup.addLayer(gridSitesLayer);
 
-  //test
-  //console.log(gridSitesLayer);
+  function CellSitesStyle(feature) {
+    return {
+      fillColor: GetFillColor(feature.properties.weightedSites),
+      weight: 1,
+      opacity: getOutlineOpacity(),
+      color: GetOutlineColour(),
+      fillOpacity: GetFillOpacity(
+        feature.properties.weightedSites,
+        feature.properties.hasSamples
+      )
+    };
+  }
+  
+  /**
+   * returns feature style based on feature properties value/abundance.
+   * @param {*} feature 
+   */
+  function CellValueStyle(feature) {
+    return {
+      fillColor: GetFillColor(feature.properties.weightedAbundance),
+      weight: 1,
+      opacity: getOutlineOpacity(),
+      color: GetOutlineColour(),
+      fillOpacity: GetFillOpacity(
+        feature.properties.weightedAbundance,
+        feature.properties.hasSamples
+      )
+    };
+  }
+  
+  /**
+   * returns feature style based on feature properties count/richness.
+   * @param {*} feature 
+   */
+  function CellCountStyle(feature) {
+    return {
+      fillColor: GetFillColor(feature.properties.weightedRichness),
+      weight: 1,
+      opacity: getOutlineOpacity(),
+      color: GetOutlineColour(),
+      fillOpacity: GetFillOpacity(
+        feature.properties.weightedRichness,
+        feature.properties.hasSamples
+      )
+    };
+  }
 }
 
 /**
@@ -584,7 +615,6 @@ function onEachFeature(feature, layer) {
       maxHeight: 150
     });
   }
-
   layer.on({
     mouseover: handleMouseOver,
     mouseout: handleMouseOut,
@@ -599,34 +629,10 @@ function onEachFeature(feature, layer) {
  */
 function handleCellClick(e) {
   var layer = e.target;
-
   console.log('layer index is ' + layer.feature.properties.index);
-
   var speciesInCell = layer.feature.properties.speciesInCell;
-
   var speciesAmount = Object.keys(speciesInCell).length;
   console.log('Number of unique classifications in cell: ' + speciesAmount);
-
-  //get total value for shannon index calculation
-  var totalValue = 0;
-  for (var species in speciesInCell) {
-    var speciesData = speciesInCell[species];
-    totalValue += speciesData.value;
-  }
-  console.log('total abundance of cell: ' + totalValue);
-
-  //calculate metrics for species within the cell
-  for (var species in speciesInCell) {
-    speciesData = speciesInCell[species];
-    var speciesShannonIndex =
-      -1 *
-      (speciesData.value /
-        totalValue *
-        Math.log(speciesData.value / totalValue));
-    var speciesRichness = speciesData.count;
-    var speciesAbundance = speciesData.value;
-    //console.log(species, speciesShannonIndex, speciesRichness, speciesAbundance);
-  }
 }
 
 /**
@@ -635,7 +641,6 @@ function handleCellClick(e) {
  */
 function handleMouseOver(e) {
   var layer = e.target;
-  //console.log(layer.feature.properties.cellSites);
   var siteList = layer.feature.properties.cellSites;
   for (site in siteList) {
     var circle = d3.selectAll('#' + siteList[site]);
@@ -664,100 +669,33 @@ function handleMouseOut(e) {
 }
 
 /**
- * returns feature style based on feature properties cellSites length
- * which is the amount of unique sites within the cell.
- * @param {*} feature 
- */
-function CellSitesStyle(feature) {
-  return {
-    fillColor: GetFillColor(feature.properties.weightedSites),
-    weight: 1,
-    opacity: GetOutlineOpacity(
-      feature.properties.weightedSites,
-      feature.properties.hasSamples
-    ),
-    color: GetOutlineColour(feature.properties.hasSamples),
-    fillOpacity: GetFillOpacity(
-      feature.properties.weightedSites,
-      feature.properties.hasSamples
-    )
-  };
-}
-
-/**
- * returns feature style based on feature properties value/abundance.
- * @param {*} feature 
- */
-function CellValueStyle(feature) {
-  return {
-    fillColor: GetFillColor(feature.properties.weightedValue),
-    weight: 1,
-    opacity: GetOutlineOpacity(
-      feature.properties.weightedValue,
-      feature.properties.hasSamples
-    ),
-    color: GetOutlineColour(feature.properties.hasSamples),
-    fillOpacity: GetFillOpacity(
-      feature.properties.weightedValue,
-      feature.properties.hasSamples
-    )
-  };
-}
-
-/**
- * returns feature style based on feature properties count/richness.
- * @param {*} feature 
- */
-function CellCountStyle(feature) {
-  return {
-    fillColor: GetFillColor(feature.properties.weightedCount),
-    weight: 1,
-    opacity: GetOutlineOpacity(
-      feature.properties.weightedCount,
-      feature.properties.hasSamples
-    ),
-    color: GetOutlineColour(feature.properties.hasSamples),
-    fillOpacity: GetFillOpacity(
-      feature.properties.weightedCount,
-      feature.properties.hasSamples
-    )
-  };
-}
-
-/**
  * Provides aggregate calculation for richness and adds it to the gridCell data.
  * Calculates and returns the maximums for cell richness, abundance and shannon entropy within the grid.
  * @param {*} gridCells 
  */
 function CalculateGridMaxes(gridCells) {
-  //console.log(cells);
-  var richness = 0;
-  var abundance = 0;
-  var siteCount = 0;
-  var totalCount = 0;
-  for (var i in gridCells) {
-    var cell = gridCells[i];
-
-    //Summing sites within cell. Add the data to the cell.
-    var cellRichness = Object.keys(cell.cellSpecies).length;
+  let richness = 0;
+  let abundance = 0;
+  let siteCount = 0;
+  for (let i in gridCells) {
+    const cell = gridCells[i];
+    const cellRichness = Object.keys(cell.cellSpecies).length;
     cell.richness = cellRichness;
     if (cell.richness > richness) {
       richness = cellRichness;
     }
-    if (cell.value > abundance) {
-      abundance = cell.value;
+    if (cell.abundance > abundance) {
+      abundance = cell.abundance;
     }
     if (cell.cellSites.length > siteCount) {
       siteCount = cell.cellSites.length;
     }
-    totalCount += cell.count;
   }
-  //console.log("max count ", maxCount, "max value ", maxValue, "total count ", totalCount);
-
+  //console.log("max count ", maxCount, "max value ", maxValue);
   var gridMaxes = {
-    richness: richness,
-    abundance: abundance,
-    siteCount: siteCount
+    richness,
+    abundance,
+    siteCount
   };
   return gridMaxes;
 }
@@ -765,18 +703,16 @@ function CalculateGridMaxes(gridCells) {
 /**
  * Returns value for outline opacity. Currently hardcoded to 0.15.
  * Currently used to centralize style changes across multiple layers.
- * @param {*} hasSamples 
  */
-function GetOutlineOpacity(hasSamples) {
+function getOutlineOpacity() {
     return 0.15;
 }
 
 /**
  * Returns value for outline color. Currently hardcoded to 0.15.
  * Currently used to centralize style changes across multiple layers.
- * @param {*} hasSamples 
  */
-function GetOutlineColour(hasSamples) {
+function GetOutlineColour() {
   return '#000000';
 }
 
@@ -822,15 +758,13 @@ function GetFillColor(d) {
  * @param {*} layer 
  */
 function highlightFeatureClick(layer) {
-  var layer = e.target;
-
+  let layer = e.target;
   layer.setStyle({
     weight: 5,
     color: '#666',
     dashArray: '',
     fillOpacity: 0.7
   });
-
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
     layer.bringToFront();
   }
@@ -846,7 +780,6 @@ function highlightLayer(layer) {
     weight: 5,
     opacity: 0.9
   });
-
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
     layer.bringToFront();
   }
@@ -862,7 +795,7 @@ function disableHighlightLayer(layer) {
   //console.log(properties);
   layer.setStyle({
     weight: 1,
-    opacity: GetOutlineOpacity(properties.hasSamples),
+    opacity: getOutlineOpacity(properties.hasSamples),
   });
 }
 
@@ -879,7 +812,7 @@ function calculateSiteMetrics(siteMetrics) {
     for (var taxon_name in site.species) {
       speciesAbundance = site.species[taxon_name];
       // shannon value for an individual species relative to a site/sample. Adds them to the sum
-      site.shannonDiversity += (speciesAbundance/site.count) * Math.log(speciesAbundance/site.count);
+      site.shannonDiversity += (speciesAbundance/site.abundance) * Math.log(speciesAbundance/site.abundance);
     }
     site.shannonDiversity *= -1;
     site.effectiveAlpha =  Math.exp(site.shannonDiversity);
@@ -938,7 +871,7 @@ function createColorRange(siteMetrics) {
 }
 
 /**
- * Returns a random amount between upper and lower.
+ * Returns a random amount between upper and lower. For jittering the plots.
  * @param {*} upper 
  * @param {*} lower 
  */
@@ -979,7 +912,7 @@ function updateGraph(siteMetrics) {
       siteId: siteMetric.site,
       Metric: 'Sequence abundance',
       // TEMP:FIXME: bpa count abundance mismatch
-      value: siteMetric.count,
+      value: siteMetric.abundance,
       meta: siteMetric
     };
     dataSet.push(siteAbundance);
@@ -1084,7 +1017,7 @@ function updateGraph(siteMetrics) {
             var circle = d3.select(this);
             var site = circle.attr('id');
             //Uses grid cell look-up to zoom to
-            var featureIndex = cellSiteDict[site];
+            var featureIndex = gridCellLookup[site];
             //console.log(featureIndex);
 
             //e>layers>feature>properties> index == featureIndex. Then highlight.
@@ -1114,7 +1047,7 @@ function updateGraph(siteMetrics) {
             var site = circle.attr('id');
             //Uses grid cell look-up to zoom to
             //TODO: feature index doesn't match up with popup content index. Reduce grid to only include sampled cells.
-            var featureIndex = cellSiteDict[site];
+            var featureIndex = gridCellLookup[site];
 
             //e>layers>feature>properties> index == featureIndex. Then highlight.
             map.eachLayer(function (layer) {
@@ -1131,7 +1064,7 @@ function updateGraph(siteMetrics) {
           //Uses grid cell look-up to zoom to
 
           //TODO: feature index doesn't match up with popup content index. Reduce grid to only include sampled cells.
-          var featureIndex = cellSiteDict[site];
+          var featureIndex = gridCellLookup[site];
 
           //e>layers>feature>properties> index == featureIndex. Then highlight.
           map.eachLayer(function(layer) {
@@ -1216,22 +1149,22 @@ window.circles = [];
 
 var detailLevel = 60;
 //warrick map additions
-var grid = MakeGrid(map, detailLevel);
+var grid = makeGrid(detailLevel);
 
 //shows the scale of the map
 var scaleIndicator = L.control.scale().addTo(map);
 
 //instantiating empty layer control layers to be filled later
-var gridCountLayerGroup = L.layerGroup();
-var gridValueLayerGroup = L.layerGroup();
+var gridRichnessLayerGroup = L.layerGroup();
+var gridAbundanceLayerGroup = L.layerGroup();
 var gridSitesLayerGroup = L.layerGroup();
 var heatLayerGroup = L.layerGroup();
 var baseMaps = {
   Base: tileLayer
 };
 var overlays = {
-  'Grid: Abundance': gridValueLayerGroup,
-  'Grid: Richness': gridCountLayerGroup,
+  'Grid: Abundance': gridAbundanceLayerGroup,
+  'Grid: Richness': gridRichnessLayerGroup,
   'Heat: Abundance': heatLayerGroup,
   'Grid: Site Count': gridSitesLayerGroup
 };
@@ -1298,15 +1231,13 @@ visControl.onAdd = function(map) {
 };
 
 visControl.update = function() {
-  //using ECMA script 6 template literal using backticks.
   // todo: use map function to list the site meta fields for the options.
-
   // todo: Make this function called after the window.meta has been processed and (possibly) filtered
   // otherwise it will have no idea what siteMetric keys to add as select options.
-
   // if siteMetrics not null then generate option elements from site meta keys.
   if (siteMetrics != null) {
     console.log("site metrics found. Filling select element based on meta keys");
+    //using ECMA script 6 template literal using backticks.
     this._div.innerHeight = 
     `<div id="chart" style="display: none;">
     </div>
@@ -1347,8 +1278,7 @@ visControl.update = function() {
     */
   }
   else {
-    console.log(siteMetrics);
-
+    // console.log(siteMetrics);
     this._div.innerHTML =
     `<div id="chart" style="display: none;">
     </div>
@@ -1374,23 +1304,19 @@ visControl.update = function() {
     ;
   }
 }
-//console.log(visControl);
 
+/** 
+ * Selects all .enter elements and changes fill to the current option of the meta-select element.
+  */
 function selectColorChange(e) {
-
   var metric = document.getElementById("meta-select").value;
-
   var metricColour = createColorRange(siteMetrics)
-
-  console.log(siteMetrics);
-
-  var circles = d3.selectAll(".enter")
+  d3.selectAll(".enter")
     .transition()
     .duration(400)
       .attr("fill", function(d) {
         return metricColour(d.meta[metric])
       })
-  // console.log(circles);
 }
 
 /**
@@ -1399,17 +1325,8 @@ function selectColorChange(e) {
 function toggleGraph() {
   //TODO: Add ability to reduce size by a factor.
   var graph = $('#chart').toggle('slow');
-
-   //for minimizing the width based on window size.
-   /*
-    chart
-    .transition()
-        .duration(1000)
-        .attr("width", function() {
-            return (main.attr("width") / 3);
-    });
-    */
 }
+
 visControl.addTo(map);
 
 //Adding d3 visualization
@@ -1485,40 +1402,7 @@ var tooltip = d3
   .attr('class', 'tooltip')
   .style('opacity', 0);
 
-// Nick's grid & pie mode.
-/*
-if (mode == "grid") {
-    var colors = ['#fee8c8', '#fdd49e', '#fdbb84', '#fc8d59', '#ef6548', '#d7301f', '#b30000', '#7f0000'];
-    var shape = new L.PatternCircle({
-        x: 5,
-        y: 5,
-        radius: 5,
-        fill: true
-    });
-    var pattern = new L.Pattern({width: 15, height: 15});
-    pattern.addShape(shape);
-    pattern.addTo(map);
-    var customLayer = L.geoJson(null, {
-        style: {
-            stroke: false,
-            fillPattern: pattern,
-        }
-    });
-    var nz = omnivore.kml('nz-coastlines-and-islands-polygons-topo-1500k.kml', null, customLayer).addTo(map);
-}
-if (mode == "pie") {
-    map.on('zoomend', function () {
-        for (var i in window.circles) {
-            window.circles[i].setOptions({
-                width: map.getZoom() * 2
-            });
-        }
-    });
-}
-*/
-
-
-// NOTE:NOTE:NOTE: Should I:
+// NOTE: Should I:
 // 1. cronjob update the data/metadata every day or something and work from those? 
 // 2. Or should I request from the DB for every new page load?
 // 3. Or make a query with the specific result set every time the filter is updated?
@@ -1533,80 +1417,10 @@ var useDatabase = true;
 var lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
-    // requirements for light request to work:
-    // 1. Ordering of the abundances needs to be otu_id ASC, sample_id ASC
-    // 2. Number of entries in Sample_OTU table entries must be equal to number of (OTU table entries * Sample_Context table entries)     
-    console.time();
-    fetch('https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered').then(response => {
-      response.json().then(result =>{
-        data = result.data
-        // console.log(data);
-        abundance_dict = {
-          'data':[]
-        }
-        abundance_dict.data = data.otus.map((otu) => {
-          otuEntry = {
-            '': otu,
-          };
-          data.sites.map((site) => {
-            otuEntry[site] = 0;
-          });
-          return otuEntry;
-        });
-        // tuple structure: otuid, sampleid, count.
-        for (let tuple in data.abundances) {
-          let otu_index = data.abundances[tuple][0];
-          let sample = data.sites[data.abundances[tuple][1]];
-          let value = (data.abundances[tuple][2]);
-          try {
-            abundance_dict.data[otu_index-1][sample] =  value;
-          }
-          catch {
-            console.log('otu index: %s, sample key: %s, value: %d', otu_index, sample, value);
-          }
-        }
-        console.timeEnd();
-        console.log(abundance_dict);
-        metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
-        fetch(metadataRequest).then(metaResponse => {
-          metaResponse.json().then(metaResults => {
-            siteData = metaResults;
-            // console.log(siteData);
-            // console.log(abundance_dict);
-            handleResults(abundance_dict, siteData);
-            visControl.update(siteMetrics);
-          })
-        });
-      })
-    })
+    loadUnsortedData();
   }
   else {
-    // w: Returns the data as nested dictionaries. Json is much larger than the light request but processes server side rather than client side.
-    try {
-      console.time();
-      abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/abundance?term=');
-      fetch(abundanceRequest).then(response => {
-        response.json().then(abundanceResults => {
-          console.timeEnd();
-          abundanceData = abundanceResults;
-          metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
-          fetch(metadataRequest).then(metaResponse => {
-            metaResponse.json().then(metaResults => {
-              siteData = metaResults;
-              // console.log(siteData);
-              console.log(abundanceData);
-              handleResults(abundanceData, siteData);
-              visControl.update(siteMetrics);
-            })
-          })
-        })
-      })
-    }
-    catch (err) {
-      // back up in case the request fails.
-      console.log(err);
-      loadFromFile();
-    }
+    loadSortedData();
   }
 }
 else {
@@ -1617,8 +1431,85 @@ var hashComponents = decodeURIComponent(
   window.location.hash.replace('#', '')
 ).split(',');
 
-// Loads from local .tsv files. Called if the request throws an error
+function loadSortedData() {
+  // Returns the data as nested dictionaries. Json is much larger than the light request but processes server side rather than client side.
+  try {
+    console.time();
+    abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/abundance?term=');
+    fetch(abundanceRequest).then(response => {
+      response.json().then(abundanceResults => {
+        console.timeEnd();
+        abundanceData = abundanceResults;
+        metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
+        fetch(metadataRequest).then(metaResponse => {
+          metaResponse.json().then(metaResults => {
+            siteData = metaResults;
+            // console.log(siteData);
+            console.log(abundanceData);
+            handleResults(abundanceData, siteData);
+            visControl.update(siteMetrics);
+          });
+        });
+      });
+    });
+  }
+  catch (err) {
+    console.log(err);
+    loadFromFile();
+  }
+}
+
+function loadUnsortedData() {
+  // requirements for light request to work:
+  // 1. Ordering of the abundances needs to be otu_id ASC, sample_id ASC
+  // 2. Number of entries in Sample_OTU table entries must be equal to number of (OTU table entries * Sample_Context table entries)     
+  console.time();
+  fetch('https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered').then(response => {
+    response.json().then(result => {
+      data = result.data;
+      console.log(data);
+      abundance_dict = {
+        'data': []
+      };
+      abundance_dict.data = data.otus.map((otu, otuIndex) => {
+        otuEntry = {
+          '': otu,
+        };
+        data.sites.map((site) => {
+          otuEntry[site] = 0;
+        });
+        return otuEntry;
+      });
+      // tuple structure: otuid, sampleid, count.
+      for (let tuple in data.abundances) {
+        let otu_index = data.abundances[tuple][0];
+        let sample = data.sites[data.abundances[tuple][1]];
+        let value = (data.abundances[tuple][2]);
+        try {
+          abundance_dict.data[otu_index-1][sample] =  value;
+        }
+        catch {
+          console.log('otu index: %s, sample key: %s, value: %d', otu_index, sample, value);
+        }
+      }
+      console.timeEnd();
+      console.log(abundance_dict);
+      metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
+      fetch(metadataRequest).then(metaResponse => {
+        metaResponse.json().then(metaResults => {
+          siteData = metaResults;
+          // console.log(siteData);
+          // console.log(abundance_dict);
+          handleResults(abundance_dict, siteData);
+          visControl.update(siteMetrics);
+        });
+      });
+    });
+  });
+}
+
 function loadFromFile(){
+  // Loads from local .tsv files. Called if the request throws an error
   Papa.parse('active-abundance-data.tsv', {
     download: true,
     header: true,
