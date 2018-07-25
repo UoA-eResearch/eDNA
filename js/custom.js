@@ -6,9 +6,9 @@ function round(x, dp) {
 }
 
 function checkFragment(f, species, site) {
-  var ampIndex = f.indexOf('&');
-  var ltIndex = f.indexOf('<');
-  var gtIndex = f.indexOf('>');
+  var ampIndex = f.indexOf("&");
+  var ltIndex = f.indexOf("<");
+  var gtIndex = f.indexOf(">");
   //Splits if ampersand or greater than found, recursively calls the split string.
   // When no &'s left return filters results
   if (ampIndex > 0) {
@@ -50,15 +50,15 @@ function getSiteWeights(filters) {
 
   //Site metrics: Adding dictionary of site metrics for calculations.
   siteMetrics = {};
-  console.time()
+  console.time();
   //loop through parsed global result data.
   for (var i in window.results.data) {
     var taxon_row = window.results.data[i];
     //Extracts the species name from "" field of window.results
-    var taxon_name = taxon_row[''];
+    var taxon_name = taxon_row[""];
     for (var taxon_column in taxon_row) {
       //Skip the bacteria name field, only process site lines.
-      if (taxon_column != '') {
+      if (taxon_column != "") {
         // site contains the full meta row for a site.
         var site = window.meta[taxon_column];
         //declare bool defaulting to false
@@ -81,7 +81,7 @@ function getSiteWeights(filters) {
           //if site currently contains no values/(maybe a value that isn't 1?) then give it a value of 0
           if (!sites[taxon_column]) {
             sites[taxon_column] = 0;
-          } 
+          }
           // Add sample-otu value to sites dictionary
           sites[taxon_column] += taxon_row[taxon_column];
           //add values to sitemetrics {} dictionary for visualization.
@@ -99,8 +99,8 @@ function getSiteWeights(filters) {
       }
     }
   }
-  $('#numberResults').text(n_points);
-  console.timeEnd()
+  $("#numberResults").text(n_points);
+  console.timeEnd();
   // console.log(grid);
   // console.log(sites);
   // console.log(siteMetrics);
@@ -113,8 +113,7 @@ function getSiteWeights(filters) {
     cell.abundance += taxon_row[taxon_column];
     if (cell.cellSpecies[taxon_name] == null) {
       createGridCellSpecies();
-    }
-    else {
+    } else {
       addValueToGridCellSpecies();
     }
     if (!cell.cellSites.includes(taxon_column)) {
@@ -158,7 +157,7 @@ function getFilterData() {
     //e = a line in the results data.
     var e = window.results.data[i];
     //e[""] = the species name.
-    var species = e[''];
+    var species = e[""];
     var n_sites = 0;
     //loops through every site for the organism 'e'.
     // If a site contains a value > 0 then increment count.
@@ -173,7 +172,7 @@ function getFilterData() {
     while (j != -1) {
       //Checks if bacteria has semicolons. i.e subspecies.
       //Repeats this check until no ';' present.
-      j = species.indexOf(';', j + 1);
+      j = species.indexOf(";", j + 1);
       if (j == -1) {
         //if no semicolon then subS is the only species.
         var subS = species;
@@ -221,7 +220,7 @@ function getFilterData() {
   }
   // console.log(data);
   for (var k in data) {
-    options.push({ id: k, text: k, title: 'Number of points: ' + data[k] });
+    options.push({ id: k, text: k, title: "Number of points: " + data[k] });
   }
   for (var k in metaStats) {
     var mean = round(metaStats[k].sum / metaStats[k].n, 2);
@@ -229,11 +228,11 @@ function getFilterData() {
       id: k,
       text: k,
       title:
-        'Range: ' +
+        "Range: " +
         round(metaStats[k].min, 2) +
-        ' - ' +
+        " - " +
         round(metaStats[k].max, 2) +
-        '. Mean: ' +
+        ". Mean: " +
         mean
     });
   }
@@ -242,8 +241,8 @@ function getFilterData() {
 
 /**
  * Function called by papaparse on completion. Fills in the siteMeta and gridCell objects based on filtered results.
- * @param {*} results 
- * @param {*} meta 
+ * @param {*} results
+ * @param {*} meta
  */
 function handleResults(results, meta) {
   //creates global var results
@@ -251,14 +250,14 @@ function handleResults(results, meta) {
   //loops through meta data passed in.
   var metaDict = {};
   for (var i in meta.data) {
-    var site = meta.data[i]
-    metaDict[site['site']] = site;
+    var site = meta.data[i];
+    metaDict[site["site"]] = site;
   }
   //makes meta dictionary global
   window.meta = metaDict;
   //instantiates the filter search bar
-  $('#filter').select2({
-    placeholder: 'Type to filter by classification and metadata',
+  $("#filter").select2({
+    placeholder: "Type to filter by classification and metadata",
     multiple: true,
     allowClear: true,
     data: getFilterData(),
@@ -267,7 +266,7 @@ function handleResults(results, meta) {
       //console.log(params);
       var term = $.trim(params.term);
 
-      if (term === '') {
+      if (term === "") {
         return null;
       }
 
@@ -278,9 +277,9 @@ function handleResults(results, meta) {
       };
     }
   });
-  $('#filter').change(function() {
+  $("#filter").change(function() {
     window.location.hash = encodeURIComponent($(this).val());
-    var filters = $(this).select2('data');
+    var filters = $(this).select2("data");
     //note: need to change it so siteweights are everywhere at a fixed lonlat.
     var siteWeights = getSiteWeights(filters);
     var maxWeight = 0;
@@ -305,14 +304,14 @@ function handleResults(results, meta) {
     map.addLayer(heatLayerGroup);
   });
   if (hashComponents[0].length) {
-    $('#filter').val(hashComponents);
+    $("#filter").val(hashComponents);
   }
-  $('#filter').trigger('change');
+  $("#filter").trigger("change");
 }
 
 /**
  * Makes grid array for cells. Each cell starts off with only containing coordinates.
- * @param {*} detailLevel 
+ * @param {*} detailLevel
  */
 function makeGrid(detailLevel) {
   //Hard coded bounds and offsets.
@@ -379,7 +378,7 @@ function makeGrid(detailLevel) {
 
 /**
  * Creates the grid lookup object/dictionary used for filling in the grid and calculating it's position.
- * @param {*} grid 
+ * @param {*} grid
  */
 function makeGridLookup(grid) {
   let gridLookup = {};
@@ -428,7 +427,7 @@ function makeGridLookup(grid) {
  * Styles all layergroups
  * Clears layergroups and adds new ones to map layer control.
  * Generates popup content for the individual cell layers.
- * @param {*} grid 
+ * @param {*} grid
  */
 function drawGrid(grid) {
   //TODO: refactor this
@@ -441,24 +440,14 @@ function drawGrid(grid) {
   let cellId = 0;
 
   // returns string in strong html tags
-  const strongLine = (s) => {
-    return (
-      '<strong>' +
-        s +
-        '</strong>' +
-        '<br />'
-    );
-  }
+  const strongLine = s => {
+    return "<strong>" + s + "</strong>" + "<br />";
+  };
 
   // returns header in bold, string in regular text
   const strongHeader = (h, s) => {
-    return (
-      '<strong>' +
-      h +
-      ': </strong> ' +
-      s +
-      '<br />');
-  }
+    return "<strong>" + h + ": </strong> " + s + "<br />";
+  };
 
   for (let index in cells) {
     const cell = cells[index];
@@ -472,44 +461,41 @@ function drawGrid(grid) {
     //Add cell statistics within popup.
     //Cell coordinates
     let popupContent =
-      strongHeader('Cell id', cellId) +
-      strongHeader('Cell Richness', cell.abundance) +
-      strongHeader('Cell Abundance', cell.richness) +
-      strongHeader('Cell Site Count', cell.cellSites.length) +
+      strongHeader("Cell id", cellId) +
+      strongHeader("Cell Richness", cell.abundance) +
+      strongHeader("Cell Abundance", cell.richness) +
+      strongHeader("Cell Site Count", cell.cellSites.length) +
       strongHeader(
-        'Longitude', cell.coordinates[0][0] +
-        ' to ' +
-        cell.coordinates[2][0]
+        "Longitude",
+        cell.coordinates[0][0] + " to " + cell.coordinates[2][0]
       ) +
       strongHeader(
-        'Latitude', 
-        cell.coordinates[0][1] +
-        ' to ' +
-        cell.coordinates[2][1]
+        "Latitude",
+        cell.coordinates[0][1] + " to " + cell.coordinates[2][1]
       ) +
-      '<br />';
+      "<br />";
     cellId++;
     const speciesInCell = cell.cellSpecies;
     //console.log(speciesInCell);
 
     //list all sites within the cell.
-    popupContent += strongLine('Sites in cell: ') + '<ul>';
+    popupContent += strongLine("Sites in cell: ") + "<ul>";
     for (let site in cell.cellSites) {
-      popupContent += '<li>' + cell.cellSites[site] + '</li>';
+      popupContent += "<li>" + cell.cellSites[site] + "</li>";
     }
-    popupContent += '</ul><br />';
+    popupContent += "</ul><br />";
 
     //lists all the species within a cell.
-    popupContent +=  strongLine('Search results in cell: ') +' <br />';
+    popupContent += strongLine("Search results in cell: ") + " <br />";
     for (let species in speciesInCell) {
       popupContent +=
         strongLine(species) +
-        strongHeader('Frequency in cell', speciesInCell[species].count) +
-        strongHeader('Abundance in cell', speciesInCell[species].value) +
-        '<br />';
+        strongHeader("Frequency in cell", speciesInCell[species].count) +
+        strongHeader("Abundance in cell", speciesInCell[species].value) +
+        "<br />";
     }
     const cellPolygon = {
-      type: 'Feature',
+      type: "Feature",
       properties: {
         index,
         weightedAbundance,
@@ -521,14 +507,14 @@ function drawGrid(grid) {
         popupContent: popupContent
       },
       geometry: {
-        type: 'Polygon',
+        type: "Polygon",
         coordinates: [cell.coordinates]
       }
     };
     features.push(cellPolygon);
   }
   let featureCollection = {
-    type: 'FeatureCollection',
+    type: "FeatureCollection",
     features: features
   };
   //Clear count layer and add new one to layergroup.
@@ -567,10 +553,10 @@ function drawGrid(grid) {
       )
     };
   }
-  
+
   /**
    * returns feature style based on feature properties value/abundance.
-   * @param {*} feature 
+   * @param {*} feature
    */
   function CellValueStyle(feature) {
     return {
@@ -584,10 +570,10 @@ function drawGrid(grid) {
       )
     };
   }
-  
+
   /**
    * returns feature style based on feature properties count/richness.
-   * @param {*} feature 
+   * @param {*} feature
    */
   function CellCountStyle(feature) {
     return {
@@ -605,8 +591,8 @@ function drawGrid(grid) {
 
 /**
  * Performs this function on every feature selected.
- * @param {*} feature 
- * @param {*} layer 
+ * @param {*} feature
+ * @param {*} layer
  */
 function onEachFeature(feature, layer) {
   if (feature.properties && feature.properties.popupContent) {
@@ -625,53 +611,53 @@ function onEachFeature(feature, layer) {
 
 /**
  * Currently used for debugging. Logs cell layer metrics.
- * @param {*} e 
+ * @param {*} e
  */
 function handleCellClick(e) {
   var layer = e.target;
-  console.log('layer index is ' + layer.feature.properties.index);
+  console.log("layer index is " + layer.feature.properties.index);
   var speciesInCell = layer.feature.properties.speciesInCell;
   var speciesAmount = Object.keys(speciesInCell).length;
-  console.log('Number of unique classifications in cell: ' + speciesAmount);
+  console.log("Number of unique classifications in cell: " + speciesAmount);
 }
 
 /**
  * Highlights visualization datapoints contained within the cellSites property of the hovered feature.
- * @param {*} e mouse hover 
+ * @param {*} e mouse hover
  */
 function handleMouseOver(e) {
   var layer = e.target;
   var siteList = layer.feature.properties.cellSites;
   for (site in siteList) {
-    var circle = d3.selectAll('#' + siteList[site]);
+    var circle = d3.selectAll("#" + siteList[site]);
     circle
       .transition()
       .duration(250)
-      .attr('r', 14);
+      .attr("r", 14);
   }
 }
 
 /**
  * Reverts the datapoint style to default when mouse leaves the cell containing the datapoint.
- * @param {*} e 
+ * @param {*} e
  */
 function handleMouseOut(e) {
   var layer = e.target;
   //console.log(layer.feature.properties.cellSites);
   var siteList = layer.feature.properties.cellSites;
   for (site in siteList) {
-    var circle = d3.selectAll('#' + siteList[site]);
+    var circle = d3.selectAll("#" + siteList[site]);
     circle
       .transition()
       .duration(250)
-      .attr('r', 7);
+      .attr("r", 7);
   }
 }
 
 /**
  * Provides aggregate calculation for richness and adds it to the gridCell data.
  * Calculates and returns the maximums for cell richness, abundance and shannon entropy within the grid.
- * @param {*} gridCells 
+ * @param {*} gridCells
  */
 function CalculateGridMaxes(gridCells) {
   let richness = 0;
@@ -705,7 +691,7 @@ function CalculateGridMaxes(gridCells) {
  * Currently used to centralize style changes across multiple layers.
  */
 function getOutlineOpacity() {
-    return 0.15;
+  return 0.15;
 }
 
 /**
@@ -713,13 +699,13 @@ function getOutlineOpacity() {
  * Currently used to centralize style changes across multiple layers.
  */
 function GetOutlineColour() {
-  return '#000000';
+  return "#000000";
 }
 
 /**
  * Returns value for fill opacity based on if has Samples or not.
  * Currently used to centralize style changes across multiple layers.
- * @param {*, *} hasSamples 
+ * @param {*, *} hasSamples
  */
 function GetFillOpacity(d, hasSamples) {
   //Should always eval to true as polygons aren't created unless hasSamples = true
@@ -737,32 +723,36 @@ function GetFillOpacity(d, hasSamples) {
 function GetFillColor(d) {
   // ?: might be better to use leaflet chloropleth plugin for this
   return d > 0.9
-    ? '#800026'
+    ? "#800026"
     : d > 0.8
-      ? '#BD0026'
+      ? "#BD0026"
       : d > 0.7
-        ? '#E31A1C'
+        ? "#E31A1C"
         : d > 0.6
-          ? '#FC4E2A'
+          ? "#FC4E2A"
           : d > 0.5
-            ? '#FD8D3C'
+            ? "#FD8D3C"
             : d > 0.4
-              ? '#FEB24C'
+              ? "#FEB24C"
               : d > 0.3
-                ? '#FED976'
-                : d > 0.2 ? '#FFEDA0' : d > 0.0 ? '#FFFFCC' : '#9ecae1';
+                ? "#FED976"
+                : d > 0.2
+                  ? "#FFEDA0"
+                  : d > 0.0
+                    ? "#FFFFCC"
+                    : "#9ecae1";
 }
 
 /**
  * Function called when layer is clicked on
- * @param {*} layer 
+ * @param {*} layer
  */
 function highlightFeatureClick(layer) {
   let layer = e.target;
   layer.setStyle({
     weight: 5,
-    color: '#666',
-    dashArray: '',
+    color: "#666",
+    dashArray: "",
     fillOpacity: 0.7
   });
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
@@ -773,7 +763,7 @@ function highlightFeatureClick(layer) {
 /**
  * Function to increase cell layer outline weight and opacity without
  * the need for mouseover/mouse click on the layer
- * @param {*} layer 
+ * @param {*} layer
  */
 function highlightLayer(layer) {
   layer.setStyle({
@@ -788,49 +778,51 @@ function highlightLayer(layer) {
 /**
  * Resets layer outline weight and opacity to original values.
  * Values are hardcoded due to geojson.reset() not working as planned.
- * @param {*} layer 
+ * @param {*} layer
  */
 function disableHighlightLayer(layer) {
   var properties = layer.feature.properties;
   //console.log(properties);
   layer.setStyle({
     weight: 1,
-    opacity: getOutlineOpacity(properties.hasSamples),
+    opacity: getOutlineOpacity(properties.hasSamples)
   });
 }
 
 /**
  * Calculates site metric max abundance, richness and shannon entropy for chart
- * visualization then calls updateGraph. 
+ * visualization then calls updateGraph.
  * Different from calculateGridMaxes which targets cell-aggregated data.
- * @param {siteMetrics} siteMetrics 
+ * @param {siteMetrics} siteMetrics
  */
 function calculateSiteMetrics(siteMetrics) {
-  for (var site_index in siteMetrics){
+  for (var site_index in siteMetrics) {
     var site = siteMetrics[site_index];
     site.shannonDiversity = 0;
     for (var taxon_name in site.species) {
       speciesAbundance = site.species[taxon_name];
       // shannon value for an individual species relative to a site/sample. Adds them to the sum
-      site.shannonDiversity += (speciesAbundance/site.abundance) * Math.log(speciesAbundance/site.abundance);
+      site.shannonDiversity +=
+        (speciesAbundance / site.abundance) *
+        Math.log(speciesAbundance / site.abundance);
     }
     site.shannonDiversity *= -1;
-    site.effectiveAlpha =  Math.exp(site.shannonDiversity);
+    site.effectiveAlpha = Math.exp(site.shannonDiversity);
     // console.log("site:" + site_index + " " +  " shannon score " + site.shannonDiversity);
   }
   updateGraph(siteMetrics);
 }
 
 /**
- * Calculates queries max and minimum site metrics. 
+ * Calculates queries max and minimum site metrics.
  * Returns colour range with spectrum from minimum value metric to max value metric.
- * @param {*} metric 
- * @param {*} siteMetrics 
+ * @param {*} metric
+ * @param {*} siteMetrics
  */
 function createColorRange(siteMetrics) {
   // todo: Sometimes doesn't work with long named meta fields.
-  
-  var metric = document.getElementById('meta-select').value;
+
+  var metric = document.getElementById("meta-select").value;
   // ? Not entirely sure why I pushed the sitemetrics onto a separate array.
   // console.log(siteMetrics);
   // console.log(metric);
@@ -847,17 +839,17 @@ function createColorRange(siteMetrics) {
   });
   console.log("visualization plot min, max:", min, max);
 
-  var colorScheme = document.getElementById('color-scheme-select').value;
+  var colorScheme = document.getElementById("color-scheme-select").value;
   var colorRange = [];
   switch (colorScheme) {
-    case("sequential"):
-    colorRange = ['blue', 'orange'];
+    case "sequential":
+      colorRange = ["blue", "orange"];
       break;
-    case("diverging"):
-      colorRange = ['#2c7bb6', '#d7191c'];
+    case "diverging":
+      colorRange = ["#2c7bb6", "#d7191c"];
       break;
     default:
-      colorRange = ['grey', 'black'];
+      colorRange = ["grey", "black"];
   }
 
   var colourRange = d3
@@ -872,19 +864,18 @@ function createColorRange(siteMetrics) {
 
 /**
  * Returns a random amount between upper and lower. For jittering the plots.
- * @param {*} upper 
- * @param {*} lower 
+ * @param {*} upper
+ * @param {*} lower
  */
 let randomRange = (upper, lower) => {
-  return (Math.random() * (upper - (lower)) + (lower));
+  return Math.random() * (upper - lower) + lower;
 };
 
 /**
  * Converts siteMetrics to an easier format for d3 use. Updates existing datapoints, enters new additional datapoints
- * @param {*} siteMetrics 
+ * @param {*} siteMetrics
  */
 function updateGraph(siteMetrics) {
-
   // todo: fix the naming here...
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   var metricColour = createColorRange(siteMetrics);
@@ -894,7 +885,7 @@ function updateGraph(siteMetrics) {
     var siteMetric = siteMetrics[site];
     var siteRichness = {
       siteId: siteMetric.site,
-      Metric: 'OTU richness',
+      Metric: "OTU richness",
       value: siteMetric.richness,
       meta: siteMetric
     };
@@ -902,7 +893,7 @@ function updateGraph(siteMetrics) {
 
     var siteShannon = {
       siteId: siteMetric.site,
-      Metric: 'Shannon entropy',
+      Metric: "Shannon entropy",
       value: siteMetric.shannonDiversity,
       meta: siteMetric
     };
@@ -910,7 +901,7 @@ function updateGraph(siteMetrics) {
 
     var siteAbundance = {
       siteId: siteMetric.site,
-      Metric: 'Sequence abundance',
+      Metric: "Sequence abundance",
       // TEMP:FIXME: bpa count abundance mismatch
       value: siteMetric.abundance,
       meta: siteMetric
@@ -919,13 +910,12 @@ function updateGraph(siteMetrics) {
 
     var siteAlpha = {
       siteId: siteMetric.site,
-      Metric: 'Effective alpha diversity',
-      value: siteMetric.effectiveAlpha, 
+      Metric: "Effective alpha diversity",
+      value: siteMetric.effectiveAlpha,
       meta: siteMetric
     };
     dataSet.push(siteAlpha);
-  
-  }//end of for loop
+  } //end of for loop
 
   var nestedData = d3
     .nest()
@@ -936,14 +926,14 @@ function updateGraph(siteMetrics) {
   // console.log(nestedData);
 
   //within the svg, within the g tags, select the class datapoints
-  var update = g.selectAll('.datapoints').data(nestedData, function(d) {
+  var update = g.selectAll(".datapoints").data(nestedData, function(d) {
     return d.values;
   });
 
   var enter = update
     .enter()
-    .append('g')
-    .attr('class', 'datapoints')
+    .append("g")
+    .attr("class", "datapoints")
     .merge(update)
     .each(function(d) {
       //loop through each data group
@@ -960,7 +950,7 @@ function updateGraph(siteMetrics) {
 
       var circle = d3
         .select(this)
-        .selectAll('circle')
+        .selectAll("circle")
         .data(d.values, function(d) {
           return d.siteId;
         });
@@ -970,97 +960,97 @@ function updateGraph(siteMetrics) {
       //Enter statement
       circle
         .enter()
-        .append('circle')
-        .attr('class', 'enter')
-        .attr('id', d => d.siteId)
+        .append("circle")
+        .attr("class", "enter")
+        .attr("id", d => d.siteId)
         //.attr('cy', y(d.key))
-        .attr('cy', function(circle) {
+        .attr("cy", function(circle) {
           // * If no jitter wanted then set jitter 0, 0.
           return y(circle.Metric) + randomRange(10, -10);
         })
-        .attr('r', 7)
-        .attr('opacity', 0.3)
-        .attr('fill', function(d) {
+        .attr("r", 7)
+        .attr("opacity", 0.3)
+        .attr("fill", function(d) {
           //TODO: Create a function to get the select dropdown values. For here and onchange.
           //console.log(d.meta[metric]);
           return metricColour(d.meta[colourMetric]);
         })
-        .on('mouseover', function(d) {
-          d3
-            .select(this.parentNode.parentNode)
-            .selectAll('#' + d.siteId)
+        .on("mouseover", function(d) {
+          d3.select(this.parentNode.parentNode)
+            .selectAll("#" + d.siteId)
             .transition()
-              .attr('r', 14)
-              .duration(250);
+            .attr("r", 14)
+            .duration(250);
           tooltip
             .transition()
-              .style('opacity', 0.9)
-              .duration(250);
+            .style("opacity", 0.9)
+            .duration(250);
           tooltip
             .html(
-              '<strong>' +
+              "<strong>" +
                 d.siteId +
-                '</strong><br />' +
-                '<strong>' +
+                "</strong><br />" +
+                "<strong>" +
                 d.Metric +
-                ': </strong>' +
+                ": </strong>" +
                 d.value +
-                '<br />' +
-                '<strong>' + document.getElementById("meta-select").value +': </strong>' +
+                "<br />" +
+                "<strong>" +
+                document.getElementById("meta-select").value +
+                ": </strong>" +
                 d.meta[document.getElementById("meta-select").value]
             )
-            .style('left', d3.event.pageX + 'px')
-            .style('top', d3.event.pageY - 10 + 'px')
-            .style('opacity', 0.9)
-            .style('z-index', 1000);
+            .style("left", d3.event.pageX + "px")
+            .style("top", d3.event.pageY - 10 + "px")
+            .style("opacity", 0.9)
+            .style("z-index", 1000);
 
-            var circle = d3.select(this);
-            var site = circle.attr('id');
-            //Uses grid cell look-up to zoom to
-            var featureIndex = gridCellLookup[site];
-            //console.log(featureIndex);
+          var circle = d3.select(this);
+          var site = circle.attr("id");
+          //Uses grid cell look-up to zoom to
+          var featureIndex = gridCellLookup[site];
+          //console.log(featureIndex);
 
-            //e>layers>feature>properties> index == featureIndex. Then highlight.
-            map.eachLayer(function (layer) {
-              //console.log(layer);
-              if (layer.feature != null) {
-                if (layer.feature.properties.index == featureIndex) {
-                  highlightLayer(layer);
-                }
+          //e>layers>feature>properties> index == featureIndex. Then highlight.
+          map.eachLayer(function(layer) {
+            //console.log(layer);
+            if (layer.feature != null) {
+              if (layer.feature.properties.index == featureIndex) {
+                highlightLayer(layer);
               }
-            });  
+            }
+          });
         })
-        .on('mouseout', function(d) {
-          d3
-            .select(this.parentNode.parentNode)
-            .selectAll('#' + d.siteId)
+        .on("mouseout", function(d) {
+          d3.select(this.parentNode.parentNode)
+            .selectAll("#" + d.siteId)
             .transition()
-            .attr('r', 7)
+            .attr("r", 7)
             .duration(250);
           tooltip
             .transition()
-            .style('opacity', 0)
-            .style('z-index', 1000)
+            .style("opacity", 0)
+            .style("z-index", 1000)
             .duration(250);
 
-            var circle = d3.select(this);
-            var site = circle.attr('id');
-            //Uses grid cell look-up to zoom to
-            //TODO: feature index doesn't match up with popup content index. Reduce grid to only include sampled cells.
-            var featureIndex = gridCellLookup[site];
-
-            //e>layers>feature>properties> index == featureIndex. Then highlight.
-            map.eachLayer(function (layer) {
-              if (layer.feature != null) {
-                if (layer.feature.properties.index == featureIndex) {
-                  disableHighlightLayer(layer);
-                }
-              }
-            }); 
-        })
-        .on('click', function(d) {
           var circle = d3.select(this);
-          var site = circle.attr('id');
+          var site = circle.attr("id");
+          //Uses grid cell look-up to zoom to
+          //TODO: feature index doesn't match up with popup content index. Reduce grid to only include sampled cells.
+          var featureIndex = gridCellLookup[site];
+
+          //e>layers>feature>properties> index == featureIndex. Then highlight.
+          map.eachLayer(function(layer) {
+            if (layer.feature != null) {
+              if (layer.feature.properties.index == featureIndex) {
+                disableHighlightLayer(layer);
+              }
+            }
+          });
+        })
+        .on("click", function(d) {
+          var circle = d3.select(this);
+          var site = circle.attr("id");
           //Uses grid cell look-up to zoom to
 
           //TODO: feature index doesn't match up with popup content index. Reduce grid to only include sampled cells.
@@ -1080,32 +1070,31 @@ function updateGraph(siteMetrics) {
         })
         .merge(circle)
         .transition()
-          .duration(1500)
-          .attr('cx', function(d) {
-            var cx;
-            if (max == min) {
-              cx = 0;
-            } else {
-              cx = (d.value - min) / (max - min);
-            }
-            return x(cx);
+        .duration(1500)
+        .attr("cx", function(d) {
+          var cx;
+          if (max == min) {
+            cx = 0;
+          } else {
+            cx = (d.value - min) / (max - min);
+          }
+          return x(cx);
         });
 
       //adding mean circles
-      d3
-        .select(this)
-        .append('circle')
-        .attr('class', 'enter-mean')
-        .attr('cy', y(d.key))
-        .attr('r', 15)
-        .style('stroke', 'grey')
-        .style('stroke-width', 2)
-        .style('fill', 'none')
-        .style('opacity', 0)
+      d3.select(this)
+        .append("circle")
+        .attr("class", "enter-mean")
+        .attr("cy", y(d.key))
+        .attr("r", 15)
+        .style("stroke", "grey")
+        .style("stroke-width", 2)
+        .style("fill", "none")
+        .style("opacity", 0)
         .transition()
-          .duration(1500)
-          .style('opacity', 0.75)
-          .attr('cx', x((mean - min) / (max - min)));
+        .duration(1500)
+        .style("opacity", 0.75)
+        .attr("cx", x((mean - min) / (max - min)));
     }); //.each() end.
 
   var remove = update.exit().remove();
@@ -1113,16 +1102,16 @@ function updateGraph(siteMetrics) {
 
 //generating the map
 var tileLayer = L.tileLayer(
-  'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
+  "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
   {
     attribution:
       '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-    subdomains: 'abcd',
+    subdomains: "abcd",
     maxZoom: 19,
-    minZoom: 5.75,
+    minZoom: 5.75
   }
 );
-var map = L.map('map', {
+var map = L.map("map", {
   zoomSnap: 0.25,
   zoomDelta: 0.25,
   layers: tileLayer,
@@ -1138,13 +1127,13 @@ map.setMaxBounds(bounds);
 //in this case proj4 is being set up to convert longlat to cartesian.
 // TODO: coordinate conversion: Change EPSG:2193 to EPSG:4326? To match the bulk convert.
 proj4.defs(
-  'EPSG:2193',
-  '+proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 +x_0=1600000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
+  "EPSG:2193",
+  "+proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 +x_0=1600000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
 );
 
 //gets the params from the search bar
 var params = new URLSearchParams(window.location.search);
-var mode = params.get('mode');
+var mode = params.get("mode");
 window.circles = [];
 
 var detailLevel = 60;
@@ -1163,69 +1152,69 @@ var baseMaps = {
   Base: tileLayer
 };
 var overlays = {
-  'Grid: Abundance': gridAbundanceLayerGroup,
-  'Grid: Richness': gridRichnessLayerGroup,
-  'Heat: Abundance': heatLayerGroup,
-  'Grid: Site Count': gridSitesLayerGroup
+  "Grid: Abundance": gridAbundanceLayerGroup,
+  "Grid: Richness": gridRichnessLayerGroup,
+  "Heat: Abundance": heatLayerGroup,
+  "Grid: Site Count": gridSitesLayerGroup
 };
 var layerMenu = L.control
   .layers(baseMaps, overlays, {
-    position: 'bottomleft',
+    position: "bottomleft",
     hideSingleBase: true,
     sortLayers: true,
     collapsed: false
   })
   .addTo(map);
 
-  //Adding input field for alternative grid slider control
-  var input = L.control({
-    position: 'bottomleft'
-  });
-  input.onAdd = (map) => {
-    this._div = L.DomUtil.create('div', 'info');
-    // todo: Shrink down the input field to 4/5 numbers.
-    this._div.innerHTML = '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
-    return this._div;
-  };
-  input.addTo(map);
-  //function for input change 
-  function changeSliderValue(value) {
-    //slider slider.slider refers to the handle. 
-    slider.slider.value = value;
-    slider._expand();
-    slider._sliderValue.innerHTML = value;
-    detailLevel = value;
-    $('#filter').trigger('change');
-  }
+//Adding input field for alternative grid slider control
+var input = L.control({
+  position: "bottomleft"
+});
+input.onAdd = map => {
+  this._div = L.DomUtil.create("div", "info");
+  // todo: Shrink down the input field to 4/5 numbers.
+  this._div.innerHTML =
+    '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
+  return this._div;
+};
+input.addTo(map);
+//function for input change
+function changeSliderValue(value) {
+  //slider slider.slider refers to the handle.
+  slider.slider.value = value;
+  slider._expand();
+  slider._sliderValue.innerHTML = value;
+  detailLevel = value;
+  $("#filter").trigger("change");
+}
 
 //Adding leaflet slider to map for grip control.
 var slider = L.control.slider(
   function(value) {
     detailLevel = value;
-    $('#filter').trigger('change');
+    $("#filter").trigger("change");
   },
   {
     id: slider,
     min: 1,
     //width not working.
-    size: '300px',
+    size: "300px",
     max: 1500,
     step: 1,
     value: detailLevel,
-    logo: 'Grid',
+    logo: "Grid",
     increment: true,
-    orientation: 'horiztonal',
-    position: 'bottomleft',
-    syncSlider: true,
+    orientation: "horiztonal",
+    position: "bottomleft",
+    syncSlider: true
   }
 );
 slider.addTo(map);
 
-
 //Adding custom control for Andrew's Visualization Copy.
-var visControl = L.control({ position: 'bottomright' });
+const visControl = L.control({ position: "bottomright" });
 visControl.onAdd = function(map) {
-  this._div = L.DomUtil.create('div', 'info'); //creates div with class "info"
+  this._div = L.DomUtil.create("div", "info"); //creates div with class "info"
   this.update();
   return this._div;
 };
@@ -1236,10 +1225,11 @@ visControl.update = function() {
   // otherwise it will have no idea what siteMetric keys to add as select options.
   // if siteMetrics not null then generate option elements from site meta keys.
   if (siteMetrics != null) {
-    console.log("site metrics found. Filling select element based on meta keys");
+    console.log(
+      "site metrics found. Filling select element based on meta keys"
+    );
     //using ECMA script 6 template literal using backticks.
-    this._div.innerHeight = 
-    `<div id="chart" style="display: none;">
+    this._div.innerHeight = `<div id="chart" style="display: none;">
     </div>
     <br />
     <button onclick="toggleGraph()">Toggle Graph</button>
@@ -1252,12 +1242,9 @@ visControl.update = function() {
         <option selected value="sequential">Sequential</option>
         <option value="diverging">Diverging</option>
       </select>
-    </label>`
-    ;
-  }
-  else {
-    this._div.innerHTML =
-    `<div id="chart" style="display: none;">
+    </label>`;
+  } else {
+    this._div.innerHTML = `<div id="chart" style="display: none;">
     </div>
     <br />
     <button onclick="toggleGraph()">Toggle Graph</button>
@@ -1277,105 +1264,34 @@ visControl.update = function() {
         <option selected value="sequential">Sequential</option>
         <option value="diverging">Diverging</option>
       </select>
-    </label>`
-    ;
+    </label>`;
   }
-}
+};
 
-/** 
+/**
  * Selects all .enter elements and changes fill to the current option of the meta-select element.
-  */
+ */
 function selectColorChange(e) {
   var metric = document.getElementById("meta-select").value;
-  var metricColour = createColorRange(siteMetrics)
+  var metricColour = createColorRange(siteMetrics);
   d3.selectAll(".enter")
     .transition()
     .duration(400)
-      .attr("fill", function(d) {
-        return metricColour(d.meta[metric])
-      })
+    .attr("fill", function(d) {
+      return metricColour(d.meta[metric]);
+    });
 }
 
 /**
  * Toggles the datapoint visualization visibility.
  */
 function toggleGraph() {
-  //TODO: Add ability to reduce size by a factor.
-  var graph = $('#chart').toggle('slow');
+  $("#chart").toggle("slow");
 }
-
 visControl.addTo(map);
 
 //Adding d3 visualization
-let { width, margin, height } = createMargin();
-
-var chart = d3
-  .select('#chart')
-  .append('svg')
-  .attr('width', width + margin.right + margin.left)
-  .attr('height', height + margin.top + margin.bottom);
-  //.attr("viewBox", "0 0 " + width + " " + height)
-  //.attr("preserveAspectRatio", "xMidYMid meet");
-
-// Define area where the graph will be drawn
-var main = chart
-  .append('g')
-  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-  .attr('width', width)
-  .attr('height', height)
-  .attr('id', 'main');
-
-var x = d3
-  .scaleLinear()
-  .domain([0, 1]) // the range of the values to plot
-  .range([0, width]); // the pixel range of the x-axis
-var xTicks = [0, 1];
-var xLabels = ['Minimum', 'Maximum'];
-var xAxis = d3
-  .axisBottom()
-  .scale(x)
-  .tickValues([0, 1])
-  .tickFormat(function(d, i) {
-    return xLabels[i];
-  });
-
-var y = d3
-  .scalePoint()
-  //.domain(nested.map( function(d) { return d.key }) )
-  .domain([
-    'OTU richness',
-    'Sequence abundance',
-    'Shannon entropy',
-    'Effective alpha diversity',
-    'Orders'
-  ])
-  .range([0, height - 20])
-  .padding(0.1);
-var yAxis = d3.axisLeft().scale(y);
-
-// Draw the x and y axes
-main
-  .append('g')
-  .attr('transform', 'translate(0,' + height + ')') // Position at bottom of chart
-  .attr('class', 'main axis')
-  .attr('id', 'xAxis')
-  .call(xAxis);
-
-main
-  .append('g')
-  .attr('transform', 'translate(0,0)') // Position at left of chart
-  .attr('class', 'main axis')
-  .attr('id', 'yAxis')
-  .call(yAxis);
-
-// Draw the graph object holding the data points
-var g = main.append('svg:g').attr('id', 'datapoints');
-
-var tooltip = d3
-  .select('#map')
-  .append('div')
-  .attr('class', 'tooltip')
-  .style('opacity', 0);
+var { g, y, tooltip, x } = createGraph();
 
 // required end result structure:  [{"": name, site: value, ...}, {"": name, site: value, ...}]
 // sets up matrix with default 0 values. Iterates thro
@@ -1384,34 +1300,95 @@ var lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
     lightResponse();
-  }
-  else {
+  } else {
     nestedResponse();
   }
-}
-else {
+} else {
   loadFromFile();
 }
 
 var hashComponents = decodeURIComponent(
-  window.location.hash.replace('#', '')
-).split(',');
+  window.location.hash.replace("#", "")
+).split(",");
 
-function createMargin() {
-  var margin = { top: 20, right: 30, bottom: 20, left: 160 }, width = window.innerWidth * 0.75 - margin.left - margin.right, height = window.innerHeight * 0.35 - margin.top - margin.bottom;
-  return { width, margin, height };
+function createGraph() {
+  var margin = { top: 20, right: 30, bottom: 20, left: 160 },
+    width = window.innerWidth * 0.75 - margin.left - margin.right,
+    height = window.innerHeight * 0.35 - margin.top - margin.bottom;
+  var chart = d3
+    .select("#chart")
+    .append("svg")
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom);
+  var main = chart
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("id", "main");
+  var x = d3
+    .scaleLinear()
+    .domain([0, 1]) // the range of the values to plot
+    .range([0, width]); // the pixel range of the x-axis
+  var xTicks = [0, 1];
+  var xLabels = ["Minimum", "Maximum"];
+  var xAxis = d3
+    .axisBottom()
+    .scale(x)
+    .tickValues([0, 1])
+    .tickFormat(function(d, i) {
+      return xLabels[i];
+    });
+  var y = d3
+    .scalePoint()
+    //.domain(nested.map( function(d) { return d.key }) )
+    .domain([
+      "OTU richness",
+      "Sequence abundance",
+      "Shannon entropy",
+      "Effective alpha diversity",
+      "Orders"
+    ])
+    .range([0, height - 20])
+    .padding(0.1);
+  var yAxis = d3.axisLeft().scale(y);
+  // Draw the x and y axes
+  main
+    .append("g")
+    .attr("transform", "translate(0," + height + ")") // Position at bottom of chart
+    .attr("class", "main axis")
+    .attr("id", "xAxis")
+    .call(xAxis);
+  main
+    .append("g")
+    .attr("transform", "translate(0,0)") // Position at left of chart
+    .attr("class", "main axis")
+    .attr("id", "yAxis")
+    .call(yAxis);
+  // Draw the graph object holding the data points
+  var g = main.append("svg:g").attr("id", "datapoints");
+  var tooltip = d3
+    .select("#map")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+  return { g, y, tooltip, x };
 }
 
 function nestedResponse() {
   // Returns the data as nested dictionaries. Json is much larger than the light request but processes server side rather than client side.
   try {
     console.time();
-    abundanceRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/abundance?term=');
+    abundanceRequest = new Request(
+      "https://edna.nectar.auckland.ac.nz/edna/api/abundance?term="
+    );
     fetch(abundanceRequest).then(response => {
       response.json().then(abundanceResults => {
         console.timeEnd();
         abundanceData = abundanceResults;
-        metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
+        metadataRequest = new Request(
+          "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term="
+        );
         fetch(metadataRequest).then(metaResponse => {
           metaResponse.json().then(metaResults => {
             siteData = metaResults;
@@ -1422,8 +1399,7 @@ function nestedResponse() {
         });
       });
     });
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err);
     loadFromFile();
   }
@@ -1431,56 +1407,64 @@ function nestedResponse() {
 
 function lightResponse() {
   // requires ordering of the abundances needs to be otu_id ASC, sample_id ASC
-  fetch('https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered').then(response => {
-    response.json().then(result => {
-      data = result.data;
-      abundance_dict = {
-        'data': []
-      };
-      abundance_dict.data = data.otus.map((otu) => {
-        otuEntry = {
-          '': otu,
+  fetch("https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered").then(
+    response => {
+      response.json().then(result => {
+        data = result.data;
+        abundance_dict = {
+          data: []
         };
-        data.sites.map((site) => {
-          otuEntry[site] = 0;
+        abundance_dict.data = data.otus.map(otu => {
+          otuEntry = {
+            "": otu
+          };
+          data.sites.map(site => {
+            otuEntry[site] = 0;
+          });
+          return otuEntry;
         });
-        return otuEntry;
-      });
-      // tuple structure: otuid, sampleid, count.
-      for (let tuple in data.abundances) {
-        let otu_index = data.abundances[tuple][0];
-        let sample = data.sites[data.abundances[tuple][1]];
-        let value = (data.abundances[tuple][2]);
-        try {
-          abundance_dict.data[otu_index-1][sample] =  value;
+        // tuple structure: otuid, sampleid, count.
+        for (let tuple in data.abundances) {
+          let otu_index = data.abundances[tuple][0];
+          let sample = data.sites[data.abundances[tuple][1]];
+          let value = data.abundances[tuple][2];
+          try {
+            abundance_dict.data[otu_index - 1][sample] = value;
+          } catch {
+            console.log(
+              "otu index: %s, sample key: %s, value: %d",
+              otu_index,
+              sample,
+              value
+            );
+          }
         }
-        catch {
-          console.log('otu index: %s, sample key: %s, value: %d', otu_index, sample, value);
-        }
-      }
-      console.timeEnd();
-      console.log(abundance_dict);
-      metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
-      fetch(metadataRequest).then(metaResponse => {
-        metaResponse.json().then(metaResults => {
-          siteData = metaResults;
-          handleResults(abundance_dict, siteData);
-          visControl.update(siteMetrics);
+        console.timeEnd();
+        console.log(abundance_dict);
+        metadataRequest = new Request(
+          "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term="
+        );
+        fetch(metadataRequest).then(metaResponse => {
+          metaResponse.json().then(metaResults => {
+            siteData = metaResults;
+            handleResults(abundance_dict, siteData);
+            visControl.update(siteMetrics);
+          });
         });
       });
-    });
-  });
+    }
+  );
 }
 
-function loadFromFile(){
+function loadFromFile() {
   // Loads from local .tsv files. Called if the request throws an error
-  Papa.parse('active-abundance-data.tsv', {
+  Papa.parse("active-abundance-data.tsv", {
     download: true,
     header: true,
     dynamicTyping: true,
     // once water data parsed, parse waterdata metadata and pass them both into handleResults.
     complete: function(results) {
-      Papa.parse('active-meta-data.tsv', {
+      Papa.parse("active-meta-data.tsv", {
         download: true,
         header: true,
         dynamicTyping: true,
