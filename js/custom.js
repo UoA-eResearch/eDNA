@@ -1254,31 +1254,8 @@ visControl.update = function() {
       </select>
     </label>`
     ;
-
-    //filling "colour by" options based on meta data keys:
-
-    // get any sample to look at. Just grabbing first:
-
-    // * Not auto-filling the colouring options at the moment.
-    // * This block auto fills the options according to valid number meta fields.
-    /*
-    var site = siteMetrics[Object.keys(siteMetrics)[0]];
-    for (var metric in site) {
-      if (isNaN(site[metric])) {
-        console.log(site[metric], " not valid number");
-      }
-      else {
-        console.log(site[metric], " valid number");
-        //if valid metric then add to options.
-        document.getElementById("meta-select").innerHTML += `
-          <option selected value=${metric}>${metric}</option>
-        `;
-      }
-    }
-    */
   }
   else {
-    // console.log(siteMetrics);
     this._div.innerHTML =
     `<div id="chart" style="display: none;">
     </div>
@@ -1330,9 +1307,7 @@ function toggleGraph() {
 visControl.addTo(map);
 
 //Adding d3 visualization
-var margin = { top: 20, right: 30, bottom: 20, left: 160 },
-  width = window.innerWidth * 0.75 - margin.left - margin.right,
-  height = window.innerHeight * 0.35 - margin.top - margin.bottom;
+let { width, margin, height } = createMargin();
 
 var chart = d3
   .select('#chart')
@@ -1402,25 +1377,16 @@ var tooltip = d3
   .attr('class', 'tooltip')
   .style('opacity', 0);
 
-// NOTE: Should I:
-// 1. cronjob update the data/metadata every day or something and work from those? 
-// 2. Or should I request from the DB for every new page load?
-// 3. Or make a query with the specific result set every time the filter is updated?
-
-// results structure:  [{"": name, site: value, ...}, {"": name, site: value, ...}]
-// query all the OTUS.
-  //iterate all the OTUS and subquery all the sites
-    //use both those keys to grab the abundance value of that.
-
-// TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
+// required end result structure:  [{"": name, site: value, ...}, {"": name, site: value, ...}]
+// sets up matrix with default 0 values. Iterates thro
 var useDatabase = true;
 var lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
-    loadUnsortedData();
+    lightResponse();
   }
   else {
-    loadSortedData();
+    nestedResponse();
   }
 }
 else {
@@ -1431,7 +1397,12 @@ var hashComponents = decodeURIComponent(
   window.location.hash.replace('#', '')
 ).split(',');
 
-function loadSortedData() {
+function createMargin() {
+  var margin = { top: 20, right: 30, bottom: 20, left: 160 }, width = window.innerWidth * 0.75 - margin.left - margin.right, height = window.innerHeight * 0.35 - margin.top - margin.bottom;
+  return { width, margin, height };
+}
+
+function nestedResponse() {
   // Returns the data as nested dictionaries. Json is much larger than the light request but processes server side rather than client side.
   try {
     console.time();
@@ -1444,7 +1415,6 @@ function loadSortedData() {
         fetch(metadataRequest).then(metaResponse => {
           metaResponse.json().then(metaResults => {
             siteData = metaResults;
-            // console.log(siteData);
             console.log(abundanceData);
             handleResults(abundanceData, siteData);
             visControl.update(siteMetrics);
@@ -1459,19 +1429,15 @@ function loadSortedData() {
   }
 }
 
-function loadUnsortedData() {
-  // requirements for light request to work:
-  // 1. Ordering of the abundances needs to be otu_id ASC, sample_id ASC
-  // 2. Number of entries in Sample_OTU table entries must be equal to number of (OTU table entries * Sample_Context table entries)     
-  console.time();
+function lightResponse() {
+  // requires ordering of the abundances needs to be otu_id ASC, sample_id ASC
   fetch('https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered').then(response => {
     response.json().then(result => {
       data = result.data;
-      console.log(data);
       abundance_dict = {
         'data': []
       };
-      abundance_dict.data = data.otus.map((otu, otuIndex) => {
+      abundance_dict.data = data.otus.map((otu) => {
         otuEntry = {
           '': otu,
         };
@@ -1498,8 +1464,6 @@ function loadUnsortedData() {
       fetch(metadataRequest).then(metaResponse => {
         metaResponse.json().then(metaResults => {
           siteData = metaResults;
-          // console.log(siteData);
-          // console.log(abundance_dict);
           handleResults(abundance_dict, siteData);
           visControl.update(siteMetrics);
         });
@@ -1521,8 +1485,6 @@ function loadFromFile(){
         header: true,
         dynamicTyping: true,
         complete: function(meta) {
-          console.log(results);
-          // console.log(meta);
           handleResults(results, meta);
           visControl.update(siteMetrics);
         }
