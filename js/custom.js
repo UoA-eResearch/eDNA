@@ -1544,17 +1544,27 @@ if (useDatabase) {
         abundance_dict = {
           'data':[]
         }
-        abundance_dict.data = data.otus.map((otu, otuIndex) => {
+        abundance_dict.data = data.otus.map((otu) => {
           otuEntry = {
             '': otu,
-          }
-          data.sites.map((site, siteIndex) => {
-            abundanceIndex = (otuIndex * data.sites.length) + siteIndex;
-            otuEntry[site] = data.abundances[abundanceIndex];
-          })
-          // console.log(abundance_dict);
+          };
+          data.sites.map((site) => {
+            otuEntry[site] = 0;
+          });
           return otuEntry;
-        })
+        });
+        // tuple structure: otuid, sampleid, count.
+        for (let tuple in data.abundances) {
+          let otu_index = data.abundances[tuple][0];
+          let sample = data.sites[data.abundances[tuple][1]];
+          let value = (data.abundances[tuple][2]);
+          try {
+            abundance_dict.data[otu_index-1][sample] =  value;
+          }
+          catch {
+            console.log('otu index: %s, sample key: %s, value: %d', otu_index, sample, value);
+          }
+        }
         console.timeEnd();
         console.log(abundance_dict);
         metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
