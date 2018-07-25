@@ -1413,7 +1413,7 @@ var tooltip = d3
     //use both those keys to grab the abundance value of that.
 
 // TEMP: Going to replace the window.results.data and window.meta.data with the results from this query and work from there until I can change everything else.
-var useDatabase = false;
+var useDatabase = true;
 var lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
@@ -1464,7 +1464,7 @@ function loadUnsortedData() {
   // 1. Ordering of the abundances needs to be otu_id ASC, sample_id ASC
   // 2. Number of entries in Sample_OTU table entries must be equal to number of (OTU table entries * Sample_Context table entries)     
   console.time();
-  fetch('https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered').then(response => {
+  fetch('http://localhost:8000/').then(response => {
     response.json().then(result => {
       data = result.data;
       // console.log(data);
@@ -1479,7 +1479,6 @@ function loadUnsortedData() {
           abundanceIndex = (otuIndex * data.sites.length) + siteIndex;
           otuEntry[site] = data.abundances[abundanceIndex];
         });
-        // console.log(abundance_dict);
         return otuEntry;
       });
       console.timeEnd();
