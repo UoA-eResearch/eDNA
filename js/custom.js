@@ -1489,10 +1489,7 @@ function loadUnsortedData() {
           abundance_dict.data[otu_index-1][sample] =  value;
         }
         catch {
-          console.log('Failed to map abundance with tuple');
-          console.log(otu_index);
-          console.log(sample);
-          console.log(value);
+          console.log('otu index: %s, sample key: %s, value: %d', otu_index, sample, value);
         }
       }
       console.timeEnd();
