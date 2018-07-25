@@ -1464,10 +1464,10 @@ function loadUnsortedData() {
   // 1. Ordering of the abundances needs to be otu_id ASC, sample_id ASC
   // 2. Number of entries in Sample_OTU table entries must be equal to number of (OTU table entries * Sample_Context table entries)     
   console.time();
-  fetch('http://localhost:8000/').then(response => {
+  fetch('https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered').then(response => {
     response.json().then(result => {
       data = result.data;
-      // console.log(data);
+      console.log(data);
       abundance_dict = {
         'data': []
       };
@@ -1475,12 +1475,26 @@ function loadUnsortedData() {
         otuEntry = {
           '': otu,
         };
-        data.sites.map((site, siteIndex) => {
-          abundanceIndex = (otuIndex * data.sites.length) + siteIndex;
-          otuEntry[site] = data.abundances[abundanceIndex];
+        data.sites.map((site) => {
+          otuEntry[site] = 0;
         });
         return otuEntry;
       });
+      // tuple structure: otuid, sampleid, count.
+      for (let tuple in data.abundances) {
+        let otu_index = data.abundances[tuple][0];
+        let sample = data.sites[data.abundances[tuple][1]];
+        let value = (data.abundances[tuple][2]);
+        try {
+          abundance_dict.data[otu_index-1][sample] =  value;
+        }
+        catch {
+          console.log('Failed to map abundance with tuple');
+          console.log(otu_index);
+          console.log(sample);
+          console.log(value);
+        }
+      }
       console.timeEnd();
       console.log(abundance_dict);
       metadataRequest = new Request('https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=');
