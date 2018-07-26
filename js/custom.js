@@ -869,41 +869,25 @@ function updateGraph(siteMetrics) {
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   var metricColour = createColorRange(siteMetrics);
   var colourMetric = document.getElementById("meta-select").value;
+
+  const makeNestableObject = (site, metricName) => {
+    // helper to make tuples that can be nested using d3
+    return {
+      siteId: site.site,
+      Metric: metricName,
+      value: site.richness,
+      meta: site
+    };
+  }
+
   var dataSet = [];
-  for (var site in siteMetrics) {
-    var siteMetric = siteMetrics[site];
-    var siteRichness = {
-      siteId: siteMetric.site,
-      Metric: "OTU richness",
-      value: siteMetric.richness,
-      meta: siteMetric
-    };
-    dataSet.push(siteRichness);
-
-    var siteShannon = {
-      siteId: siteMetric.site,
-      Metric: "Shannon entropy",
-      value: siteMetric.shannonDiversity,
-      meta: siteMetric
-    };
-    dataSet.push(siteShannon);
-
-    var siteAbundance = {
-      siteId: siteMetric.site,
-      Metric: "Sequence abundance",
-      value: siteMetric.abundance,
-      meta: siteMetric
-    };
-    dataSet.push(siteAbundance);
-
-    var siteAlpha = {
-      siteId: siteMetric.site,
-      Metric: "Effective alpha diversity",
-      value: siteMetric.effectiveAlpha,
-      meta: siteMetric
-    };
-    dataSet.push(siteAlpha);
-  } //end of for loop
+  for (var key in siteMetrics) {
+    var site = siteMetrics[key];
+    dataSet.push(makeNestableObject(site, "OTU richness"));
+    dataSet.push(makeNestableObject(site, "Shannon entropy"));
+    dataSet.push(makeNestableObject(site, "Sequence abundance"));
+    dataSet.push(makeNestableObject(site, "Effective alpha diversity"));
+  }
 
   var nestedData = d3
     .nest()
@@ -917,7 +901,7 @@ function updateGraph(siteMetrics) {
   var update = g.selectAll(".datapoints").data(nestedData, function(d) {
     return d.values;
   });
-  var enter = update
+  update
     .enter()
     .append("g")
     .attr("class", "datapoints")
