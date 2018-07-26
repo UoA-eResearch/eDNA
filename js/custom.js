@@ -874,24 +874,26 @@ function updateGraph(siteMetrics) {
   var metricColour = createColorRange(siteMetrics);
   var colourMetric = document.getElementById("meta-select").value;
 
-  const makeNestableObject = (site, metricName) => {
+  function makeNestableObject (site, metricName, value) {
     // helper to make tuples that can be nested using d3
     return {
       siteId: site.site,
       Metric: metricName,
-      value: site.richness,
+      value: value,
       meta: site
     };
   }
 
+  console.log(siteMetrics);
+
   var dataSet = [];
   for (var key in siteMetrics) {
     var site = siteMetrics[key];
-    dataSet.push(makeNestableObject(site, "OTU richness"));
-    dataSet.push(makeNestableObject(site, "Shannon entropy"));
-    dataSet.push(makeNestableObject(site, "Sequence abundance"));
-    dataSet.push(makeNestableObject(site, "Effective alpha diversity"));
-  }
+    dataSet.push(makeNestableObject(site, "OTU richness", site.richness));
+    dataSet.push(makeNestableObject(site, "Shannon entropy", site.shannonDiversity));
+    dataSet.push(makeNestableObject(site, "Sequence abundance", site.abundance));
+    dataSet.push(makeNestableObject(site, "Effective alpha diversity", site.effectiveAlpha));
+  } 
 
   var nestedData = d3
     .nest()
