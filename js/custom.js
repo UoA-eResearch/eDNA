@@ -5,6 +5,14 @@ function round(x, dp) {
   return tmp / factor;
 }
 
+const strongLine = s => {
+  return "<strong>" + s + "</strong>" + "<br />";
+};
+
+const strongHeader = (h, s) => {
+  return "<strong>" + h + ": </strong> " + s + "<br />";
+};
+
 function checkFragment(f, species, site) {
   var ampIndex = f.indexOf("&");
   var ltIndex = f.indexOf("<");
@@ -440,14 +448,10 @@ function drawGrid(grid) {
   let cellId = 0;
 
   // returns string in strong html tags
-  const strongLine = s => {
-    return "<strong>" + s + "</strong>" + "<br />";
-  };
+  
 
   // returns header in bold, string in regular text
-  const strongHeader = (h, s) => {
-    return "<strong>" + h + ": </strong> " + s + "<br />";
-  };
+  
 
   for (let index in cells) {
     const cell = cells[index];
@@ -955,18 +959,12 @@ function updateGraph(siteMetrics) {
             .duration(250);
           tooltip
             .html(
-              "<strong>" +
-                d.siteId +
-                "</strong><br />" +
-                "<strong>" +
-                d.Metric +
-                ": </strong>" +
-                d.value +
-                "<br />" +
-                "<strong>" +
-                document.getElementById("meta-select").value +
-                ": </strong>" +
+              strongLine(d.siteId) +
+              strongHeader(d.Metric, d.value) +
+              strongHeader(
+                document.getElementById("meta-select").value,
                 d.meta[document.getElementById("meta-select").value]
+              )
             )
             .style("left", d3.event.pageX + "px")
             .style("top", d3.event.pageY - 10 + "px")
