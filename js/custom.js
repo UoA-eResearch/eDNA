@@ -5,10 +5,19 @@ function round(x, dp) {
   return tmp / factor;
 }
 
+/**
+ * Simple helper to wrap contents in strong tags followed by a line break.
+ * @param {content} s 
+ */
 const strongLine = s => {
   return "<strong>" + s + "</strong>" + "<br />";
 };
 
+/**
+ * Helper function to make a strong field label with a value.
+ * @param {header} h 
+ * @param {value} s 
+ */
 const strongHeader = (h, s) => {
   return "<strong>" + h + ": </strong> " + s + "<br />";
 };
@@ -48,24 +57,17 @@ var siteMetrics;
 function getSiteWeights(filters) {
   var sites = {};
   n_points = 0;
-
   //warrick Clears grid layer values, gives them an index.
   var grid = makeGrid(detailLevel);
   gridCellLookup = makeGridLookup(grid);
-
   //console.log(grid);
-  //set bool for all the grids that don't have a site.
-
   //Site metrics: Adding dictionary of site metrics for calculations.
   siteMetrics = {};
-  console.time();
   //loop through parsed global result data.
   for (var i in window.results.data) {
     var taxon_row = window.results.data[i];
-    //Extracts the species name from "" field of window.results
     var taxon_name = taxon_row[""];
     for (var taxon_column in taxon_row) {
-      //Skip the bacteria name field, only process site lines.
       if (taxon_column != "") {
         // site contains the full meta row for a site.
         var site = window.meta[taxon_column];
@@ -108,7 +110,6 @@ function getSiteWeights(filters) {
     }
   }
   $("#numberResults").text(n_points);
-  console.timeEnd();
   // console.log(grid);
   // console.log(sites);
   // console.log(siteMetrics);
@@ -427,14 +428,6 @@ function makeGridLookup(grid) {
 }
 
 /**
- * Main function for calculating and rendering the grid layers.
- * Calculates grid metrics to style the grid.
- * Gives each layer a id in feature.properties.
- * Creates feature collection
- * Creates cell polygons
- * Styles all layergroups
- * Clears layergroups and adds new ones to map layer control.
- * Generates popup content for the individual cell layers.
  * @param {*} grid
  */
 function drawGrid(grid) {
@@ -446,13 +439,6 @@ function drawGrid(grid) {
   const maxSiteCount = gridMaxes.siteCount;
   let features = [];
   let cellId = 0;
-
-  // returns string in strong html tags
-  
-
-  // returns header in bold, string in regular text
-  
-
   for (let index in cells) {
     const cell = cells[index];
     //if grid doesn't contain any sites then don't add to map.
@@ -480,7 +466,6 @@ function drawGrid(grid) {
       "<br />";
     cellId++;
     const speciesInCell = cell.cellSpecies;
-    //console.log(speciesInCell);
 
     //list all sites within the cell.
     popupContent += strongLine("Sites in cell: ") + "<ul>";
@@ -1357,8 +1342,29 @@ function nestedResponse() {
   }
 }
 
+function createLoadingMessage() {
+  let popupDiv = document.createElement("div");
+  popupDiv.id = "flex-container-loading";
+  let loading = document.createElement("h1");
+  loading.textContent = "Fetching data...";
+  popupDiv.appendChild(loading);
+  let map = document.getElementById("map");
+  map.appendChild(popupDiv);
+}
+
+function toggleLoadingPopup() {
+  let loadingPopup = document.getElementById('flex-container-loading');
+  if (loadingPopup.style.display == "none") {
+    loadingPopup.style.display = "flex";
+  }
+  else {
+    loadingPopup.style.display = "none";
+  }
+}
+
 function lightResponse() {
   // requires ordering of the abundances needs to be otu_id ASC, sample_id ASC
+  createLoadingMessage();
   fetch("https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered").then(
     response => {
       response.json().then(result => {
@@ -1392,7 +1398,7 @@ function lightResponse() {
           }
         }
         console.timeEnd();
-        console.log(abundance_dict);
+        toggleLoadingPopup();
         metadataRequest = new Request(
           "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term="
         );
