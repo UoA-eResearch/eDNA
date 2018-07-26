@@ -1344,22 +1344,22 @@ function nestedResponse() {
 
 function createLoadingMessage() {
   let popupDiv = document.createElement("div");
-  popupDiv.id = "flex-container-loading";
-  let loading = document.createElement("h1");
-  loading.textContent = "Fetching data...";
-  popupDiv.appendChild(loading);
+  popupDiv.id = "flex-container-state";
+  let state = document.createElement("h1");
+  state.id = "state-header";
+  state.textContent = "Fetching data...";
+  popupDiv.appendChild(state);
   let map = document.getElementById("map");
   map.appendChild(popupDiv);
 }
 
-function toggleLoadingPopup() {
-  let loadingPopup = document.getElementById('flex-container-loading');
-  if (loadingPopup.style.display == "none") {
-    loadingPopup.style.display = "flex";
-  }
-  else {
-    loadingPopup.style.display = "none";
-  }
+function updateStatePopup(s) {
+  document.getElementById('state-header').textContent = s;
+}
+
+function disableStatePopup() {
+  let statePopup = document.getElementById('flex-container-state');
+  statePopup.style.display = "none";
 }
 
 function lightResponse() {
@@ -1398,7 +1398,7 @@ function lightResponse() {
           }
         }
         console.timeEnd();
-        toggleLoadingPopup();
+        disableStatePopup();
         metadataRequest = new Request(
           "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term="
         );
