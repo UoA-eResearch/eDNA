@@ -796,19 +796,17 @@ function disableHighlightLayer(layer) {
  * @param {siteMetrics} siteMetrics
  */
 function calculateSiteMetrics(siteMetrics) {
-  for (var site_index in siteMetrics) {
-    var site = siteMetrics[site_index];
+  for (let site_index in siteMetrics) {
+    let site = siteMetrics[site_index];
     site.shannonDiversity = 0;
-    for (var taxon_name in site.species) {
+    for (let taxon_name in site.species) {
       speciesAbundance = site.species[taxon_name];
-      // shannon value for an individual species relative to a site/sample. Adds them to the sum
       site.shannonDiversity +=
         (speciesAbundance / site.abundance) *
         Math.log(speciesAbundance / site.abundance);
     }
     site.shannonDiversity *= -1;
     site.effectiveAlpha = Math.exp(site.shannonDiversity);
-    // console.log("site:" + site_index + " " +  " shannon score " + site.shannonDiversity);
   }
   updateGraph(siteMetrics);
 }
@@ -826,10 +824,10 @@ function createColorRange(siteMetrics) {
   for (var site in siteMetrics) {
     sites.push(siteMetrics[site]);
   }
-  var min = d3.min(sites, function(d) {
+  const min = d3.min(sites, function(d) {
     return d[metric];
   });
-  var max = d3.max(sites, function(d) {
+  const max = d3.max(sites, function(d) {
     return d[metric];
   });
   console.log("visualization plot min, max:", min, max);
@@ -851,7 +849,6 @@ function createColorRange(siteMetrics) {
     .interpolate(d3.interpolateRgb)
     .domain([min, max])
     .range(colorRange);
-
   return colourRange;
 }
 
