@@ -1059,7 +1059,8 @@ function updateGraph(siteMetrics) {
         .attr("cx", x((mean - min) / (max - min)));
     }); //.each() end.
 
-  var remove = update.exit().remove();
+  // should remove extras. Not sure if necessary.
+  update.exit().remove();
 }
 
 //generating the map
