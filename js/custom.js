@@ -820,17 +820,12 @@ function calculateSiteMetrics(siteMetrics) {
  * @param {*} siteMetrics
  */
 function createColorRange(siteMetrics) {
-  // todo: Sometimes doesn't work with long named meta fields.
-
-  var metric = document.getElementById("meta-select").value;
-  // ? Not entirely sure why I pushed the sitemetrics onto a separate array.
-  // console.log(siteMetrics);
-  // console.log(metric);
-  sites = [];
+  // gets value from drop down and creates colour scale from the select option.
+  const metric = document.getElementById("meta-select").value;
+  const sites = [];
   for (var site in siteMetrics) {
     sites.push(siteMetrics[site]);
   }
-
   var min = d3.min(sites, function(d) {
     return d[metric];
   });
@@ -838,9 +833,8 @@ function createColorRange(siteMetrics) {
     return d[metric];
   });
   console.log("visualization plot min, max:", min, max);
-
-  var colorScheme = document.getElementById("color-scheme-select").value;
-  var colorRange = [];
+  const colorScheme = document.getElementById("color-scheme-select").value;
+  const colorRange = [];
   switch (colorScheme) {
     case "sequential":
       colorRange = ["blue", "orange"];
@@ -851,8 +845,7 @@ function createColorRange(siteMetrics) {
     default:
       colorRange = ["grey", "black"];
   }
-
-  var colourRange = d3
+  const colourRange = d3
     .scaleLinear()
     // ? Not sure if interpolate is best visibility choice.
     .interpolate(d3.interpolateRgb)
@@ -876,7 +869,6 @@ let randomRange = (upper, lower) => {
  * @param {*} siteMetrics
  */
 function updateGraph(siteMetrics) {
-  // todo: fix the naming here...
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   var metricColour = createColorRange(siteMetrics);
   var colourMetric = document.getElementById("meta-select").value;
@@ -902,7 +894,6 @@ function updateGraph(siteMetrics) {
     var siteAbundance = {
       siteId: siteMetric.site,
       Metric: "Sequence abundance",
-      // TEMP:FIXME: bpa count abundance mismatch
       value: siteMetric.abundance,
       meta: siteMetric
     };
@@ -929,7 +920,6 @@ function updateGraph(siteMetrics) {
   var update = g.selectAll(".datapoints").data(nestedData, function(d) {
     return d.values;
   });
-
   var enter = update
     .enter()
     .append("g")
@@ -937,26 +927,23 @@ function updateGraph(siteMetrics) {
     .merge(update)
     .each(function(d) {
       //loop through each data group
-      var min = d3.min(d.values, function(d) {
+      const min = d3.min(d.values, function(d) {
         return d.value;
       });
-      var max = d3.max(d.values, function(d) {
+      const max = d3.max(d.values, function(d) {
         return d.value;
       });
-      var mean = d3.mean(d.values, function(d) {
+      const mean = d3.mean(d.values, function(d) {
         return d.value;
       });
       //console.log(min, max, mean);
-
       var circle = d3
         .select(this)
         .selectAll("circle")
         .data(d.values, function(d) {
           return d.siteId;
         });
-
       circle.exit().remove();
-
       //Enter statement
       circle
         .enter()
@@ -1004,16 +991,12 @@ function updateGraph(siteMetrics) {
             .style("top", d3.event.pageY - 10 + "px")
             .style("opacity", 0.9)
             .style("z-index", 1000);
-
           var circle = d3.select(this);
           var site = circle.attr("id");
           //Uses grid cell look-up to zoom to
           var featureIndex = gridCellLookup[site];
-          //console.log(featureIndex);
-
           //e>layers>feature>properties> index == featureIndex. Then highlight.
           map.eachLayer(function(layer) {
-            //console.log(layer);
             if (layer.feature != null) {
               if (layer.feature.properties.index == featureIndex) {
                 highlightLayer(layer);
@@ -1291,12 +1274,12 @@ function toggleGraph() {
 visControl.addTo(map);
 
 //Adding d3 visualization
-var { g, y, tooltip, x } = createGraph();
+const { g, y, tooltip, x } = createGraph();
 
 // required end result structure:  [{"": name, site: value, ...}, {"": name, site: value, ...}]
 // sets up matrix with default 0 values. Iterates thro
-var useDatabase = true;
-var lightRequest = true;
+let useDatabase = true;
+let lightRequest = true;
 if (useDatabase) {
   if (lightRequest) {
     lightResponse();
