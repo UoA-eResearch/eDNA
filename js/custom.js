@@ -1192,22 +1192,23 @@ var slider = L.control.slider(
 slider.addTo(map);
 
 //Adding custom control for Andrew's Visualization Copy.
-const visControl = L.control({ position: "bottomright" });
-visControl.onAdd = function() {
+const leafletGraphControl = L.control({ position: "bottomright" });
+leafletGraphControl.onAdd = function() {
   this._div = L.DomUtil.create("div", "info"); //creates div with class "info"
   this.update();
   return this._div;
 };
 
-visControl.update = function() {
+leafletGraphControl.update = function() {
   // TODO: use map function to list the site meta fields for the options.
   // TODO: To make this able to procedurally generate the options, needs to be called after siteMetrics has been set up.
+
   if (siteMetrics != null) {
     console.log(
       "site metrics found. Filling select element based on meta keys"
     );
-    //using ECMA script 6 template literal using backticks.
-    this._div.innerHeight = `<div id="chart" style="display: none;">
+    // using ECMA script 6 template literal using backticks.
+    this._div.innerHeight = `<div id="chart" style="display:none;">
     </div>
     <br />
     <button onclick="toggleGraph()">Toggle Graph</button>
@@ -1267,7 +1268,7 @@ function selectColorChange(e) {
 function toggleGraph() {
   $("#chart").toggle("slow");
 }
-visControl.addTo(map);
+leafletGraphControl.addTo(map);
 
 //Adding d3 visualization
 const { g, y, tooltip, x } = createGraph();
@@ -1373,7 +1374,7 @@ function nestedResponse() {
             siteData = metaResults;
             console.log(abundanceData);
             handleResults(abundanceData, siteData);
-            visControl.update(siteMetrics);
+            leafletGraphControl.update(siteMetrics);
           });
         });
       });
@@ -1427,7 +1428,7 @@ function lightResponse() {
           metaResponse.json().then(metaResults => {
             siteData = metaResults;
             handleResults(abundance_dict, siteData);
-            visControl.update(siteMetrics);
+            leafletGraphControl.update(siteMetrics);
           });
         });
       });
@@ -1449,7 +1450,7 @@ function loadFromFile() {
         dynamicTyping: true,
         complete: function(meta) {
           handleResults(results, meta);
-          visControl.update(siteMetrics);
+          leafletGraphControl.update(siteMetrics);
         }
       });
     }
