@@ -7,7 +7,7 @@ function round(x, dp) {
 
 /**
  * Simple helper to wrap contents in strong tags followed by a line break.
- * @param {content} s 
+ * @param {content} s
  */
 const strongLine = s => {
   return "<strong>" + s + "</strong>" + "<br />";
@@ -15,8 +15,8 @@ const strongLine = s => {
 
 /**
  * Helper function to make a strong field label with a value.
- * @param {header} h 
- * @param {value} s 
+ * @param {header} h
+ * @param {value} s
  */
 const strongHeader = (h, s) => {
   return "<strong>" + h + ": </strong> " + s + "<br />";
@@ -452,8 +452,8 @@ function drawGrid(grid) {
     //Cell coordinates
     let popupContent =
       strongHeader("Cell id", cellId) +
-      strongHeader("Cell Richness", cell.abundance) +
-      strongHeader("Cell Abundance", cell.richness) +
+      strongHeader("Cell Richness", cell.richness) +
+      strongHeader("Cell Abundance", cell.abundance) +
       strongHeader("Cell Site Count", cell.cellSites.length) +
       strongHeader(
         "Longitude",
@@ -859,7 +859,7 @@ function updateGraph(siteMetrics) {
   var metricColour = createColorRange(siteMetrics);
   var colourMetric = document.getElementById("meta-select").value;
 
-  function makeNestableObject (site, metricName, value) {
+  function makeNestableObject(site, metricName, value) {
     // helper to make tuples that can be nested using d3
     return {
       siteId: site.site,
@@ -875,10 +875,16 @@ function updateGraph(siteMetrics) {
   for (var key in siteMetrics) {
     var site = siteMetrics[key];
     dataSet.push(makeNestableObject(site, "OTU richness", site.richness));
-    dataSet.push(makeNestableObject(site, "Shannon entropy", site.shannonDiversity));
-    dataSet.push(makeNestableObject(site, "Sequence abundance", site.abundance));
-    dataSet.push(makeNestableObject(site, "Effective alpha diversity", site.effectiveAlpha));
-  } 
+    dataSet.push(
+      makeNestableObject(site, "Shannon entropy", site.shannonDiversity)
+    );
+    dataSet.push(
+      makeNestableObject(site, "Sequence abundance", site.abundance)
+    );
+    dataSet.push(
+      makeNestableObject(site, "Effective alpha diversity", site.effectiveAlpha)
+    );
+  }
 
   var nestedData = d3
     .nest()
@@ -947,11 +953,11 @@ function updateGraph(siteMetrics) {
           tooltip
             .html(
               strongLine(d.siteId) +
-              strongHeader(d.Metric, d.value) +
-              strongHeader(
-                document.getElementById("meta-select").value,
-                d.meta[document.getElementById("meta-select").value]
-              )
+                strongHeader(d.Metric, d.value) +
+                strongHeader(
+                  document.getElementById("meta-select").value,
+                  d.meta[document.getElementById("meta-select").value]
+                )
             )
             .style("left", d3.event.pageX + "px")
             .style("top", d3.event.pageY - 10 + "px")
@@ -1174,8 +1180,8 @@ leafletGraphControl.update = function() {
   // TODO: To make this able to procedurally generate the options, needs to be called after siteMetrics has been set up.
 
   // Creates the same thing so that it wont throw reference errors. I think so calculations occur using the metric values before the elements exist.
-  const selectionTemplate = (text) => {
-    return (`<div id="chart" style="display:none;">
+  const selectionTemplate = text => {
+    return `<div id="chart" style="display:none;">
     </div>
     <br />
     <button onclick="toggleGraph()">Toggle Graph</button>
@@ -1189,10 +1195,10 @@ leafletGraphControl.update = function() {
         <option selected value="sequential">Sequential</option>
         <option value="diverging">Diverging</option>
       </select>
-    </label>`);
-  }
+    </label>`;
+  };
   if (siteMetrics != null) {
-    // using back ticks 
+    // using back ticks
     this._div.innerHeight = selectionTemplate("");
   } else {
     this._div.innerHTML = selectionTemplate(` <option selected value="elev">elev</option>
@@ -1354,11 +1360,11 @@ function createLoadingMessage() {
 }
 
 function updateStatePopup(s) {
-  document.getElementById('state-header').textContent = s;
+  document.getElementById("state-header").textContent = s;
 }
 
 function disableStatePopup() {
-  let statePopup = document.getElementById('flex-container-state');
+  let statePopup = document.getElementById("flex-container-state");
   statePopup.style.display = "none";
 }
 
