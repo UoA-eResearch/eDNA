@@ -23,9 +23,11 @@ const strongHeader = (h, s) => {
 };
 
 function checkFragment(f, species, site) {
-  var ampIndex = f.indexOf("&");
-  var ltIndex = f.indexOf("<");
-  var gtIndex = f.indexOf(">");
+  let ampIndex = f.indexOf("&");
+  let ltIndex = f.indexOf("<");
+  let gtIndex = f.indexOf(">");
+  // TEST: trying to add an equivalence evaluator:
+  let eqIndex = f.indexOf("=");
   //Splits if ampersand or greater than found, recursively calls the split string.
   // When no &'s left return filters results
   if (ampIndex > 0) {
@@ -44,6 +46,12 @@ function checkFragment(f, species, site) {
     var left = f.substring(0, gtIndex).trim();
     var right = f.substring(gtIndex + 1).trim();
     if (site[left] > right) {
+      return true;
+    }
+  } else if (eqIndex > 0) {
+    var left = f.substring(0, eqIndex).trim();
+    var right = f.substring(eqIndex + 1).trim();
+    if (site[left] == right) {
       return true;
     }
   } else {
@@ -287,6 +295,7 @@ function handleResults(results, meta) {
     }
   });
   $("#filter").change(function() {
+    console.log(this);
     window.location.hash = encodeURIComponent($(this).val());
     var filters = $(this).select2("data");
     //note: need to change it so siteweights are everywhere at a fixed lonlat.
