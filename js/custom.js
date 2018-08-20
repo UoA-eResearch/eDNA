@@ -26,7 +26,6 @@ function checkFragment(f, species, site) {
   let ampIndex = f.indexOf("&");
   let ltIndex = f.indexOf("<");
   let gtIndex = f.indexOf(">");
-  // TEST: trying to add an equivalence evaluator:
   let eqIndex = f.indexOf("=");
   //Splits if ampersand or greater than found, recursively calls the split string.
   // When no &'s left return filters results
@@ -295,7 +294,6 @@ function handleResults(results, meta) {
     }
   });
   $("#filter").change(function() {
-    console.log(this);
     window.location.hash = encodeURIComponent($(this).val());
     var filters = $(this).select2("data");
     //note: need to change it so siteweights are everywhere at a fixed lonlat.
@@ -314,6 +312,7 @@ function handleResults(results, meta) {
     }
 
     //Where the results are generated. Currently in heatmap form.
+    // TODO: move heat layer into drawgrid or something so it updates even when it's inactive.
     if (!window.heat) window.heat = L.heatLayer(latlngs); //.addTo(map);
     heatLayerGroup.clearLayers();
     heatLayerGroup.addLayer(window.heat);
