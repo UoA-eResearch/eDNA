@@ -276,7 +276,8 @@ function handleResults(results, meta) {
     placeholder: "Type to filter by classification and metadata",
     multiple: true,
     allowClear: true,
-    data: getFilterData(),
+    data: [],
+    // data: getFilterData(),
     tags: true,
     createTag: function(params) {
       //console.log(params);
@@ -295,6 +296,7 @@ function handleResults(results, meta) {
   });
   $("#filter").change(function() {
     window.location.hash = encodeURIComponent($(this).val());
+    getSuggestions(window.location.hash);
     var filters = $(this).select2("data");
     //note: need to change it so siteweights are everywhere at a fixed lonlat.
     var siteWeights = getSiteWeights(filters);
@@ -324,6 +326,55 @@ function handleResults(results, meta) {
     $("#filter").val(hashComponents);
   }
   $("#filter").trigger("change");
+}
+
+function getSuggestions(q) {
+  // remove the hash
+  q = q.substring(1);
+  console.log(q);
+  console.log("getting suggestions");
+  fetch("http://localhost:8000/edna/api/filter-options?q=" + q).then(
+    response => {
+      response.json().then(result => {
+        let data = result.data;
+        // console.log(data);
+        let index = 0;
+        // TODO: make this smartly iterate the data array then the elements so it's a nested map instead of 2 maps. slightly better readability.
+        select_taxons = data.taxonomy_options.map(taxon => {
+          option = {
+            id: taxon,
+            text: taxon
+          };
+          index++;
+          return option;
+        });
+        select_contexts = data.context_options.map(context => {
+          option = {
+            // TODO: add value functionality
+            id: index,
+            text: context
+          };
+          index++;
+          return option;
+        });
+        groupedOptions = [
+          {
+            text: "Taxonomic",
+            children: select_taxons
+          },
+          {
+            text: "Contextual",
+            children: select_contexts
+          }
+        ];
+        console.log(groupedOptions);
+        $("#filter").select2({
+          data: groupedOptions
+        });
+        return groupedOptions;
+      });
+    }
+  );
 }
 
 /**
