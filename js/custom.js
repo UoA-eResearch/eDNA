@@ -293,9 +293,12 @@ function handleResults(results, meta) {
     }
   });
   $("#filter").change(function() {
-    // TEST: re-routing the change to go through the new change function being made.
     window.location.hash = encodeURIComponent($(this).val());
     var filters = $(this).select2("data");
+    // TEST: re-routing the change to go through the new change function being made.
+    fetchAbundances(filters);
+    // TEST:END:
+
     //note: need to change it so siteweights are everywhere at a fixed lonlat.
     var siteWeights = getSiteWeights(filters);
     var maxWeight = 0;
@@ -378,8 +381,8 @@ function fetchFilterData(q) {
 /**
  * Use filter params to request abundance api and handle response.
  */
-function fetchAbundances(query) {
-  console.log(object);
+function fetchAbundances(q) {
+  console.log(q);
 }
 
 /**
