@@ -345,7 +345,8 @@ function fetchFilterData(q) {
       select_taxons = data.taxonomy_options.map(taxon => {
         option = {
           id: taxon,
-          text: taxon
+          text: taxon,
+          group: "taxon"
         };
         index++;
         return option;
@@ -354,7 +355,8 @@ function fetchFilterData(q) {
         option = {
           // TODO: add value functionality
           id: index,
-          text: context
+          text: context,
+          group: "context"
         };
         index++;
         return option;
@@ -381,8 +383,11 @@ function fetchFilterData(q) {
 /**
  * Use filter params to request abundance api and handle response.
  */
-function fetchAbundances(q) {
-  console.log(q);
+function fetchAbundances(params) {
+  console.log(params);
+  params.map(param => {
+    console.log(param);
+  });
 }
 
 /**
