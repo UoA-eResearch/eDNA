@@ -276,17 +276,15 @@ function handleResults(results, meta) {
     placeholder: "Type to filter by classification and metadata",
     multiple: true,
     allowClear: true,
-    data: [],
+    data: fetchFilterData(),
     // data: getFilterData(),
     tags: true,
     createTag: function(params) {
       //console.log(params);
       var term = $.trim(params.term);
-
       if (term === "") {
         return null;
       }
-
       return {
         id: term,
         text: term,
@@ -295,8 +293,8 @@ function handleResults(results, meta) {
     }
   });
   $("#filter").change(function() {
+    // TEST: re-routing the change to go through the new change function being made.
     window.location.hash = encodeURIComponent($(this).val());
-    getSuggestions(window.location.hash);
     var filters = $(this).select2("data");
     //note: need to change it so siteweights are everywhere at a fixed lonlat.
     var siteWeights = getSiteWeights(filters);
@@ -328,53 +326,60 @@ function handleResults(results, meta) {
   $("#filter").trigger("change");
 }
 
-function getSuggestions(q) {
-  // remove the hash
-  q = q.substring(1);
-  console.log(q);
-  console.log("getting suggestions");
-  fetch("http://localhost:8000/edna/api/filter-options?q=" + q).then(
-    response => {
-      response.json().then(result => {
-        let data = result.data;
-        // console.log(data);
-        let index = 0;
-        // TODO: make this smartly iterate the data array then the elements so it's a nested map instead of 2 maps. slightly better readability.
-        select_taxons = data.taxonomy_options.map(taxon => {
-          option = {
-            id: taxon,
-            text: taxon
-          };
-          index++;
-          return option;
-        });
-        select_contexts = data.context_options.map(context => {
-          option = {
-            // TODO: add value functionality
-            id: index,
-            text: context
-          };
-          index++;
-          return option;
-        });
-        groupedOptions = [
-          {
-            text: "Taxonomic",
-            children: select_taxons
-          },
-          {
-            text: "Contextual",
-            children: select_contexts
-          }
-        ];
-        console.log(groupedOptions);
-        $("#filter").select2({
-          data: groupedOptions
-        });
-        return groupedOptions;
+/**
+ * Requests all the taxon entries + metadata fields from the OTU and SampleContextual tables on the server. Places the options in the filter.
+ * @param {*} q
+ */
+function fetchFilterData(q) {
+  console.log("Requesting select options.");
+  // TODO: If more scalability needed, add pagination and as-you-type suggestions.
+  fetch("http://localhost:8000/edna/api/filter-options?q=").then(response => {
+    response.json().then(result => {
+      let data = result.data;
+      // console.log(data);
+      let index = 0;
+      // TODO: make this smartly iterate the data array then the elements so it's a nested map instead of 2 maps. slightly better readability.
+      select_taxons = data.taxonomy_options.map(taxon => {
+        option = {
+          id: taxon,
+          text: taxon
+        };
+        index++;
+        return option;
       });
-    }
-  );
+      select_contexts = data.context_options.map(context => {
+        option = {
+          // TODO: add value functionality
+          id: index,
+          text: context
+        };
+        index++;
+        return option;
+      });
+      groupedOptions = [
+        {
+          text: "Taxonomic",
+          children: select_taxons
+        },
+        {
+          text: "Contextual",
+          children: select_contexts
+        }
+      ];
+      console.log(groupedOptions);
+      $("#filter").select2({
+        data: groupedOptions
+      });
+      return groupedOptions;
+    });
+  });
+}
+
+/**
+ * Use filter params to request abundance api and handle response.
+ */
+function fetchAbundances(query) {
+  console.log(object);
 }
 
 /**
