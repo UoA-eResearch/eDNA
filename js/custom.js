@@ -384,24 +384,28 @@ function fetchFilterData(q) {
  * Use filter params to request abundance api and handle response.
  */
 const API_URLS = {
-  filtered_abundance: "http://localhost:8000/edna/api/abundance?term=",
-  filtered_meta: "http://localhost:8000/edna/api/metadata?term="
+  filtered_abundance:
+    "https://edna.nectar.auckland.ac.nz/edna/api/abundance?term=",
+  filtered_meta: "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=",
+  ordered_sampleotu:
+    "https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered"
 };
 
 function fetchAbundances(params) {
   console.log(params);
   // result needs to return all the abundances of the taxonomies in a query as well as the sites and accumulations of them.
   results = [];
-  // ?: Better to make it all into one big query set to individual request to the database
-  // ?: One request = less over-head and less TTFB?
+  // TODO: Make into one query_set that's then sent to the server and process and returned in one go.
   params.map(param => {
     // TEMP: Just testing otu assuming name terms at the moment.
     console.log(API_URLS.filtered_abundance + param.id);
-    fetch(API_URLS.filtered_abundance + params.id).then(response => {
-      response.json().then(json => {
+    fetch(API_URLS.filtered_abundance + param.id)
+      .then(response => response.json())
+      .then(json => {
+        // console.log(json.data);
+
         console.log(json);
       });
-    });
 
     // TODO: handle params categorically.
     // if (param.group == "taxon") {
@@ -1419,21 +1423,14 @@ function createGraph() {
 function nestedResponse() {
   // Returns the data as nested dictionaries. Json is much larger than the light request but processes server side rather than client side.
   try {
-    console.time();
-    abundanceRequest = new Request(
-      "https://edna.nectar.auckland.ac.nz/edna/api/abundance?term="
-    );
+    abundanceRequest = new Request(API_URLS.filtered_abundance);
     fetch(abundanceRequest).then(response => {
       response.json().then(abundanceResults => {
-        console.timeEnd();
         abundanceData = abundanceResults;
-        metadataRequest = new Request(
-          "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term="
-        );
+        metadataRequest = new Request(API_URLS.filtered_meta);
         fetch(metadataRequest).then(metaResponse => {
           metaResponse.json().then(metaResults => {
             siteData = metaResults;
-            console.log(abundanceData);
             handleResults(abundanceData, siteData);
             leafletGraphControl.update(siteMetrics);
           });
@@ -1469,53 +1466,48 @@ function disableStatePopup() {
 function lightResponse() {
   // requires ordering of the abundances needs to be otu_id ASC, sample_id ASC
   createLoadingMessage();
-  fetch("https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered").then(
-    response => {
-      response.json().then(result => {
-        data = result.data;
-        abundance_dict = {
-          data: []
+  fetch(API_URLS.ordered_sampleotu).then(response => {
+    response.json().then(result => {
+      data = result.data;
+      abundance_dict = {
+        data: []
+      };
+      abundance_dict.data = data.otus.map(otu => {
+        otuEntry = {
+          "": otu
         };
-        abundance_dict.data = data.otus.map(otu => {
-          otuEntry = {
-            "": otu
-          };
-          data.sites.map(site => {
-            otuEntry[site] = 0;
-          });
-          return otuEntry;
+        data.sites.map(site => {
+          otuEntry[site] = 0;
         });
-        // tuple structure: otuid, sampleid, count.
-        for (let tuple in data.abundances) {
-          let otu_index = data.abundances[tuple][0];
-          let sample = data.sites[data.abundances[tuple][1]];
-          let value = data.abundances[tuple][2];
-          try {
-            abundance_dict.data[otu_index - 1][sample] = value;
-          } catch {
-            console.log(
-              "otu index: %s, sample key: %s, value: %d",
-              otu_index,
-              sample,
-              value
-            );
-          }
+        return otuEntry;
+      });
+      // tuple structure: otuid, sampleid, count.
+      for (let tuple in data.abundances) {
+        let otu_index = data.abundances[tuple][0];
+        let sample = data.sites[data.abundances[tuple][1]];
+        let value = data.abundances[tuple][2];
+        try {
+          abundance_dict.data[otu_index - 1][sample] = value;
+        } catch {
+          console.log(
+            "Error at otu index: %s, sample key: %s, value: %d",
+            otu_index,
+            sample,
+            value
+          );
         }
-        console.timeEnd();
-        disableStatePopup();
-        metadataRequest = new Request(
-          "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term="
-        );
-        fetch(metadataRequest).then(metaResponse => {
-          metaResponse.json().then(metaResults => {
-            siteData = metaResults;
-            handleResults(abundance_dict, siteData);
-            leafletGraphControl.update(siteMetrics);
-          });
+      }
+      disableStatePopup();
+      metadataRequest = new Request(API_URLS.filtered_meta);
+      fetch(metadataRequest).then(metaResponse => {
+        metaResponse.json().then(metaResults => {
+          siteData = metaResults;
+          handleResults(abundance_dict, siteData);
+          leafletGraphControl.update(siteMetrics);
         });
       });
-    }
-  );
+    });
+  });
 }
 
 function loadFromFile() {
