@@ -1,3 +1,11 @@
+const API_URLS = {
+  filtered_abundance:
+    "https://edna.nectar.auckland.ac.nz/edna/api/abundance?term=",
+  filtered_meta: "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=",
+  ordered_sampleotu:
+    "https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered"
+};
+
 function round(x, dp) {
   var factor = Math.pow(10, dp);
   var tmp = x * factor;
@@ -343,9 +351,10 @@ function fetchFilterData(q) {
       let index = 0;
       // TODO: make this smartly iterate the data array then the elements so it's a nested map instead of 2 maps. slightly better readability.
       select_taxons = data.taxonomy_options.map(taxon => {
+        // return structure = { pk, otu code }
         option = {
-          id: taxon,
-          text: taxon,
+          id: taxon[0],
+          text: taxon[1],
           group: "taxon"
         };
         index++;
@@ -383,40 +392,28 @@ function fetchFilterData(q) {
 /**
  * Use filter params to request abundance api and handle response.
  */
-const API_URLS = {
-  filtered_abundance:
-    "https://edna.nectar.auckland.ac.nz/edna/api/abundance?term=",
-  filtered_meta: "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=",
-  ordered_sampleotu:
-    "https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered"
-};
-
 function fetchAbundances(params) {
   console.log(params);
   // result needs to return all the abundances of the taxonomies in a query as well as the sites and accumulations of them.
   results = [];
-  // TODO: Make into one query_set that's then sent to the server and process and returned in one go.
+  // TODO: Combined into query batch to be sent as one
   params.map(param => {
     // TEMP: Just testing otu assuming name terms at the moment.
     console.log(API_URLS.filtered_abundance + param.id);
     fetch(API_URLS.filtered_abundance + param.id)
       .then(response => response.json())
       .then(json => {
-        // console.log(json.data);
-
-        console.log(json);
+        // return json.data;
+        results.push(json.data);
+        console.log(results);
       });
+    //FIXME: need to avoid getting duplicate results too.
+    // TODO: handle params categorically using param.group props.
 
-    // TODO: handle params categorically.
-    // if (param.group == "taxon") {
-    //   console.log("this is a taxonomic param");
-    //   search_term = param.id;
-    // }
-    // if (param.group == "context") {
-    // work out the sites that meet the meta result
-    // get every abundance within those sites.
-    // maybe make a fast access table with the total abundance of every site.
-    // }
+    // TODO: clean up the param strings
+    // TODO: figure out the otu id's to be included in the sampleOTU set
+    // TODO: Get all the abundances containing any of the OTU ids generated.
+    // TODO:TEMP: get all the sites (for now)
   });
 }
 
