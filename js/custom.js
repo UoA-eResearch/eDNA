@@ -88,7 +88,7 @@ function getSiteWeights(filters) {
         var site = window.meta[taxon_column];
         //declare bool defaulting to false
         var match = false;
-        //if no filters it will always be match
+        //if empty filter then match for all sites.
         if (filters.length == 0) match = true;
         //loops through the filters from the <select> dropdown html element.
         for (var j in filters) {
