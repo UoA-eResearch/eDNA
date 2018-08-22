@@ -383,10 +383,36 @@ function fetchFilterData(q) {
 /**
  * Use filter params to request abundance api and handle response.
  */
+const API_URLS = {
+  filtered_abundance: "http://localhost:8000/edna/api/abundance?term=",
+  filtered_meta: "http://localhost:8000/edna/api/metadata?term="
+};
+
 function fetchAbundances(params) {
   console.log(params);
+  // result needs to return all the abundances of the taxonomies in a query as well as the sites and accumulations of them.
+  results = [];
+  // ?: Better to make it all into one big query set to individual request to the database
+  // ?: One request = less over-head and less TTFB?
   params.map(param => {
-    console.log(param);
+    // TEMP: Just testing otu assuming name terms at the moment.
+    console.log(API_URLS.filtered_abundance + param.id);
+    fetch(API_URLS.filtered_abundance + params.id).then(response => {
+      response.json().then(json => {
+        console.log(json);
+      });
+    });
+
+    // TODO: handle params categorically.
+    // if (param.group == "taxon") {
+    //   console.log("this is a taxonomic param");
+    //   search_term = param.id;
+    // }
+    // if (param.group == "context") {
+    // work out the sites that meet the meta result
+    // get every abundance within those sites.
+    // maybe make a fast access table with the total abundance of every site.
+    // }
   });
 }
 
