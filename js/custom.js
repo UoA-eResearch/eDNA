@@ -275,6 +275,7 @@ function getFilterData() {
  */
 function handleResults(results, meta) {
   // bind sampleotu and meta to window obj
+  console.log(window.results);
   window.results = results;
   // Restructures site data to use site code as key
   var metaDict = {};
@@ -428,10 +429,13 @@ function fetchAbundances(params) {
 
 function newSiteWeights(abundances) {
   // currently returns nested results
-  console.log(abundances);
-  console.log(window.taxonLookup);
-  console.log(window.taxonLookup[abundances[0][0]]);
-  console.log(window.meta);
+
+  //LOGS
+  // console.log(abundances);
+  // console.log(window.taxonLookup);
+  // console.log(window.taxonLookup[abundances[0][0]]);
+  // console.log(window.meta);
+
   // already have all the taxon options from the taxonomy options.
   // already should already have all the sites (I think?)
   window.siteLookup = {};
@@ -443,6 +447,8 @@ function newSiteWeights(abundances) {
     })
   );
   console.log(window.siteLookup);
+
+  //handleResults won't create metadata correct while we're using the otu pk rather than term at the moment
 }
 
 /**
