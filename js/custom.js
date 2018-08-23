@@ -429,8 +429,12 @@ function newSiteWeights(abundances) {
   console.log(abundances);
   console.log(window.taxonLookup);
   console.log(window.taxonLookup[abundances[0][0]]);
+  console.log(window.meta);
   // already have all the taxon options from the taxonomy options.
   // already should already have all the sites (I think?)
+  fetch("http://localhost:8000/edna/api/metadata?term=").then(response => {
+    console.log(response);
+  });
 }
 
 /**
