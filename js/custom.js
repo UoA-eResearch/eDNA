@@ -1,9 +1,10 @@
 const API_URLS = {
   filtered_abundance:
-    "https://edna.nectar.auckland.ac.nz/edna/api/abundance?term=",
+    "https://edna.nectar.auckland.ac.nz/edna/api/abundance?id=",
   filtered_meta: "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=",
   ordered_sampleotu:
-    "https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered"
+    "https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered",
+  test_sample_otu_pk: "http://localhost:8000/edna/api/abundance?id="
 };
 
 function round(x, dp) {
@@ -80,9 +81,9 @@ function getSiteWeights(filters) {
   siteMetrics = {};
   //loop through parsed global result data.
   for (var i in window.results.data) {
-    var taxon_row = window.results.data[i];
-    var taxon_name = taxon_row[""];
-    for (var taxon_column in taxon_row) {
+    let taxon_row = window.results.data[i];
+    let taxon_name = taxon_row[""];
+    for (let taxon_column in taxon_row) {
       if (taxon_column != "") {
         // site contains the full meta row for a site.
         var site = window.meta[taxon_column];
@@ -269,17 +270,17 @@ function getFilterData() {
  * @param {*} meta
  */
 function handleResults(results, meta) {
-  //creates global var results
+  // bind sampleotu and meta to window obj
   window.results = results;
-  //loops through meta data passed in.
+  // Restructures site data to use site code as key
   var metaDict = {};
   for (var i in meta.data) {
     var site = meta.data[i];
     metaDict[site["site"]] = site;
   }
-  //makes meta dictionary global
+  // bind sties to window obj
   window.meta = metaDict;
-  //instantiates the filter search bar
+  // instantiates the filter search bar
   $("#filter").select2({
     placeholder: "Type to filter by classification and metadata",
     multiple: true,
@@ -321,7 +322,6 @@ function handleResults(results, meta) {
       var siteMeta = window.meta[site];
       latlngs.push([siteMeta.y, siteMeta.x, siteWeights[site]]);
     }
-
     //Where the results are generated. Currently in heatmap form.
     // TODO: move heat layer into drawgrid or something so it updates even when it's inactive.
     if (!window.heat) window.heat = L.heatLayer(latlngs); //.addTo(map);
@@ -399,22 +399,29 @@ function fetchAbundances(params) {
   // TODO: Combined into query batch to be sent as one
   params.map(param => {
     // TEMP: Just testing otu assuming name terms at the moment.
-    console.log(API_URLS.filtered_abundance + param.id);
-    fetch(API_URLS.filtered_abundance + param.id)
+    let url = API_URLS.test_sample_otu_pk + param.id;
+    console.log(url);
+    fetch(url)
       .then(response => response.json())
       .then(json => {
         // return json.data;
-        results.push(json.data);
-        console.log(results);
+        json.data.map(sampleOtu => {
+          results.push(sampleOtu);
+        });
+        newSiteWeights(results);
       });
-    //FIXME: need to avoid getting duplicate results too.
+    // FIXME: need to avoid getting duplicate results too.
     // TODO: handle params categorically using param.group props.
-
     // TODO: clean up the param strings
     // TODO: figure out the otu id's to be included in the sampleOTU set
     // TODO: Get all the abundances containing any of the OTU ids generated.
     // TODO:TEMP: get all the sites (for now)
   });
+}
+
+function newSiteWeights(abundances) {
+  // currently returns nested results
+  console.log(abundances);
 }
 
 /**
