@@ -8,7 +8,8 @@ const API_URLS = {
   ordered_sampleotu: nectar_base_url + "sample_otu_ordered",
   test_sample_otu_pk: local_base_url + "abundance?id=",
   test_nested_abundances: local_base_url + "abundance?id=",
-  local_metadata_term: local_base_url + "metadata?term="
+  local_metadata_term: local_base_url + "metadata?term=",
+  local_filter_options: local_base_url + "filter-options?q="
 };
 
 function round(x, dp) {
@@ -349,7 +350,7 @@ function handleResults(results, meta) {
 function fetchFilterData(q) {
   console.log("Requesting dropdown suggestions from server.");
   // TODO: If more scalability needed, add pagination and as-you-type suggestions.
-  fetch("http://localhost:8000/edna/api/filter-options?q=").then(response => {
+  fetch(API_URLS.local_filter_options).then(response => {
     response.json().then(result => {
       let data = result.data;
       // console.log(data);
@@ -401,6 +402,7 @@ function fetchFilterData(q) {
  * Use filter params to request abundance api and handle response.
  */
 function fetchAbundances(params) {
+  console.log("fetching abundances using filter data");
   console.log(params);
   // result needs to return all the abundances of the taxonomies in a query as well as the sites and accumulations of them.
   results = [];
@@ -446,9 +448,22 @@ function newSiteWeights(abundances) {
       });
     })
   );
-  console.log(window.siteLookup);
-
   //handleResults won't create metadata correct while we're using the otu pk rather than term at the moment
+  //note: sampleOtu structure = {otu pk, sample pk, count }
+  console.time();
+  // construct the empty array
+  let res = {};
+  abundances.map(a => {
+    res[a[0]] = {};
+  });
+  abundances.map(a => {
+    res[a[0]][a[1]] = 0;
+  });
+  abundances.map(a => {
+    res[a[0]][a[1]] += a[2];
+  });
+  console.log(res);
+  console.timeEnd();
 }
 
 /**
