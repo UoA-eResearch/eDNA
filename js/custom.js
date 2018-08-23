@@ -343,7 +343,7 @@ function handleResults(results, meta) {
  * @param {*} q
  */
 function fetchFilterData(q) {
-  console.log("Requesting select options.");
+  console.log("Requesting dropdown suggestions from server.");
   // TODO: If more scalability needed, add pagination and as-you-type suggestions.
   fetch("http://localhost:8000/edna/api/filter-options?q=").then(response => {
     response.json().then(result => {
@@ -351,17 +351,20 @@ function fetchFilterData(q) {
       // console.log(data);
       let index = 0;
       // TODO: make this smartly iterate the data array then the elements so it's a nested map instead of 2 maps. slightly better readability.
-      select_taxons = data.taxonomy_options.map(taxon => {
+      window.taxonLookup = {};
+      let taxonOptions = data.taxonomy_options.map(taxon => {
         // return structure = { pk, otu code }
-        option = {
+        let option = {
           id: taxon[0],
           text: taxon[1],
           group: "taxon"
         };
         index++;
+        window.taxonLookup[taxon[0]] = taxon[1];
         return option;
       });
-      select_contexts = data.context_options.map(context => {
+
+      let contextOptions = data.context_options.map(context => {
         option = {
           // TODO: add value functionality
           id: index,
@@ -371,14 +374,15 @@ function fetchFilterData(q) {
         index++;
         return option;
       });
+      window.siteLookup = contextOptions;
       groupedOptions = [
         {
           text: "Taxonomic",
-          children: select_taxons
+          children: taxonOptions
         },
         {
           text: "Contextual",
-          children: select_contexts
+          children: contextOptions
         }
       ];
       console.log(groupedOptions);
@@ -423,6 +427,10 @@ function fetchAbundances(params) {
 function newSiteWeights(abundances) {
   // currently returns nested results
   console.log(abundances);
+  console.log(window.taxonLookup);
+  console.log(window.taxonLookup[abundances[0][0]]);
+  // already have all the taxon options from the taxonomy options.
+  // already should already have all the sites (I think?)
 }
 
 /**
