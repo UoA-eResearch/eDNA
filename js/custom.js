@@ -1,13 +1,14 @@
+const local_base_url = "http://localhost:8000/edna/api/";
+const nectar_base_url = "https://edna.nectar.auckland.ac.nz/edna/api/";
+// change active depending on the situation.
+const active_base_url = local_base_url;
 const API_URLS = {
-  local_base_url: "http://localhost:8000/edna/api/",
-  nectar_base_url: "https://edna.nectar.auckland.ac.nz/edna/api/",
-  filtered_abundance:
-    "https://edna.nectar.auckland.ac.nz/edna/api/abundance?id=",
-  filtered_meta: "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=",
-  ordered_sampleotu:
-    "https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered",
-  test_sample_otu_pk: "http://localhost:8000/edna/api/abundance?id=",
-  test_nested_abundances: "http://localhost:8000/edna/api/abundance?id="
+  filtered_abundance: nectar_base_url + "abundance?id=",
+  filtered_meta: nectar_base_url + "metadata?term=",
+  ordered_sampleotu: nectar_base_url + "sample_otu_ordered",
+  test_sample_otu_pk: local_base_url + "abundance?id=",
+  test_nested_abundances: local_base_url + "abundance?id=",
+  local_metadata_term: local_base_url + "metadata?term="
 };
 
 function round(x, dp) {
@@ -434,7 +435,7 @@ function newSiteWeights(abundances) {
   // already have all the taxon options from the taxonomy options.
   // already should already have all the sites (I think?)
   window.siteLookup = {};
-  fetch("http://localhost:8000/edna/api/metadata?term=").then(response =>
+  fetch(API_URLS.local_metadata_term).then(response =>
     response.json().then(sites => {
       sites.data.map(site => {
         window.siteLookup[site.id] = site.site;
