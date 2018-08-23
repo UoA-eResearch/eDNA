@@ -4,7 +4,8 @@ const API_URLS = {
   filtered_meta: "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=",
   ordered_sampleotu:
     "https://edna.nectar.auckland.ac.nz/edna/api/sample_otu_ordered",
-  test_sample_otu_pk: "http://localhost:8000/edna/api/abundance?id="
+  test_sample_otu_pk: "http://localhost:8000/edna/api/abundance?id=",
+  test_nested_abundances: "http://localhost:8000/edna/api/abundance?id="
 };
 
 function round(x, dp) {
