@@ -1,4 +1,6 @@
 const API_URLS = {
+  local_base_url: "http://localhost:8000/edna/api/",
+  nectar_base_url: "https://edna.nectar.auckland.ac.nz/edna/api/",
   filtered_abundance:
     "https://edna.nectar.auckland.ac.nz/edna/api/abundance?id=",
   filtered_meta: "https://edna.nectar.auckland.ac.nz/edna/api/metadata?term=",
@@ -374,7 +376,6 @@ function fetchFilterData(q) {
         index++;
         return option;
       });
-      window.siteLookup = contextOptions;
       groupedOptions = [
         {
           text: "Taxonomic",
@@ -432,9 +433,15 @@ function newSiteWeights(abundances) {
   console.log(window.meta);
   // already have all the taxon options from the taxonomy options.
   // already should already have all the sites (I think?)
-  fetch("http://localhost:8000/edna/api/metadata?term=").then(response => {
-    console.log(response);
-  });
+  window.siteLookup = {};
+  fetch("http://localhost:8000/edna/api/metadata?term=").then(response =>
+    response.json().then(sites => {
+      sites.data.map(site => {
+        window.siteLookup[site.id] = site.site;
+      });
+    })
+  );
+  console.log(window.siteLookup);
 }
 
 /**
