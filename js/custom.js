@@ -311,7 +311,7 @@ function handleResults(results, meta) {
     window.location.hash = encodeURIComponent($(this).val());
     var filters = $(this).select2("data");
     // TEST: re-routing the change to go through the new change function being made.
-    fetchAbundances(filters);
+    fetchSiteWeights(filters);
     console.log("fetching abundances complete.");
     // TEST:END:
 
@@ -329,7 +329,7 @@ function handleResults(results, meta) {
       var siteMeta = window.meta[site];
       latlngs.push([siteMeta.y, siteMeta.x, siteWeights[site]]);
     }
-    //Where the results are generated. Currently in heatmap form.
+    // Where the results are generated. Currently in heatmap form.
     // TODO: move heat layer into drawgrid or something so it updates even when it's inactive.
     if (!window.heat) window.heat = L.heatLayer(latlngs); //.addTo(map);
     heatLayerGroup.clearLayers();
@@ -402,12 +402,11 @@ function fetchFilterData(q) {
 /**
  * Use filter params to request abundance api and handle response.
  */
-function fetchAbundances(params) {
+function fetchSiteWeights(params) {
   console.log("Fetching abundances");
   console.log(params);
-  // result needs to return all the abundances of the taxonomies in a query as well as the sites and accumulations of them.
   results = [];
-  // TODO: Combined into query batch to be sent as one
+  // if there are no params the map function will not run so this allows it to run a blank query.
   if (params.length == 0) {
     params = [
       {
@@ -416,6 +415,7 @@ function fetchAbundances(params) {
     ];
   }
   params.map(param => {
+    // TODO: Combined into query batch to be sent as one
     // TEMP: Just testing otu assuming name terms at the moment.
     let url = API_URLS.test_sample_otu_pk + param.id;
     console.log(url);
@@ -426,7 +426,7 @@ function fetchAbundances(params) {
         json.data.map(sampleOtu => {
           results.push(sampleOtu);
         });
-        newSiteWeights(results);
+        restructureSampleOtuResponse(results);
       });
     // FIXME: need to avoid getting duplicate results too.
     // TODO: handle params categorically using param.group props.
@@ -437,34 +437,24 @@ function fetchAbundances(params) {
   });
 }
 
-function newSiteWeights(abundances) {
-  // currently returns nested results
-
-  //LOGS
-  // console.log(abundances);
-  // console.log(window.taxonLookup);
-  // console.log(window.taxonLookup[abundances[0][0]]);
-  // console.log(window.meta);
-
-  // already have all the taxon options from the taxonomy options.
-  // already should already have all the sites (I think?)
-  // window.siteLookup = {};
+function restructureSampleOtuResponse(abundances) {
+  // TODO: Create the site lookup earlier than here or move that and the window one into a separate function.
   let siteLookup = {};
-  fetch(API_URLS.local_metadata_term)
-    .then(response =>
+  let siteWeights = fetch(API_URLS.local_metadata_term)
+    .then(response => {
       response.json().then(sites => {
         sites.data.map(site => {
           siteLookup[site.id] = site.site;
         });
-      })
-    )
+      });
+    })
     .then(() => {
       // TEMP: 1. iteratively add the nesting, then convert the keys separate.
       console.log(siteLookup);
       console.time();
       // construct the empty array
       let nestedResults = {};
-      // sampleOtu structure = {otu pk, sample pk, count }
+      // sampleOtu structure = { otu pk, sample pk, count }
       abundances.map(a => {
         let taxonName = window.taxonLookup[a[0]];
         // if no otu make a blank otu object.
@@ -484,6 +474,10 @@ function newSiteWeights(abundances) {
       console.log(nestedResults);
       console.timeEnd();
     });
+  // siteWeights.then(idk => {
+  // console.log(idk);
+  // });
+
   //handleResults won't create metadata correct while we're using the otu pk rather than term at the moment
 
   // TEMP: 2. Add all the nesting from an instance and convert all at once.
