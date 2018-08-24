@@ -439,14 +439,20 @@ function fetchSiteWeights(params) {
 
 function restructureSampleOtuResponse(abundances) {
   // TODO: Create the site lookup earlier than here or move that and the window one into a separate function.
+  // separate dictionary by sitecode used to contain all the metadata.
+  window.siteData = {};
   const createSiteLookup = fetch(API_URLS.local_metadata_term).then(
     response => {
       let siteLookup = {};
       response.json().then(sitesJson => {
         sitesJson.data.map(site => {
-          siteLookup[site.id] = site.site;
+          // adding to site lookup table
+          siteLookup[site.id] = site;
+          // adding to site data dictionary
+          window.siteData[site.site] = site;
         });
       });
+      // binding to window for use when cell aggregating and sorting.
       return siteLookup;
     }
   );
@@ -458,7 +464,7 @@ function restructureSampleOtuResponse(abundances) {
       if (!(taxonName in nestedResults)) {
         nestedResults[taxonName] = {};
       }
-      let siteName = siteLookup[a[1]];
+      let siteName = siteLookup[a[1]].site;
       let value = a[2];
       if (!(siteName in nestedResults[taxonName])) {
         nestedResults[taxonName][siteName] = value;
@@ -501,6 +507,12 @@ function handleNestedResults(results) {
   }
   console.log(sumFrequency);
   console.log(siteAggregate);
+  // aggregate by cell
+  let cellAggregate = {};
+  for (let sKey in siteAggregate) {
+    console.log(window.siteData[sKey]);
+  }
+  // calculate where a site falls into
   console.timeEnd();
 }
 
