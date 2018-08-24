@@ -508,12 +508,9 @@ function handleNestedResults(results) {
   console.log(sumFrequency);
   console.log(siteAggregate);
   // aggregate by cell
-  let cellAggregate = {};
-  for (let sKey in siteAggregate) {
-    console.log(window.siteData[sKey]);
-  }
-  // calculate where a site falls into
-  console.timeEnd();
+
+  //need to get up grid parameters as they determine the cell keys.
+  // TODO: bring detail level to window or something similar.
 }
 
 /**
