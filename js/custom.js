@@ -439,48 +439,69 @@ function fetchSiteWeights(params) {
 
 function restructureSampleOtuResponse(abundances) {
   // TODO: Create the site lookup earlier than here or move that and the window one into a separate function.
-  let siteLookup = {};
-  let siteWeights = fetch(API_URLS.local_metadata_term)
-    .then(response => {
-      response.json().then(sites => {
-        sites.data.map(site => {
+  const createSiteLookup = fetch(API_URLS.local_metadata_term).then(
+    response => {
+      let siteLookup = {};
+      response.json().then(sitesJson => {
+        sitesJson.data.map(site => {
           siteLookup[site.id] = site.site;
         });
       });
-    })
-    .then(() => {
-      // TEMP: 1. iteratively add the nesting, then convert the keys separate.
-      console.log(siteLookup);
-      console.time();
-      // construct the empty array
-      let nestedResults = {};
-      // sampleOtu structure = { otu pk, sample pk, count }
-      abundances.map(a => {
-        let taxonName = window.taxonLookup[a[0]];
-        // if no otu make a blank otu object.
-        if (!(taxonName in nestedResults)) {
-          nestedResults[taxonName] = {};
-        }
-        // if no site name within taxon obj make a site and init the value
-        let siteName = siteLookup[a[1]];
-        if (!(siteName in nestedResults[taxonName])) {
-          let value = a[2];
-          nestedResults[taxonName][siteName] = value;
-        } else {
-          nestedResults[taxonName][siteName] += value;
-        }
-      });
-      // convert otu keys into otu name
-      console.log(nestedResults);
-      console.timeEnd();
+      return siteLookup;
+    }
+  );
+  let nestResults = createSiteLookup.then(siteLookup => {
+    let nestedResults = {};
+    abundances.map(a => {
+      let taxonName = window.taxonLookup[a[0]];
+      // if no otu make a blank otu object.
+      if (!(taxonName in nestedResults)) {
+        nestedResults[taxonName] = {};
+      }
+      let siteName = siteLookup[a[1]];
+      let value = a[2];
+      if (!(siteName in nestedResults[taxonName])) {
+        nestedResults[taxonName][siteName] = value;
+      } else {
+        nestedResults[taxonName][siteName] += value;
+      }
     });
-  // siteWeights.then(idk => {
-  // console.log(idk);
-  // });
-
+    return nestedResults;
+  });
+  nestResults.then(results => {
+    handleNestedResults(results);
+  });
   //handleResults won't create metadata correct while we're using the otu pk rather than term at the moment
-
   // TEMP: 2. Add all the nesting from an instance and convert all at once.
+}
+
+function handleNestedResults(results) {
+  // console.log(results);
+  let sumFrequency = 0;
+  let siteAggregate = {};
+  console.time();
+  for (let otuKey in results) {
+    let otu = results[otuKey];
+    for (let siteKey in otu) {
+      let abundance = otu[siteKey];
+      // not strictly necessary as the fetch API only returns non-zero abundances.
+      if (abundance > 0) {
+        sumFrequency++;
+      }
+      if (siteKey in siteAggregate) {
+        siteAggregate[siteKey].abundance += abundance;
+        siteAggregate[siteKey].richness++;
+      } else {
+        siteAggregate[siteKey] = {
+          abundance,
+          richness: 1
+        };
+      }
+    }
+  }
+  console.log(sumFrequency);
+  console.log(siteAggregate);
+  console.timeEnd();
 }
 
 /**
