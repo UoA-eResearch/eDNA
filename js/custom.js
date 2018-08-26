@@ -311,7 +311,7 @@ function handleResults(results, meta) {
     window.location.hash = encodeURIComponent($(this).val());
     var filters = $(this).select2("data");
     // TEST: re-routing the change to go through the new change function being made.
-    fetchSiteWeights(filters);
+    fetchSampleOtus(filters);
     console.log("fetching abundances complete.");
     // TEST:END:
 
@@ -402,7 +402,7 @@ function fetchFilterData(q) {
 /**
  * Use filter params to request abundance api and handle response.
  */
-function fetchSiteWeights(params) {
+function fetchSampleOtus(params) {
   console.log("Fetching abundances");
   console.log(params);
   results = [];
@@ -414,103 +414,37 @@ function fetchSiteWeights(params) {
       }
     ];
   }
-  params.map(param => {
-    // TODO: Combined into query batch to be sent as one
-    // TEMP: Just testing otu assuming name terms at the moment.
-    let url = API_URLS.test_sample_otu_pk + param.id;
-    console.log(url);
-    fetch(url)
-      .then(response => response.json())
-      .then(json => {
-        // return json.data;
-        json.data.map(sampleOtu => {
-          results.push(sampleOtu);
-        });
-        restructureSampleOtuResponse(results);
-      });
-    // FIXME: need to avoid getting duplicate results too.
-    // TODO: handle params categorically using param.group props.
-    // TODO: clean up the param strings
-    // TODO: figure out the otu id's to be included in the sampleOTU set
-    // TODO: Get all the abundances containing any of the OTU ids generated.
-    // TODO:TEMP: get all the sites (for now)
+
+  // iteratively build the url query
+  let url = API_URLS.test_sample_otu_pk;
+  params.map((param, index) => {
+    if (index == 0) {
+      url += param.id;
+    } else {
+      url += "&id=" + param.id;
+    }
   });
+  console.log(url);
+
+  // get the abundances
+  fetch(url)
+    .then(response => response.json())
+    .then(json => {
+      json.data.map(sampleOtu => {
+        // not sure I need to do mapping here.
+        // do something with the abundances.
+        // get a list of unique site ids and then query for the full metadata of the sites from that result.
+      });
+      restructureSampleOtuResponse(results);
+    });
+  // FIXME: need to avoid getting duplicate results too.
+  // TODO: handle params categorically using param.group props.
 }
 
-function restructureSampleOtuResponse(abundances) {
-  // TODO: Create the site lookup earlier than here or move that and the window one into a separate function.
-  // separate dictionary by sitecode used to contain all the metadata.
-  window.siteData = {};
-  const createSiteLookup = fetch(API_URLS.local_metadata_term).then(
-    response => {
-      let siteLookup = {};
-      response.json().then(sitesJson => {
-        sitesJson.data.map(site => {
-          // adding to site lookup table
-          siteLookup[site.id] = site;
-          // adding to site data dictionary
-          window.siteData[site.site] = site;
-        });
-      });
-      // binding to window for use when cell aggregating and sorting.
-      return siteLookup;
-    }
-  );
-  let nestResults = createSiteLookup.then(siteLookup => {
-    let nestedResults = {};
-    abundances.map(a => {
-      let taxonName = window.taxonLookup[a[0]];
-      // if no otu make a blank otu object.
-      if (!(taxonName in nestedResults)) {
-        nestedResults[taxonName] = {};
-      }
-      let siteName = siteLookup[a[1]].site;
-      let value = a[2];
-      if (!(siteName in nestedResults[taxonName])) {
-        nestedResults[taxonName][siteName] = value;
-      } else {
-        nestedResults[taxonName][siteName] += value;
-      }
-    });
-    return nestedResults;
-  });
-  nestResults.then(results => {
-    handleNestedResults(results);
-  });
-  //handleResults won't create metadata correct while we're using the otu pk rather than term at the moment
-  // TEMP: 2. Add all the nesting from an instance and convert all at once.
-}
+function restructureSampleOtuResponse(abundances) {}
 
 function handleNestedResults(results) {
-  // console.log(results);
-  let sumFrequency = 0;
-  let siteAggregate = {};
-  console.time();
-  for (let otuKey in results) {
-    let otu = results[otuKey];
-    for (let siteKey in otu) {
-      let abundance = otu[siteKey];
-      // not strictly necessary as the fetch API only returns non-zero abundances.
-      if (abundance > 0) {
-        sumFrequency++;
-      }
-      if (siteKey in siteAggregate) {
-        siteAggregate[siteKey].abundance += abundance;
-        siteAggregate[siteKey].richness++;
-      } else {
-        siteAggregate[siteKey] = {
-          abundance,
-          richness: 1
-        };
-      }
-    }
-  }
-  console.log(sumFrequency);
-  console.log(siteAggregate);
-  // aggregate by cell
-
-  //need to get up grid parameters as they determine the cell keys.
-  // TODO: bring detail level to window or something similar.
+  console.log("handle the abundance results");
 }
 
 /**
