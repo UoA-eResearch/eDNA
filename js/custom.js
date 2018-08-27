@@ -445,21 +445,27 @@ function fetchSampleOtus(params) {
       fetch(sampleContextualUrl)
         .then(response => response.json())
         .then(sampleContextJson => {
-          restructureData(sampleOtuJson.data, sampleContextJson.data);
+          handleResponseData(sampleOtuJson.data, sampleContextJson.data);
         });
     });
   // FIXME: need to avoid getting duplicate results too.
   // TODO: handle params categorically using param.group props.
 }
 
-function restructureData(sampleOtus, sampleContexts) {
-  console.log(sampleOtus, sampleContexts);
-  console.time();
+function handleResponseData(sampleOtus, sampleContexts) {
+  // console.log(sampleOtus, sampleContexts);
   let siteAggs = aggregateBySite(sampleOtus);
-  let cellAgg = aggregateByCell(siteAggs, sampleContexts);
-  console.timeEnd();
+  let cellAggs = aggregateByCell(siteAggs, sampleContexts);
+  console.log(cellAggs);
+  let featureCollection = makeFeatureCollection(cellAggs);
+  console.log(featureCollection);
+  renderFeatureCollection(featureCollection);
 }
 
+/**
+ * Iterates the sample otu json response and sums the values by site
+ * @param {*} sampleOtus
+ */
 function aggregateBySite(sampleOtus) {
   let siteAggs = [];
   for (let i in sampleOtus) {
@@ -482,6 +488,11 @@ function aggregateBySite(sampleOtus) {
   return siteAggs;
 }
 
+/**
+ * Iterates the site aggregates and sums the values by grid cell coordinates.
+ * @param {*} siteAggs
+ * @param {*} sampleContexts
+ */
 function aggregateByCell(siteAggs, sampleContexts) {
   // setting up grid parameters
   let start = [164.71222, -33.977509];
@@ -518,13 +529,9 @@ function aggregateByCell(siteAggs, sampleContexts) {
           latOffset
         )
       };
-      console.log(cellAggs[cellKey]);
     }
   }
-  console.log(cellAggs);
-  console.log(Object.keys(cellAggs).length);
-
-  renderGridLayers(cellAggs);
+  return cellAggs;
 
   function calculateCellCoordinates(key, start, latOffset, lngOffset) {
     // can use the key + grid start to reverse engineer the coordinates
@@ -532,7 +539,7 @@ function aggregateByCell(siteAggs, sampleContexts) {
     let yFactor = Math.floor(offsets / detailLevel);
     let xFactor = offsets % detailLevel;
     let cellStartX = start[0] + lngOffset * xFactor;
-    let cellStartY = start[1] + latOffset * yFactor;
+    let cellStartY = start[1] - latOffset * yFactor;
 
     // tL, tR, bR, bL
     return [
@@ -554,15 +561,33 @@ function aggregateByCell(siteAggs, sampleContexts) {
   }
 }
 
-function renderGridLayers(cellAggs) {
+function makeFeatureCollection(cellAggs) {
   let maxes = calculateMaxes(cellAggs);
-
-  console.time();
+  let featureCollection = {
+    type: "FeatureCollection",
+    features: []
+  };
   for (let key in cellAggs) {
     let cell = cellAggs[key];
-    console.log(cell);
+    const weightedRichness = cell.richness / maxes.richness;
+    const weightedAbundance = cell.abundance / maxes.abundance;
+    const weightedSites = cell.sites.size / maxes.sites;
+    const weightedSpecies = cell.species.size / maxes.species;
+    featureCollection.features.push({
+      type: "Feature",
+      properties: {
+        weightedAbundance,
+        weightedRichness,
+        weightedSites,
+        weightedSpecies
+      },
+      geometry: {
+        type: "Polygon",
+        coordinates: [cell.coordinates]
+      }
+    });
   }
-  console.timeEnd();
+  return featureCollection;
 
   function calculateMaxes(cellAggs) {
     let abundance = 0;
@@ -590,6 +615,55 @@ function renderGridLayers(cellAggs) {
       species,
       sites
     };
+  }
+}
+
+function renderFeatureCollection(featureCollection) {
+  const gridAbundanceLayer = L.geoJSON(featureCollection, {
+    style: cellAbundanceStyle
+  });
+  gridAbundanceLayerGroup.clearLayers();
+  gridAbundanceLayerGroup.addLayer(gridAbundanceLayer);
+
+  function cellAbundanceStyle(feature) {
+    return {
+      fillColor: GetFillColor(feature.properties.weightedAbundance),
+      weight: 1,
+      opacity: getOutlineOpacity(),
+      color: GetOutlineColour(),
+      fillOpacity: GetFillOpacity(feature.properties.weightedAbundance)
+    };
+  }
+  function GetFillColor(d) {
+    // ?: might be better to use leaflet chloropleth plugin for this
+    return d > 0.9
+      ? "#800026"
+      : d > 0.8
+        ? "#BD0026"
+        : d > 0.7
+          ? "#E31A1C"
+          : d > 0.6
+            ? "#FC4E2A"
+            : d > 0.5
+              ? "#FD8D3C"
+              : d > 0.4
+                ? "#FEB24C"
+                : d > 0.3
+                  ? "#FED976"
+                  : d > 0.2
+                    ? "#FFEDA0"
+                    : d > 0.0
+                      ? "#FFFFCC"
+                      : "#9ecae1";
+  }
+  function getOutlineOpacity() {
+    return 0.15;
+  }
+  function GetOutlineColour() {
+    return "#000000";
+  }
+  function GetFillOpacity(d) {
+    return d > 0.0 ? 0.8 : 0.2;
   }
 }
 
