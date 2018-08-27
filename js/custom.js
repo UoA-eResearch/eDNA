@@ -459,7 +459,16 @@ function handleResponseData(sampleOtus, sampleContexts) {
   console.log(cellAggs);
   let featureCollection = makeFeatureCollection(cellAggs);
   console.log(featureCollection);
-  renderFeatureCollection(featureCollection, "weightedAbundance");
+  renderFeatureCollection(
+    featureCollection,
+    "weightedAbundance",
+    gridAbundanceLayerGroup
+  );
+  renderFeatureCollection(
+    featureCollection,
+    "weightedRichness",
+    gridRichnessLayerGroup
+  );
 }
 
 /**
@@ -618,7 +627,7 @@ function makeFeatureCollection(cellAggs) {
   }
 }
 
-function renderFeatureCollection(featureCollection, property) {
+function renderFeatureCollection(featureCollection, property, layerGroup) {
   const outlineOpacity = 0.15;
   const outlineColor = "#000000";
   const fillOpacity = d => (d > 0.0 ? 0.8 : 0.2);
@@ -642,11 +651,11 @@ function renderFeatureCollection(featureCollection, property) {
                     : d > 0.0
                       ? "#FFFFCC"
                       : "#9ECAE1";
-  const gridAbundanceLayer = L.geoJSON(featureCollection, {
+  const updatedLayer = L.geoJSON(featureCollection, {
     style: layerStyle
   });
-  gridAbundanceLayerGroup.clearLayers();
-  gridAbundanceLayerGroup.addLayer(gridAbundanceLayer);
+  layerGroup.clearLayers();
+  layerGroup.addLayer(updatedLayer);
 
   function layerStyle(feature) {
     return {
