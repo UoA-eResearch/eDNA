@@ -641,7 +641,7 @@ function renderFeatureCollection(featureCollection, property) {
                     ? "#FFEDA0"
                     : d > 0.0
                       ? "#FFFFCC"
-                      : "#9ecae1";
+                      : "#9ECAE1";
   const gridAbundanceLayer = L.geoJSON(featureCollection, {
     style: layerStyle
   });
@@ -650,43 +650,12 @@ function renderFeatureCollection(featureCollection, property) {
 
   function layerStyle(feature) {
     return {
-      fillColor: GetFillColor(feature.properties[property]),
+      fillColor: fillColor(feature.properties[property]),
       weight: 1,
-      opacity: getOutlineOpacity(),
-      color: GetOutlineColour(),
-      fillOpacity: GetFillOpacity(feature.properties[property])
+      opacity: outlineOpacity,
+      color: outlineColor,
+      fillOpacity: fillOpacity(feature.properties[property])
     };
-  }
-  function GetFillColor(d) {
-    // ?: might be better to use leaflet chloropleth plugin for this
-    return d > 0.9
-      ? "#800026"
-      : d > 0.8
-        ? "#BD0026"
-        : d > 0.7
-          ? "#E31A1C"
-          : d > 0.6
-            ? "#FC4E2A"
-            : d > 0.5
-              ? "#FD8D3C"
-              : d > 0.4
-                ? "#FEB24C"
-                : d > 0.3
-                  ? "#FED976"
-                  : d > 0.2
-                    ? "#FFEDA0"
-                    : d > 0.0
-                      ? "#FFFFCC"
-                      : "#9ecae1";
-  }
-  function getOutlineOpacity() {
-    return 0.15;
-  }
-  function GetOutlineColour() {
-    return "#000000";
-  }
-  function GetFillOpacity(d) {
-    return d > 0.0 ? 0.8 : 0.2;
   }
 }
 
