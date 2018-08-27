@@ -550,7 +550,7 @@ function aggregateByCell(siteAggs, sampleContexts) {
     let cellStartX = start[0] + lngOffset * xFactor;
     let cellStartY = start[1] - latOffset * yFactor;
 
-    // tL, tR, bR, bL
+    // order: topleft, topright, bottomright, bottomleft
     return [
       [cellStartX, cellStartY],
       [cellStartX + lngOffset, cellStartY],
@@ -582,13 +582,15 @@ function makeFeatureCollection(cellAggs) {
     const weightedAbundance = cell.abundance / maxes.abundance;
     const weightedSites = cell.sites.size / maxes.sites;
     const weightedSpecies = cell.species.size / maxes.species;
+    const popupContent = makePopupContent(cell);
     featureCollection.features.push({
       type: "Feature",
       properties: {
         weightedAbundance,
         weightedRichness,
         weightedSites,
-        weightedSpecies
+        weightedSpecies,
+        popupContent
       },
       geometry: {
         type: "Polygon",
@@ -625,6 +627,30 @@ function makeFeatureCollection(cellAggs) {
       sites
     };
   }
+
+  function makePopupContent(cell) {
+    let popupContent =
+      strongHeader("Cell Richness", cell.richness) +
+      strongHeader("Cell Abundance", cell.abundance) +
+      strongHeader("Cell Site Count", cell.sites.size) +
+      strongHeader(
+        "Longitude",
+        cell.coordinates[0][0] + " to " + cell.coordinates[2][0]
+      ) +
+      strongHeader(
+        "Latitude",
+        cell.coordinates[0][1] + " to " + cell.coordinates[2][1]
+      ) +
+      "<br />";
+    const speciesInCell = cell.species;
+    //list all sites within the cell.
+    popupContent += strongLine("Sites in cell: ") + "<ul>";
+    for (let site in cell.site) {
+      popupContent += "<li>" + cell.site[site] + "</li>";
+    }
+    popupContent += "</ul><br />";
+    return popupContent;
+  }
 }
 
 function renderFeatureCollection(featureCollection, property, layerGroup) {
@@ -652,7 +678,8 @@ function renderFeatureCollection(featureCollection, property, layerGroup) {
                       ? "#FFFFCC"
                       : "#9ECAE1";
   const updatedLayer = L.geoJSON(featureCollection, {
-    style: layerStyle
+    style: layerStyle,
+    onEachFeature: onEachFeature
   });
   layerGroup.clearLayers();
   layerGroup.addLayer(updatedLayer);
@@ -665,6 +692,64 @@ function renderFeatureCollection(featureCollection, property, layerGroup) {
       color: outlineColor,
       fillOpacity: fillOpacity(feature.properties[property])
     };
+  }
+
+  function onEachFeature(feature, layer) {
+    if (feature.properties && feature.properties.popupContent) {
+      var popup = layer.bindPopup(feature.properties.popupContent, {
+        maxWidth: 4000,
+        maxHeight: 150
+      });
+    }
+    layer.on({
+      mouseover: handleMouseOver,
+      mouseout: handleMouseOut,
+      click: handleCellClick,
+      select: highlightLayer
+    });
+
+    function handleCellClick(e) {
+      var layer = e.target;
+      console.log("layer index is " + layer.feature.properties.index);
+      var speciesInCell = layer.feature.properties.speciesInCell;
+      var speciesAmount = Object.keys(speciesInCell).length;
+      console.log("Number of unique classifications in cell: " + speciesAmount);
+    }
+
+    function handleMouseOver(e) {
+      var layer = e.target;
+      var siteList = layer.feature.properties.cellSites;
+      for (site in siteList) {
+        var circle = d3.selectAll("#" + siteList[site]);
+        circle
+          .transition()
+          .duration(250)
+          .attr("r", 14);
+      }
+    }
+
+    function handleMouseOut(e) {
+      var layer = e.target;
+      //console.log(layer.feature.properties.cellSites);
+      var siteList = layer.feature.properties.cellSites;
+      for (site in siteList) {
+        var circle = d3.selectAll("#" + siteList[site]);
+        circle
+          .transition()
+          .duration(250)
+          .attr("r", 7);
+      }
+    }
+
+    function highlightLayer(layer) {
+      layer.setStyle({
+        weight: 5,
+        opacity: 0.9
+      });
+      if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+      }
+    }
   }
 }
 
@@ -731,6 +816,7 @@ function makeGrid(detailLevel) {
       cellSites: [],
       hasSamples: false
     };
+    console.log(cell.coordinates);
     return cell;
   }
 }
