@@ -459,7 +459,7 @@ function handleResponseData(sampleOtus, sampleContexts) {
   console.log(cellAggs);
   let featureCollection = makeFeatureCollection(cellAggs);
   console.log(featureCollection);
-  renderFeatureCollection(featureCollection);
+  renderFeatureCollection(featureCollection, "weightedAbundance");
 }
 
 /**
@@ -618,20 +618,43 @@ function makeFeatureCollection(cellAggs) {
   }
 }
 
-function renderFeatureCollection(featureCollection) {
+function renderFeatureCollection(featureCollection, property) {
+  const outlineOpacity = 0.15;
+  const outlineColor = "#000000";
+  const fillOpacity = d => (d > 0.0 ? 0.8 : 0.2);
+  const fillColor = d =>
+    d > 0.9
+      ? "#800026"
+      : d > 0.8
+        ? "#BD0026"
+        : d > 0.7
+          ? "#E31A1C"
+          : d > 0.6
+            ? "#FC4E2A"
+            : d > 0.5
+              ? "#FD8D3C"
+              : d > 0.4
+                ? "#FEB24C"
+                : d > 0.3
+                  ? "#FED976"
+                  : d > 0.2
+                    ? "#FFEDA0"
+                    : d > 0.0
+                      ? "#FFFFCC"
+                      : "#9ecae1";
   const gridAbundanceLayer = L.geoJSON(featureCollection, {
-    style: cellAbundanceStyle
+    style: layerStyle
   });
   gridAbundanceLayerGroup.clearLayers();
   gridAbundanceLayerGroup.addLayer(gridAbundanceLayer);
 
-  function cellAbundanceStyle(feature) {
+  function layerStyle(feature) {
     return {
-      fillColor: GetFillColor(feature.properties.weightedAbundance),
+      fillColor: GetFillColor(feature.properties[property]),
       weight: 1,
       opacity: getOutlineOpacity(),
       color: GetOutlineColour(),
-      fillOpacity: GetFillOpacity(feature.properties.weightedAbundance)
+      fillOpacity: GetFillOpacity(feature.properties[property])
     };
   }
   function GetFillColor(d) {
