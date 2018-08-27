@@ -483,17 +483,72 @@ function aggregateBySite(sampleOtus) {
 }
 
 function aggregateByCell(siteAggs, sampleContexts) {
-  console.log(siteAggs, sampleContexts);
-  let grid = makeGrid(detailLevel);
-  console.log(grid);
+  // setting up grid parameters
+  let start = [164.71222, -33.977509];
+  let end = [178.858982, -49.66352];
+  const hardBounds = L.latLngBounds(start, end);
+  const northWest = hardBounds.getNorthWest();
+  const northEast = hardBounds.getNorthEast();
+  const southWest = hardBounds.getSouthWest();
+  const latOffset = (northWest.lat - southWest.lat) / detailLevel;
+  const lngOffset = (northEast.lng - northWest.lng) / detailLevel;
+  // using the params for generating the keys
+  let cellAggs = {};
   for (let siteId in siteAggs) {
+    let siteAgg = siteAggs[siteId];
     let sampleContext = sampleContexts[siteId];
     let x = sampleContext.x;
     let y = sampleContext.y;
+    let cellKey = generateCellKey(x, y, start, lngOffset, latOffset);
+    if (cellKey in cellAggs) {
+      cellAggs[cellKey].abundance += siteAgg.abundance;
+      cellAggs[cellKey].richness += siteAgg.richness;
+      cellAggs[cellKey].species.add(siteAgg.species);
+      cellAggs[cellKey].sites.add(siteId);
+    } else {
+      cellAggs[cellKey] = {
+        abundance: siteAgg.abundance,
+        richness: siteAgg.richness,
+        sites: new Set(siteId),
+        species: siteAgg.species,
+        coordinates: calculateCellCoordinates(
+          cellKey,
+          start,
+          lngOffset,
+          latOffset
+        )
+      };
+      console.log(cellAggs[cellKey]);
+    }
+  }
+  console.log(cellAggs);
+  console.log(Object.keys(cellAggs).length);
+
+  function calculateCellCoordinates(key, start, latOffset, lngOffset) {
+    // can use the key + grid start to reverse engineer the coordinates
+    let offsets = parseInt(key);
+    let yFactor = Math.floor(offsets / detailLevel);
+    let xFactor = offsets % detailLevel;
+    let cellStartX = start[0] + lngOffset * xFactor;
+    let cellStartY = start[1] + latOffset * yFactor;
+
+    // tL, tR, bR, bL
+    return [
+      [cellStartX, cellStartY],
+      [cellStartX + lngOffset, cellStartY],
+      [cellStartX + lngOffset, cellStartY - latOffset],
+      [cellStartX, cellStartY - latOffset]
+    ];
   }
 
-  function generateCellKey() {
-    let start = [164.71222, -33.977509];
+  function generateCellKey(x, y, start, latOffset, lngOffset) {
+    let lngDiff = Math.abs(x) - Math.abs(start[0]);
+    let colIndex = Math.floor(lngDiff / lngOffset);
+    let latDiff = Math.abs(y) - Math.abs(start[1]);
+    let rowIndex = Math.floor(latDiff / latOffset);
+    let cellKey = rowIndex * detailLevel + colIndex;
+    // console.log(cellKey);
+    return cellKey;
   }
 }
 
