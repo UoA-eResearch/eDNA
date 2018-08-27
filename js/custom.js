@@ -8,7 +8,7 @@ const API_URLS = {
   ordered_sampleotu: nectar_base_url + "sample_otu_ordered",
   test_sample_otu_pk: local_base_url + "abundance?id=",
   test_nested_abundances: local_base_url + "abundance?id=",
-  local_metadata_term: local_base_url + "metadata?term=",
+  local_metadata_id: local_base_url + "metadata?id=",
   local_filter_options: local_base_url + "filter-options?q="
 };
 
@@ -416,32 +416,86 @@ function fetchSampleOtus(params) {
   }
 
   // iteratively build the url query
-  let url = API_URLS.test_sample_otu_pk;
+  let sampleOtuUrl = API_URLS.test_sample_otu_pk;
   params.map((param, index) => {
     if (index == 0) {
-      url += param.id;
+      sampleOtuUrl += param.id;
     } else {
-      url += "&id=" + param.id;
+      sampleOtuUrl += "&id=" + param.id;
     }
   });
-  console.log(url);
-
   // get the abundances
-  fetch(url)
+  fetch(sampleOtuUrl)
     .then(response => response.json())
-    .then(json => {
-      json.data.map(sampleOtu => {
-        // not sure I need to do mapping here.
-        // do something with the abundances.
-        // get a list of unique site ids and then query for the full metadata of the sites from that result.
+    .then(sampleOtuJson => {
+      let sampleContextualsToRequest = [];
+      sampleOtuJson.data.map(tuple => {
+        if (!sampleContextualsToRequest.includes(tuple[1])) {
+          sampleContextualsToRequest.push(tuple[1]);
+        }
       });
-      restructureSampleOtuResponse(results);
+      let sampleContextualUrl = API_URLS.local_metadata_id;
+      sampleContextualsToRequest.map((id, index) => {
+        if (index == 0) {
+          sampleContextualUrl += id;
+        } else {
+          sampleContextualUrl += "&id=" + id;
+        }
+      });
+      fetch(sampleContextualUrl)
+        .then(response => response.json())
+        .then(sampleContextJson => {
+          restructureData(sampleOtuJson.data, sampleContextJson.data);
+        });
     });
   // FIXME: need to avoid getting duplicate results too.
   // TODO: handle params categorically using param.group props.
 }
 
-function restructureSampleOtuResponse(abundances) {}
+function restructureData(sampleOtus, sampleContexts) {
+  console.log(sampleOtus, sampleContexts);
+  console.time();
+  let siteAggs = aggregateBySite(sampleOtus);
+  let cellAgg = aggregateByCell(siteAggs, sampleContexts);
+  console.timeEnd();
+}
+
+function aggregateBySite(sampleOtus) {
+  let siteAggs = [];
+  for (let i in sampleOtus) {
+    let tuple = sampleOtus[i];
+    let otuId = tuple[0];
+    let siteId = tuple[1];
+    let abundance = tuple[2];
+    if (!(siteId in siteAggs)) {
+      siteAggs[siteId] = {
+        abundance,
+        richness: 1,
+        species: new Set([otuId])
+      };
+    } else {
+      siteAggs[siteId].abundance += abundance;
+      siteAggs[siteId].richness++;
+      siteAggs[siteId].species.add(otuId);
+    }
+  }
+  return siteAggs;
+}
+
+function aggregateByCell(siteAggs, sampleContexts) {
+  console.log(siteAggs, sampleContexts);
+  let grid = makeGrid(detailLevel);
+  console.log(grid);
+  for (let siteId in siteAggs) {
+    let sampleContext = sampleContexts[siteId];
+    let x = sampleContext.x;
+    let y = sampleContext.y;
+  }
+
+  function generateCellKey() {
+    let start = [164.71222, -33.977509];
+  }
+}
 
 function handleNestedResults(results) {
   console.log("handle the abundance results");
