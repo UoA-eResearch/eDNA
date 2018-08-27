@@ -504,12 +504,12 @@ function aggregateByCell(siteAggs, sampleContexts) {
       cellAggs[cellKey].abundance += siteAgg.abundance;
       cellAggs[cellKey].richness += siteAgg.richness;
       cellAggs[cellKey].species.add(siteAgg.species);
-      cellAggs[cellKey].sites.add(siteId);
+      cellAggs[cellKey].sites.add(parseInt(siteId));
     } else {
       cellAggs[cellKey] = {
         abundance: siteAgg.abundance,
         richness: siteAgg.richness,
-        sites: new Set(siteId),
+        sites: new Set([parseInt(siteId)]),
         species: siteAgg.species,
         coordinates: calculateCellCoordinates(
           cellKey,
@@ -523,6 +523,8 @@ function aggregateByCell(siteAggs, sampleContexts) {
   }
   console.log(cellAggs);
   console.log(Object.keys(cellAggs).length);
+
+  renderGridLayers(cellAggs);
 
   function calculateCellCoordinates(key, start, latOffset, lngOffset) {
     // can use the key + grid start to reverse engineer the coordinates
@@ -552,8 +554,43 @@ function aggregateByCell(siteAggs, sampleContexts) {
   }
 }
 
-function handleNestedResults(results) {
-  console.log("handle the abundance results");
+function renderGridLayers(cellAggs) {
+  let maxes = calculateMaxes(cellAggs);
+
+  console.time();
+  for (let key in cellAggs) {
+    let cell = cellAggs[key];
+    console.log(cell);
+  }
+  console.timeEnd();
+
+  function calculateMaxes(cellAggs) {
+    let abundance = 0;
+    let richness = 0;
+    let species = 0;
+    let sites = 0;
+    for (let key in cellAggs) {
+      let cell = cellAggs[key];
+      if (cell.abundance > abundance) {
+        abundance = cell.abundance;
+      }
+      if (cell.richness > richness) {
+        richness = cell.richness;
+      }
+      if (cell.species.size > species) {
+        species = cell.species.size;
+      }
+      if (cell.sites.size > sites) {
+        sites = cell.sites.size;
+      }
+    }
+    return {
+      abundance,
+      richness,
+      species,
+      sites
+    };
+  }
 }
 
 /**
