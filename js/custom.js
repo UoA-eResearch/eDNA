@@ -460,6 +460,8 @@ function handleResponseData(sampleOtus, sampleContexts) {
     window.sampleContextLookup[sampleContext.id] = sampleContext;
   }
   let siteAggs = aggregateBySite(sampleOtus);
+  // NOTE: Can render heatlayer here
+  let heatLayer = renderHeatLayer(siteAggs);
   let cellAggs = aggregateByCell(siteAggs, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggs);
   renderFeatureCollection(
@@ -472,6 +474,12 @@ function handleResponseData(sampleOtus, sampleContexts) {
     "weightedRichness",
     gridRichnessLayerGroup
   );
+  // NOTE: disabling this one for quick comparison between the layers while the coordinates are mismatching.
+  // renderFeatureCollection(
+  //   featureCollection,
+  //   "weightedSites",
+  //   gridSitesLayerGroup
+  // );
 }
 
 /**
@@ -507,6 +515,26 @@ function aggregateBySite(sampleOtus) {
     }
   }
   return siteAggs;
+}
+
+function renderHeatLayer(siteAggs) {
+  let heatData = [];
+  let maxWeight = 0;
+  for (let siteId in siteAggs) {
+    let siteMeta = window.sampleContextLookup[siteId];
+    let siteWeight = siteAggs[siteId].abundance;
+    if (maxWeight < siteWeight) {
+      maxWeight = siteWeight;
+    }
+    heatData.push([siteMeta.y, siteMeta.x, siteWeight]);
+  }
+  let heatLayer = L.heatLayer(heatData);
+  heatLayerGroup.clearLayers();
+  heatLayerGroup.addLayer(heatLayer);
+  window.heat.setOptions({ max: maxWeight * 1.5, maxZoom: 6 });
+  window.heat.setLatLngs(heatData);
+  map.addLayer(heatLayerGroup);
+  return heatLayer;
 }
 
 /**
@@ -675,7 +703,6 @@ function makeFeatureCollection(cellAggs) {
     }
     popupContent += "</ul><br />";
     for (let otuId in cell.otus) {
-      console.log(cell.otus[otuId]);
       popupContent +=
         strongLine(window.otuLookup[otuId]) +
         strongHeader("Abundance in cell", cell.otus[otuId].abundance) +
