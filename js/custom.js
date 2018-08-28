@@ -453,7 +453,13 @@ function fetchSampleOtus(params) {
 }
 
 function handleResponseData(sampleOtus, sampleContexts) {
-  window.sampleContextLookup = sampleContexts;
+  // restructure the sample contexts by pk
+  window.sampleContextLookup = {};
+  for (let i in sampleContexts) {
+    let sampleContext = sampleContexts[i];
+    window.sampleContextLookup[sampleContext.id] = sampleContext;
+  }
+  console.log(window.sampleContextLookup);
   let siteAggs = aggregateBySite(sampleOtus);
   let cellAggs = aggregateByCell(siteAggs, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggs);
@@ -525,7 +531,8 @@ function aggregateByCell(siteAggs, sampleContexts) {
   let cellAggs = {};
   for (let siteId in siteAggs) {
     let site = siteAggs[siteId];
-    let sampleContext = sampleContexts[siteId];
+    let sampleContext = sampleContextLookup[siteId];
+    console.log(sampleContexts.length);
     let x = sampleContext.x;
     let y = sampleContext.y;
     let cellKey = generateCellKey(x, y, start, lngOffset, latOffset);
@@ -547,7 +554,6 @@ function aggregateByCell(siteAggs, sampleContexts) {
     // Adding values that are allowed to overlap/accumulate.
     let cell = cellAggs[cellKey];
     cell.abundance += site.abundance;
-
     cell.sites.push(siteId);
     // Evaluate if the species is new to the site, if so, make a new otu entry and increment richness
     for (let otuId in site.otus) {
