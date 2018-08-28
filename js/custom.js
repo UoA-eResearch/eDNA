@@ -476,24 +476,35 @@ function handleResponseData(sampleOtus, sampleContexts) {
  * @param {*} sampleOtus
  */
 function aggregateBySite(sampleOtus) {
-  let siteAggs = [];
+  let siteAggs = {};
+  console.time();
   for (let i in sampleOtus) {
     let tuple = sampleOtus[i];
     let otuId = tuple[0];
     let siteId = tuple[1];
     let abundance = tuple[2];
+    // if site doesn't exist set up blank site and always increment to avoid messy conditionals.
     if (!(siteId in siteAggs)) {
       siteAggs[siteId] = {
-        abundance,
-        richness: 1,
-        species: new Set([otuId])
+        abundance: 0,
+        richness: 0,
+        species: {}
       };
-    } else {
-      siteAggs[siteId].abundance += abundance;
-      siteAggs[siteId].richness++;
-      siteAggs[siteId].species.add(otuId);
+    }
+    siteAgg = siteAggs[siteId];
+    siteAgg.abundance += abundance;
+    if (!(otuId in siteAgg.species)) {
+      siteAgg.species[otuId] = {
+        abundance: 0,
+        richness: 0
+      };
+      siteAgg.richness++;
+      siteAgg.species[otuId].abundance += abundance;
+      siteAgg.species[otuId].richness++;
     }
   }
+  console.timeEnd();
+  console.log(siteAggs);
   return siteAggs;
 }
 
@@ -717,10 +728,10 @@ function renderFeatureCollection(featureCollection, property, layerGroup) {
     }
 
     function handleMouseOver(e) {
-      var layer = e.target;
-      var siteList = layer.feature.properties.cellSites;
+      let layer = e.target;
+      let siteList = layer.feature.properties.cellSites;
       for (site in siteList) {
-        var circle = d3.selectAll("#" + siteList[site]);
+        let circle = d3.selectAll("#" + siteList[site]);
         circle
           .transition()
           .duration(250)
@@ -729,11 +740,11 @@ function renderFeatureCollection(featureCollection, property, layerGroup) {
     }
 
     function handleMouseOut(e) {
-      var layer = e.target;
+      let layer = e.target;
       //console.log(layer.feature.properties.cellSites);
-      var siteList = layer.feature.properties.cellSites;
+      let siteList = layer.feature.properties.cellSites;
       for (site in siteList) {
-        var circle = d3.selectAll("#" + siteList[site]);
+        let circle = d3.selectAll("#" + siteList[site]);
         circle
           .transition()
           .duration(250)
@@ -816,7 +827,7 @@ function makeGrid(detailLevel) {
       cellSites: [],
       hasSamples: false
     };
-    console.log(cell.coordinates);
+    // console.log(cell.coordinates);
     return cell;
   }
 }
