@@ -461,6 +461,7 @@ function handleResponseData(sampleOtus, sampleContexts) {
   }
   let siteAggs = aggregateBySite(sampleOtus);
   // NOTE: Can render heatlayer here
+  console.log("going to heat layer");
   let heatLayer = renderHeatLayer(siteAggs);
   let cellAggs = aggregateByCell(siteAggs, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggs);
@@ -531,8 +532,8 @@ function renderHeatLayer(siteAggs) {
   let heatLayer = L.heatLayer(heatData);
   heatLayerGroup.clearLayers();
   heatLayerGroup.addLayer(heatLayer);
-  window.heat.setOptions({ max: maxWeight * 1.5, maxZoom: 6 });
-  window.heat.setLatLngs(heatData);
+  heatLayer.setOptions({ max: maxWeight * 1.5, maxZoom: 6 });
+  heatLayer.setLatLngs(heatData);
   map.addLayer(heatLayerGroup);
   return heatLayer;
 }
