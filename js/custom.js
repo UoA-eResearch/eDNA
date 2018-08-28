@@ -456,9 +456,7 @@ function handleResponseData(sampleOtus, sampleContexts) {
   // console.log(sampleOtus, sampleContexts);
   let siteAggs = aggregateBySite(sampleOtus);
   let cellAggs = aggregateByCell(siteAggs, sampleContexts);
-  console.log(cellAggs);
   let featureCollection = makeFeatureCollection(cellAggs);
-  console.log(featureCollection);
   renderFeatureCollection(
     featureCollection,
     "weightedAbundance",
@@ -513,6 +511,8 @@ function aggregateBySite(sampleOtus) {
  */
 function aggregateByCell(siteAggs, sampleContexts) {
   // setting up grid parameters
+  makeGrid(detailLevel);
+  console.log("aggregate by cell");
   let start = [164.71222, -33.977509];
   let end = [178.858982, -49.66352];
   const hardBounds = L.latLngBounds(start, end);
@@ -529,6 +529,7 @@ function aggregateByCell(siteAggs, sampleContexts) {
     let x = sampleContext.x;
     let y = sampleContext.y;
     let cellKey = generateCellKey(x, y, start, lngOffset, latOffset);
+    console.log(cellKey);
     if (!(cellKey in cellAggs)) {
       cellAggs[cellKey] = {
         abundance: 0,
@@ -572,7 +573,6 @@ function aggregateByCell(siteAggs, sampleContexts) {
     let xFactor = offsets % detailLevel;
     let cellStartX = start[0] + lngOffset * xFactor;
     let cellStartY = start[1] - latOffset * yFactor;
-
     // order: topleft, topright, bottomright, bottomleft
     return [
       [cellStartX, cellStartY],
@@ -588,7 +588,6 @@ function aggregateByCell(siteAggs, sampleContexts) {
     let latDiff = Math.abs(y) - Math.abs(start[1]);
     let rowIndex = Math.floor(latDiff / latOffset);
     let cellKey = rowIndex * detailLevel + colIndex;
-    // console.log(cellKey);
     return cellKey;
   }
 }
@@ -784,6 +783,8 @@ function makeGrid(detailLevel) {
   southEast = hardBounds.getSouthEast();
   const latOffset = (northWest.lat - southWest.lat) / detailLevel;
   const lngOffset = (northEast.lng - northWest.lng) / detailLevel;
+  console.log("make grid");
+  console.log(latOffset, lngOffset);
   // The bounds method seems to make the rectangle less distorted
   // const latOffset = (gridStart[1] - gridEnd[1]) / detailLevel;
   // const lngOffset = (gridEnd[0] - gridStart[0]) / detailLevel;
