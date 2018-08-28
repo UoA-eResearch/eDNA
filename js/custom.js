@@ -558,6 +558,11 @@ function aggregateByCell(siteAggs, sampleContexts) {
       );
     }
   }
+  // Adding the totals of the species and sites here so it's all in one function.
+  for (let key in cellAggs) {
+    let cellAgg = cellAggs[key];
+    cellAgg["siteCount"] = cellAgg.sites.length;
+  }
   return cellAggs;
 
   function calculateCellCoordinates(key, start, latOffset, lngOffset) {
@@ -598,8 +603,7 @@ function makeFeatureCollection(cellAggs) {
     let cell = cellAggs[key];
     const weightedRichness = cell.richness / maxes.richness;
     const weightedAbundance = cell.abundance / maxes.abundance;
-    const weightedSites = cell.sites.length / maxes.sites;
-    const weightedSpecies = Object.keys(cell.otus).length / maxes.species;
+    const weightedSites = cell.siteCount / maxes.sites;
     const popupContent = makePopupContent(cell);
     featureCollection.features.push({
       type: "Feature",
@@ -607,7 +611,6 @@ function makeFeatureCollection(cellAggs) {
         weightedAbundance,
         weightedRichness,
         weightedSites,
-        weightedSpecies,
         popupContent
       },
       geometry: {
@@ -621,7 +624,6 @@ function makeFeatureCollection(cellAggs) {
   function calculateMaxes(cellAggs) {
     let abundance = 0;
     let richness = 0;
-    let species = 0;
     let sites = 0;
     for (let key in cellAggs) {
       let cell = cellAggs[key];
@@ -631,19 +633,13 @@ function makeFeatureCollection(cellAggs) {
       if (cell.richness > richness) {
         richness = cell.richness;
       }
-      let speciesCount = Object.keys(cell.otus).length;
-      if (speciesCount > species) {
-        species = speciesCount;
-      }
-      let siteCount = cell.sites.length;
-      if (siteCount > sites) {
-        sites = siteCount;
+      if (cell.siteCount > sites) {
+        sites = cell.siteCount;
       }
     }
     return {
       abundance,
       richness,
-      species,
       sites
     };
   }
@@ -652,7 +648,7 @@ function makeFeatureCollection(cellAggs) {
     let popupContent =
       strongHeader("Cell Richness", cell.richness) +
       strongHeader("Cell Abundance", cell.abundance) +
-      strongHeader("Cell Site Count", cell.sites.size) +
+      strongHeader("Cell Site Count", cell.siteCount) +
       strongHeader(
         "Longitude",
         cell.coordinates[0][0] + " to " + cell.coordinates[2][0]
@@ -662,11 +658,10 @@ function makeFeatureCollection(cellAggs) {
         cell.coordinates[0][1] + " to " + cell.coordinates[2][1]
       ) +
       "<br />";
-    const speciesInCell = cell.species;
     //list all sites within the cell.
     popupContent += strongLine("Sites in cell: ") + "<ul>";
-    for (let site in cell.site) {
-      popupContent += "<li>" + cell.site[site] + "</li>";
+    for (let site in cell.sites) {
+      popupContent += "<li>" + cell.sites[site] + "</li>";
     }
     popupContent += "</ul><br />";
     return popupContent;
