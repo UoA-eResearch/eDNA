@@ -559,7 +559,7 @@ function aggregateByCell(siteAggs, sampleContexts) {
       if (!(otuId in cell.otus)) {
         cell.otus[otuId] = {
           abundance: 0,
-          richness: 0
+          count: 0
         };
         // alternatively just use the otus keys length and assign to richness.
         cell.richness++;
@@ -674,6 +674,14 @@ function makeFeatureCollection(cellAggs) {
         "<li>" + window.sampleContextLookup[siteId].site + "</li>";
     }
     popupContent += "</ul><br />";
+    for (let otuId in cell.otus) {
+      console.log(cell.otus[otuId]);
+      popupContent +=
+        strongLine(window.otuLookup[otuId]) +
+        strongHeader("Abundance in cell", cell.otus[otuId].abundance) +
+        strongHeader("Frequency in cell", cell.otus[otuId].count) +
+        "<br />";
+    }
     return popupContent;
   }
 }
@@ -928,15 +936,13 @@ function drawGrid(grid) {
       ) +
       "<br />";
     cellId++;
-    const speciesInCell = cell.cellSpecies;
-
     //list all sites within the cell.
     popupContent += strongLine("Sites in cell: ") + "<ul>";
     for (let site in cell.cellSites) {
       popupContent += "<li>" + cell.cellSites[site] + "</li>";
     }
     popupContent += "</ul><br />";
-
+    const speciesInCell = cell.cellSpecies;
     //lists all the species within a cell.
     popupContent += strongLine("Search results in cell: ") + " <br />";
     for (let species in speciesInCell) {
