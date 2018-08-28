@@ -477,7 +477,6 @@ function handleResponseData(sampleOtus, sampleContexts) {
  */
 function aggregateBySite(sampleOtus) {
   let siteAggs = {};
-  console.time();
   for (let i in sampleOtus) {
     let tuple = sampleOtus[i];
     let otuId = tuple[0];
@@ -488,23 +487,22 @@ function aggregateBySite(sampleOtus) {
       siteAggs[siteId] = {
         abundance: 0,
         richness: 0,
-        species: {}
+        otus: {}
       };
     }
     siteAgg = siteAggs[siteId];
     siteAgg.abundance += abundance;
-    if (!(otuId in siteAgg.species)) {
-      siteAgg.species[otuId] = {
+    // same default object creation principle applied to the otus sub-object.
+    if (!(otuId in siteAgg.otus)) {
+      siteAgg.otus[otuId] = {
         abundance: 0,
         richness: 0
       };
       siteAgg.richness++;
-      siteAgg.species[otuId].abundance += abundance;
-      siteAgg.species[otuId].richness++;
+      siteAgg.otus[otuId].abundance += abundance;
+      siteAgg.otus[otuId].richness++;
     }
   }
-  console.timeEnd();
-  console.log(siteAggs);
   return siteAggs;
 }
 
@@ -531,24 +529,33 @@ function aggregateByCell(siteAggs, sampleContexts) {
     let x = sampleContext.x;
     let y = sampleContext.y;
     let cellKey = generateCellKey(x, y, start, lngOffset, latOffset);
-    if (cellKey in cellAggs) {
-      cellAggs[cellKey].abundance += siteAgg.abundance;
-      cellAggs[cellKey].richness += siteAgg.richness;
-      cellAggs[cellKey].species.add(siteAgg.species);
-      cellAggs[cellKey].sites.add(parseInt(siteId));
-    } else {
+    if (!(cellKey in cellAggs)) {
       cellAggs[cellKey] = {
-        abundance: siteAgg.abundance,
-        richness: siteAgg.richness,
-        sites: new Set([parseInt(siteId)]),
-        species: siteAgg.species,
-        coordinates: calculateCellCoordinates(
-          cellKey,
-          start,
-          lngOffset,
-          latOffset
-        )
+        abundance: 0,
+        richness: 0,
+        sites: [],
+        otus: {},
+        coordinates: []
       };
+      cellAgg = cellAggs[cellKey];
+      cellAgg.abundance += siteAgg.abundance;
+      cellAgg.richness += siteAgg.richness;
+      cellAgg.sites.push(siteId);
+      for (let otuId in siteAgg.otus) {
+        let otu = siteAgg.otus[otuId];
+        if (otuId in cellAgg.otus) {
+          cellAgg.otu[otuId].abundance += otu.abundance;
+          cellAgg.otu[otuId].richness += otu.richness;
+        } else {
+          cellAgg.otus[otuId] = otu;
+        }
+      }
+      cellAgg.coordinates = calculateCellCoordinates(
+        cellKey,
+        start,
+        lngOffset,
+        latOffset
+      );
     }
   }
   return cellAggs;
@@ -591,8 +598,8 @@ function makeFeatureCollection(cellAggs) {
     let cell = cellAggs[key];
     const weightedRichness = cell.richness / maxes.richness;
     const weightedAbundance = cell.abundance / maxes.abundance;
-    const weightedSites = cell.sites.size / maxes.sites;
-    const weightedSpecies = cell.species.size / maxes.species;
+    const weightedSites = cell.sites.length / maxes.sites;
+    const weightedSpecies = Object.keys(cell.otus).length / maxes.species;
     const popupContent = makePopupContent(cell);
     featureCollection.features.push({
       type: "Feature",
@@ -624,11 +631,13 @@ function makeFeatureCollection(cellAggs) {
       if (cell.richness > richness) {
         richness = cell.richness;
       }
-      if (cell.species.size > species) {
-        species = cell.species.size;
+      let speciesCount = Object.keys(cell.otus).length;
+      if (speciesCount > species) {
+        species = speciesCount;
       }
-      if (cell.sites.size > sites) {
-        sites = cell.sites.size;
+      let siteCount = cell.sites.length;
+      if (siteCount > sites) {
+        sites = siteCount;
       }
     }
     return {
