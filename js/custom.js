@@ -357,7 +357,7 @@ function fetchFilterData(q) {
       // console.log(data);
       let index = 0;
       // TODO: make this smartly iterate the data array then the elements so it's a nested map instead of 2 maps. slightly better readability.
-      window.taxonLookup = {};
+      window.otuLookup = {};
       let taxonOptions = data.taxonomy_options.map(taxon => {
         // return structure = { pk, otu code }
         let option = {
@@ -366,7 +366,7 @@ function fetchFilterData(q) {
           group: "taxon"
         };
         index++;
-        window.taxonLookup[taxon[0]] = taxon[1];
+        window.otuLookup[taxon[0]] = taxon[1];
         return option;
       });
 
@@ -453,7 +453,7 @@ function fetchSampleOtus(params) {
 }
 
 function handleResponseData(sampleOtus, sampleContexts) {
-  // console.log(sampleOtus, sampleContexts);
+  window.sampleContextLookup = sampleContexts;
   let siteAggs = aggregateBySite(sampleOtus);
   let cellAggs = aggregateByCell(siteAggs, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggs);
@@ -529,7 +529,6 @@ function aggregateByCell(siteAggs, sampleContexts) {
     let x = sampleContext.x;
     let y = sampleContext.y;
     let cellKey = generateCellKey(x, y, start, lngOffset, latOffset);
-    console.log(cellKey);
     if (!(cellKey in cellAggs)) {
       cellAggs[cellKey] = {
         abundance: 0,
@@ -538,31 +537,33 @@ function aggregateByCell(siteAggs, sampleContexts) {
         otus: {},
         coordinates: []
       };
-      cellAgg = cellAggs[cellKey];
-      cellAgg.abundance += siteAgg.abundance;
-      cellAgg.richness += siteAgg.richness;
-      cellAgg.sites.push(siteId);
-      for (let otuId in siteAgg.otus) {
-        let otu = siteAgg.otus[otuId];
-        if (otuId in cellAgg.otus) {
-          cellAgg.otu[otuId].abundance += otu.abundance;
-          cellAgg.otu[otuId].richness += otu.richness;
-        } else {
-          cellAgg.otus[otuId] = otu;
-        }
-      }
-      cellAgg.coordinates = calculateCellCoordinates(
-        cellKey,
-        start,
-        lngOffset,
-        latOffset
-      );
     }
-  }
-  // Adding the totals of the species and sites here so it's all in one function.
-  for (let key in cellAggs) {
-    let cellAgg = cellAggs[key];
-    cellAgg["siteCount"] = cellAgg.sites.length;
+    let cellAgg = cellAggs[cellKey];
+    console.log(siteAgg.richness);
+    cellAgg.abundance += siteAgg.abundance;
+    cellAgg.sites.push(siteId);
+    for (let otuId in siteAgg.otus) {
+      let otu = siteAgg.otus[otuId];
+      if (otuId in cellAgg.otus) {
+        cellAgg.otus[otuId].abundance += otu.abundance;
+        cellAgg.otus[otuId].richness += otu.richness;
+      } else {
+        cellAgg.otus[otuId] = otu;
+      }
+    }
+    cellAgg.coordinates = calculateCellCoordinates(
+      cellKey,
+      start,
+      lngOffset,
+      latOffset
+    );
+    // Adding the totals of the species and sites here so it's all in one function.
+    // Cannot just add richness together as sites within the same cell might contain the same species.
+    for (let key in cellAggs) {
+      let cellAgg = cellAggs[key];
+      cellAgg["siteCount"] = cellAgg.sites.length;
+      cellAgg["richness"] = Object.keys(cellAgg.otus).length;
+    }
   }
   return cellAggs;
 
