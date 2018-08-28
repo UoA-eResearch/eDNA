@@ -494,11 +494,11 @@ function aggregateBySite(sampleOtus) {
     if (!(otuId in siteAgg.otus)) {
       siteAgg.otus[otuId] = {
         abundance: 0,
-        richness: 0
+        count: 0
       };
       siteAgg.richness++;
       siteAgg.otus[otuId].abundance += abundance;
-      siteAgg.otus[otuId].richness++;
+      siteAgg.otus[otuId].count++;
     }
   }
   return siteAggs;
@@ -524,45 +524,49 @@ function aggregateByCell(siteAggs, sampleContexts) {
   // using the params for generating the keys
   let cellAggs = {};
   for (let siteId in siteAggs) {
-    let siteAgg = siteAggs[siteId];
+    let site = siteAggs[siteId];
     let sampleContext = sampleContexts[siteId];
     let x = sampleContext.x;
     let y = sampleContext.y;
     let cellKey = generateCellKey(x, y, start, lngOffset, latOffset);
+    // if doesn't exist, create the cell.
     if (!(cellKey in cellAggs)) {
       cellAggs[cellKey] = {
         abundance: 0,
         richness: 0,
         sites: [],
         otus: {},
-        coordinates: []
+        coordinates: calculateCellCoordinates(
+          cellKey,
+          start,
+          lngOffset,
+          latOffset
+        )
       };
     }
-    let cellAgg = cellAggs[cellKey];
-    console.log(siteAgg.richness);
-    cellAgg.abundance += siteAgg.abundance;
-    cellAgg.sites.push(siteId);
-    for (let otuId in siteAgg.otus) {
-      let otu = siteAgg.otus[otuId];
-      if (otuId in cellAgg.otus) {
-        cellAgg.otus[otuId].abundance += otu.abundance;
-        cellAgg.otus[otuId].richness += otu.richness;
-      } else {
-        cellAgg.otus[otuId] = otu;
+    // Adding values that are allowed to overlap/accumulate.
+    let cell = cellAggs[cellKey];
+    cell.abundance += site.abundance;
+
+    cell.sites.push(siteId);
+    // Evaluate if the species is new to the site, if so, make a new otu entry and increment richness
+    for (let otuId in site.otus) {
+      let siteOtu = site.otus[otuId];
+      if (!(otuId in cell.otus)) {
+        cell.otus[otuId] = {
+          abundance: 0,
+          richness: 0
+        };
+        // alternatively just use the otus keys length and assign to richness.
+        cell.richness++;
       }
+      let cellOtu = cell.otus[otuId];
+      cellOtu.abundance += siteOtu.abundance;
+      cellOtu.count += siteOtu.count;
     }
-    cellAgg.coordinates = calculateCellCoordinates(
-      cellKey,
-      start,
-      lngOffset,
-      latOffset
-    );
-    // Adding the totals of the species and sites here so it's all in one function.
-    // Cannot just add richness together as sites within the same cell might contain the same species.
     for (let key in cellAggs) {
       let cellAgg = cellAggs[key];
       cellAgg["siteCount"] = cellAgg.sites.length;
-      cellAgg["richness"] = Object.keys(cellAgg.otus).length;
     }
   }
   return cellAggs;
@@ -660,8 +664,10 @@ function makeFeatureCollection(cellAggs) {
       "<br />";
     //list all sites within the cell.
     popupContent += strongLine("Sites in cell: ") + "<ul>";
-    for (let site in cell.sites) {
-      popupContent += "<li>" + cell.sites[site] + "</li>";
+    for (let i in cell.sites) {
+      siteId = cell.sites[i];
+      popupContent +=
+        "<li>" + window.sampleContextLookup[siteId].site + "</li>";
     }
     popupContent += "</ul><br />";
     return popupContent;
