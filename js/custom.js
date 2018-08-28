@@ -459,7 +459,6 @@ function handleResponseData(sampleOtus, sampleContexts) {
     let sampleContext = sampleContexts[i];
     window.sampleContextLookup[sampleContext.id] = sampleContext;
   }
-  console.log(window.sampleContextLookup);
   let siteAggs = aggregateBySite(sampleOtus);
   let cellAggs = aggregateByCell(siteAggs, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggs);
@@ -531,8 +530,7 @@ function aggregateByCell(siteAggs, sampleContexts) {
   let cellAggs = {};
   for (let siteId in siteAggs) {
     let site = siteAggs[siteId];
-    let sampleContext = sampleContextLookup[siteId];
-    console.log(sampleContexts.length);
+    let sampleContext = window.sampleContextLookup[siteId];
     let x = sampleContext.x;
     let y = sampleContext.y;
     let cellKey = generateCellKey(x, y, start, lngOffset, latOffset);
