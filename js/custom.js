@@ -414,7 +414,6 @@ function fetchSampleOtus(params) {
       }
     ];
   }
-
   // iteratively build the url query
   let sampleOtuUrl = API_URLS.test_sample_otu_pk;
   params.map((param, index) => {
@@ -453,6 +452,8 @@ function fetchSampleOtus(params) {
 }
 
 function handleResponseData(sampleOtus, sampleContexts) {
+  // display amount of abundances from a search below the filter
+  $("#numberResults").text(sampleOtus.length);
   // restructure the sample contexts by pk
   window.sampleContextLookup = {};
   for (let i in sampleContexts) {
