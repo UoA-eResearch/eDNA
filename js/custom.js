@@ -430,15 +430,20 @@ function fetchSampleOtus(params) {
   }
   let testUrl = API_URLS.test_sample_otu_pk;
   // TODO: Can make the string effectively the list and append at the same time the params are iterated over but we will just do this for now.
-  let s = "";
+  let urlArgs = "";
   ontologyIds.map((idCombo, index) => {
     if (index != 0) {
-      s = "&";
+      urlArgs += "&";
     }
-    s += "otu= " + idCombo;
+    urlArgs += "otu=" + idCombo;
   });
-  testUrl += s;
+  testUrl += urlArgs;
   console.log(testUrl);
+  fetch(testUrl).then(response => {
+    response.json().then(jsonResponse => {
+      console.log(jsonResponse.data);
+    });
+  });
 
   results = [];
   // if there are no params the map function will not run so this allows it to run a blank query.
