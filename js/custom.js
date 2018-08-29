@@ -6,7 +6,7 @@ const API_URLS = {
   filtered_abundance: nectar_base_url + "abundance?id=",
   filtered_meta: nectar_base_url + "metadata?term=",
   ordered_sampleotu: nectar_base_url + "sample_otu_ordered",
-  test_sample_otu_pk: local_base_url + "abundance?id=",
+  test_sample_otu_pk: local_base_url + "abundance?",
   test_nested_abundances: local_base_url + "abundance?id=",
   local_metadata_id: local_base_url + "metadata?id=",
   local_filter_options: local_base_url + "filter-options?q="
@@ -403,26 +403,57 @@ function fetchFilterData(q) {
  * Use filter params to request abundance api and handle response.
  */
 function fetchSampleOtus(params) {
-  console.log("Fetching abundances");
-  console.log(params);
+  let ontologyIds = [];
+  for (let i in params) {
+    let param = params[i];
+    // if param is in taxon group
+    let fragments = param.text.split(";");
+    let regEx = /[k, p, c, o, f, g, s, a]__/;
+    let idCombination = [];
+    for (let j in fragments) {
+      let frag = fragments[j];
+      // if it's just the prefix we're done with the otuIds for that partiular otu. If it's not just the prefix then trim the prefix if it exists or add the whole fragment to the id combination.
+      if (regEx.test(frag)) {
+        if (frag.length == 3) {
+          break;
+        } else {
+          idCombination.push(frag.substring(3));
+        }
+      } else {
+        idCombination.push(frag);
+      }
+    }
+    console.log(ontologyIds);
+    ontologyIds.push(idCombination.join("+"));
+    // send them off to the api to be processed.
+    // if param is in meta group
+  }
+  let testUrl = API_URLS.test_sample_otu_pk;
+  // TODO: Can make the string effectively the list and append at the same time the params are iterated over but we will just do this for now.
+  let s = "";
+  ontologyIds.map((idCombo, index) => {
+    if (index != 0) {
+      s = "&";
+    }
+    s += "otu= " + idCombo;
+  });
+  testUrl += s;
+  console.log(testUrl);
+
   results = [];
   // if there are no params the map function will not run so this allows it to run a blank query.
-  if (params.length == 0) {
-    params = [
-      {
-        id: ""
-      }
-    ];
-  }
+
   // iteratively build the url query
-  let sampleOtuUrl = API_URLS.test_sample_otu_pk;
-  params.map((param, index) => {
-    if (index == 0) {
-      sampleOtuUrl += param.id;
-    } else {
-      sampleOtuUrl += "&id=" + param.id;
-    }
-  });
+  let sampleOtuUrl = API_URLS.test_sample_otu_pk + "id=";
+  if (params.length != 0) {
+    params.map((param, index) => {
+      if (index == 0) {
+        sampleOtuUrl += param.id;
+      } else {
+        sampleOtuUrl += "&id=" + param.id;
+      }
+    });
+  }
   // get the abundances
   fetch(sampleOtuUrl)
     .then(response => response.json())
@@ -461,8 +492,6 @@ function handleResponseData(sampleOtus, sampleContexts) {
     window.sampleContextLookup[sampleContext.id] = sampleContext;
   }
   let siteAggs = aggregateBySite(sampleOtus);
-  // NOTE: Can render heatlayer here
-  console.log("going to heat layer");
   let heatLayer = renderHeatLayer(siteAggs);
   let cellAggs = aggregateByCell(siteAggs, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggs);
