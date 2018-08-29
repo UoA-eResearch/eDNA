@@ -432,12 +432,11 @@ function fetchSampleOtus(params) {
   // TODO: Can make the string effectively the list and append at the same time the params are iterated over but we will just do this for now.
   let urlArgs = "";
   ontologyIds.map((idCombo, index) => {
-    if (index != 0) {
-      urlArgs += "&";
+    if (index == 0) {
+      testUrl += "otu=" + idCombo;
     }
-    urlArgs += "otu=" + idCombo;
+    testUrl += "&otu=" + idCombo;
   });
-  testUrl += urlArgs;
   console.log(testUrl);
   fetch(testUrl).then(response => {
     response.json().then(jsonResponse => {
