@@ -3,7 +3,7 @@ const nectar_base_url = "https://edna.nectar.auckland.ac.nz/edna/api/";
 // change active depending on the situation.
 const active_base_url = local_base_url;
 const API_URLS = {
-  filtered_abundance: nectar_base_url + "abundance?id=",
+  filtered_abundance: nectar_base_url + "abundance?otu=",
   filtered_meta: nectar_base_url + "metadata?term=",
   ordered_sampleotu: nectar_base_url + "sample_otu_ordered",
   test_sample_otu_pk: local_base_url + "abundance?",
