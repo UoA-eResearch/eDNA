@@ -6,7 +6,7 @@ const API_URLS = {
   filtered_abundance: nectar_base_url + "abundance?otu=",
   filtered_meta: nectar_base_url + "metadata?term=",
   ordered_sampleotu: nectar_base_url + "sample_otu_ordered",
-  test_sample_otu_pk: local_base_url + "abundance?",
+  test_sample_otu_pk: local_base_url + "abundance?otu=",
   test_nested_abundances: local_base_url + "abundance?id=",
   local_metadata_id: local_base_url + "metadata?id=",
   local_filter_options: local_base_url + "filter-options?q="
@@ -361,8 +361,8 @@ function fetchFilterData(q) {
       let taxonOptions = data.taxonomy_options.map(taxon => {
         // return structure = { pk, otu code }
         let option = {
-          id: taxon[0],
-          text: taxon[1],
+          id: taxon[1],
+          text: taxon[0],
           group: "taxon"
         };
         index++;
@@ -403,85 +403,61 @@ function fetchFilterData(q) {
  * Use filter params to request abundance api and handle response.
  */
 function fetchSampleOtus(params) {
+  // replace the comma delimimter with '+'
   let ontologyIds = [];
   for (let i in params) {
     let param = params[i];
     // if param is in taxon group
-    let fragments = param.text.split(";");
-    let regEx = /[k, p, c, o, f, g, s, a]__/;
-    let idCombination = [];
-    for (let j in fragments) {
-      let frag = fragments[j];
-      // if it's just the prefix we're done with the otuIds for that partiular otu. If it's not just the prefix then trim the prefix if it exists or add the whole fragment to the id combination.
-      if (regEx.test(frag)) {
-        if (frag.length == 3) {
-          break;
-        } else {
-          idCombination.push(frag.substring(3));
-        }
-      } else {
-        idCombination.push(frag);
-      }
-    }
-    console.log(ontologyIds);
-    ontologyIds.push(idCombination.join("+"));
-    // send them off to the api to be processed.
-    // if param is in meta group
+    let idChain = param.id.split(",").join("+");
+    ontologyIds.push(idChain);
   }
-  let testUrl = API_URLS.test_sample_otu_pk;
-  // TODO: Can make the string effectively the list and append at the same time the params are iterated over but we will just do this for now.
-  let urlArgs = "";
-  ontologyIds.map((idCombo, index) => {
-    if (index == 0) {
-      testUrl += "otu=" + idCombo;
-    }
-    testUrl += "&otu=" + idCombo;
-  });
-  console.log(testUrl);
-  fetch(testUrl).then(response => {
+  // convert idChain list into a string and append to the url
+  // TODO: Possibly make it figure out the lowest common ancestor to increase performance.
+  let url = API_URLS.test_sample_otu_pk;
+  url += ontologyIds.join("&otu=");
+  console.log(url);
+  // fetch the url
+  fetch(url).then(response => {
     response.json().then(jsonResponse => {
-      console.log(jsonResponse.data);
-    });
-  });
-
-  results = [];
-  // if there are no params the map function will not run so this allows it to run a blank query.
-
-  // iteratively build the url query
-  let sampleOtuUrl = API_URLS.test_sample_otu_pk + "id=";
-  if (params.length != 0) {
-    params.map((param, index) => {
-      if (index == 0) {
-        sampleOtuUrl += param.id;
-      } else {
-        sampleOtuUrl += "&id=" + param.id;
-      }
-    });
-  }
-  // get the abundances
-  fetch(sampleOtuUrl)
-    .then(response => response.json())
-    .then(sampleOtuJson => {
-      let sampleContextualsToRequest = [];
-      sampleOtuJson.data.map(tuple => {
-        if (!sampleContextualsToRequest.includes(tuple[1])) {
-          sampleContextualsToRequest.push(tuple[1]);
-        }
-      });
+      let sampleOtuJson = jsonResponse;
       let sampleContextualUrl = API_URLS.local_metadata_id;
-      sampleContextualsToRequest.map((id, index) => {
-        if (index == 0) {
-          sampleContextualUrl += id;
-        } else {
-          sampleContextualUrl += "&id=" + id;
-        }
-      });
       fetch(sampleContextualUrl)
         .then(response => response.json())
         .then(sampleContextJson => {
           handleResponseData(sampleOtuJson.data, sampleContextJson.data);
         });
     });
+  });
+
+  results = [];
+  // if there are no params the map function will not run so this allows it to run a blank query.
+
+  // get the abundances
+  // TEMP:START: Not using up until the fix me for now.
+  // fetch(sampleOtuUrl)
+  //   .then(response => response.json())
+  //   .then(sampleOtuJson => {
+  //     let sampleContextualsToRequest = [];
+  //     sampleOtuJson.data.map(tuple => {
+  //       if (!sampleContextualsToRequest.includes(tuple[1])) {
+  //         sampleContextualsToRequest.push(tuple[1]);
+  //       }
+  //     });
+  //     let sampleContextualUrl = API_URLS.local_metadata_id;
+  //     sampleContextualsToRequest.map((id, index) => {
+  //       if (index == 0) {
+  //         sampleContextualUrl += id;
+  //       } else {
+  //         sampleContextualUrl += "&id=" + id;
+  //       }
+  //     });
+  //     fetch(sampleContextualUrl)
+  //       .then(response => response.json())
+  //       .then(sampleContextJson => {
+  //         handleResponseData(sampleOtuJson.data, sampleContextJson.data);
+  //       });
+  //   });
+  // TEMP:END:
   // FIXME: need to avoid getting duplicate results too.
   // TODO: handle params categorically using param.group props.
 }
