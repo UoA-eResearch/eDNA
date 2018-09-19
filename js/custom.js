@@ -745,7 +745,7 @@ function GetFillColor(d) {
  * @param {*} layer
  */
 function highlightFeatureClick(layer) {
-  let layer = e.target;
+  var layer = e.target;
   layer.setStyle({
     weight: 5,
     color: "#666",
@@ -1402,7 +1402,7 @@ function lightResponse() {
           let value = data.abundances[tuple][2];
           try {
             abundance_dict.data[otu_index - 1][sample] = value;
-          } catch {
+          } catch (err) {
             console.log(
               "otu index: %s, sample key: %s, value: %d",
               otu_index,
