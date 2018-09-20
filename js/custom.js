@@ -1900,21 +1900,6 @@ function lightResponse() {
             sample,
             value
           );
-        // tuple structure: otuid, sampleid, count.
-        for (let tuple in data.abundances) {
-          let otu_index = data.abundances[tuple][0];
-          let sample = data.sites[data.abundances[tuple][1]];
-          let value = data.abundances[tuple][2];
-          try {
-            abundance_dict.data[otu_index - 1][sample] = value;
-          } catch (err) {
-            console.log(
-              "otu index: %s, sample key: %s, value: %d",
-              otu_index,
-              sample,
-              value
-            );
-          }
         }
       }
       disableStatePopup();
