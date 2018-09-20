@@ -1893,7 +1893,7 @@ function lightResponse() {
         let value = data.abundances[tuple][2];
         try {
           abundance_dict.data[otu_index - 1][sample] = value;
-        } catch {
+        } catch (err) {
           console.log(
             "Error at otu index: %s, sample key: %s, value: %d",
             otu_index,
