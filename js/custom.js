@@ -77,7 +77,7 @@ var siteMetrics;
 //Called by handeResults
 function getSiteWeights(filters) {
   var sites = {};
-  n_points = 0;
+  let n_points = 0;
   //warrick Clears grid layer values, gives them an index.
   var grid = makeGrid(detailLevel);
   gridCellLookup = makeGridLookup(grid);
@@ -270,86 +270,10 @@ function getFilterData() {
 }
 
 /**
- * Function called by papaparse on completion. Fills in the siteMeta and gridCell objects based on filtered results.
- * @param {*} results
- * @param {*} meta
- */
-function handleResults(results, meta) {
-  // bind sampleotu and meta to window obj
-  console.log(window.results);
-  window.results = results;
-  // Restructures site data to use site code as key
-  var metaDict = {};
-  for (var i in meta.data) {
-    var site = meta.data[i];
-    metaDict[site["site"]] = site;
-  }
-  // bind sties to window obj
-  window.meta = metaDict;
-  // instantiates the filter search bar
-  $("#filter").select2({
-    placeholder: "Type to filter by classification and metadata",
-    multiple: true,
-    allowClear: true,
-    data: fetchFilterData(),
-    // data: getFilterData(),
-    tags: true,
-    createTag: function(params) {
-      //console.log(params);
-      var term = $.trim(params.term);
-      if (term === "") {
-        return null;
-      }
-      return {
-        id: term,
-        text: term,
-        newTag: true // add additional parameters
-      };
-    }
-  });
-  $("#filter").change(function() {
-    window.location.hash = encodeURIComponent($(this).val());
-    var filters = $(this).select2("data");
-    // TEST: re-routing the change to go through the new change function being made.
-    fetchSampleOtus(filters);
-    console.log("fetching abundances complete.");
-    // TEST:END:
-
-    //note: need to change it so siteweights are everywhere at a fixed lonlat.
-    var siteWeights = getSiteWeights(filters);
-    var maxWeight = 0;
-    for (var site in siteWeights) {
-      var w = siteWeights[site];
-      if (w > maxWeight) maxWeight = w;
-    }
-    //grid data layer creation
-    // TODO: combined heat layer site coordinates and site-weights with others
-    var latlngs = [];
-    for (var site in siteWeights) {
-      var siteMeta = window.meta[site];
-      latlngs.push([siteMeta.y, siteMeta.x, siteWeights[site]]);
-    }
-    // Where the results are generated. Currently in heatmap form.
-    // TODO: move heat layer into drawgrid or something so it updates even when it's inactive.
-    if (!window.heat) window.heat = L.heatLayer(latlngs); //.addTo(map);
-    heatLayerGroup.clearLayers();
-    heatLayerGroup.addLayer(window.heat);
-    window.heat.setOptions({ max: maxWeight * 1.5, maxZoom: 6 });
-    window.heat.setLatLngs(latlngs);
-    map.addLayer(heatLayerGroup);
-  });
-  if (hashComponents[0].length) {
-    $("#filter").val(hashComponents);
-  }
-  $("#filter").trigger("change");
-}
-
-/**
  * Requests all the taxon entries + metadata fields from the OTU and SampleContextual tables on the server. Places the options in the filter.
  * @param {*} q
  */
 function fetchFilterData(q) {
-  console.log("Requesting dropdown suggestions from server.");
   // TODO: If more scalability needed, add pagination and as-you-type suggestions.
   fetch(API_URLS.local_filter_options).then(response => {
     response.json().then(result => {
@@ -380,20 +304,22 @@ function fetchFilterData(q) {
         index++;
         return option;
       });
-      groupedOptions = [
-        {
-          text: "Taxonomic",
-          children: taxonOptions
-        },
-        {
-          text: "Contextual",
-          children: contextOptions
-        }
-      ];
+      groupedOptions = {
+        results: [
+          {
+            text: "Taxonomic",
+            children: taxonOptions
+          },
+          {
+            text: "Contextual",
+            children: contextOptions
+          }
+        ]
+      };
       console.log(groupedOptions);
-      $("#filter").select2({
-        data: groupedOptions
-      });
+      // $("#filter").select2({
+      //   data: groupedOptions
+      // });
       return groupedOptions;
     });
   });
@@ -408,11 +334,18 @@ function fetchSampleOtus(params) {
   for (let i in params) {
     let param = params[i];
     // if param is in taxon group
-    let idChain = param.id.split(",").join("+");
-    ontologyIds.push(idChain);
+    if (param.group == "taxon") {
+      let idChain = param.id.split(",").join("+");
+      ontologyIds.push(idChain);
+    } else {
+      // TODO:WIP: Add meta field searching
+      // use the field name then use either equals/gt or
+      console.log(param.text);
+    }
   }
   // convert idChain list into a string and append to the url
   // TODO: Possibly make it figure out the lowest common ancestor to increase performance.
+
   let url = API_URLS.test_sample_otu_pk;
   url += ontologyIds.join("&otu=");
   console.log(url);
@@ -491,6 +424,7 @@ function handleResponseData(sampleOtus, sampleContexts) {
   //   "weightedSites",
   //   gridSitesLayerGroup
   // );
+  calculateSiteMetrics(siteAggs);
 }
 
 /**
@@ -1362,6 +1296,7 @@ let randomRange = (upper, lower) => {
  * @param {*} siteMetrics
  */
 function updateGraph(siteMetrics) {
+  console.log(siteMetrics);
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   var metricColour = createColorRange(siteMetrics);
   var colourMetric = document.getElementById("meta-select").value;
@@ -1375,7 +1310,6 @@ function updateGraph(siteMetrics) {
       meta: site
     };
   }
-
   console.log(siteMetrics);
 
   var dataSet = [];
@@ -1743,20 +1677,6 @@ leafletGraphControl.addTo(map);
 //Adding d3 visualization
 const { g, y, tooltip, x } = createGraph();
 
-// required end result structure:  [{"": name, site: value, ...}, {"": name, site: value, ...}]
-// sets up matrix with default 0 values. Iterates thro
-let useDatabase = true;
-let lightRequest = true;
-if (useDatabase) {
-  if (lightRequest) {
-    lightResponse();
-  } else {
-    nestedResponse();
-  }
-} else {
-  loadFromFile();
-}
-
 var hashComponents = decodeURIComponent(
   window.location.hash.replace("#", "")
 ).split(",");
@@ -1825,29 +1745,6 @@ function createGraph() {
   return { g, y, tooltip, x };
 }
 
-function nestedResponse() {
-  // Returns the data as nested dictionaries. Json is much larger than the light request but processes server side rather than client side.
-  try {
-    abundanceRequest = new Request(API_URLS.filtered_abundance);
-    fetch(abundanceRequest).then(response => {
-      response.json().then(abundanceResults => {
-        abundanceData = abundanceResults;
-        metadataRequest = new Request(API_URLS.filtered_meta);
-        fetch(metadataRequest).then(metaResponse => {
-          metaResponse.json().then(metaResults => {
-            siteData = metaResults;
-            handleResults(abundanceData, siteData);
-            leafletGraphControl.update(siteMetrics);
-          });
-        });
-      });
-    });
-  } catch (err) {
-    console.log(err);
-    loadFromFile();
-  }
-}
-
 function createLoadingMessage() {
   let popupDiv = document.createElement("div");
   popupDiv.id = "flex-container-state";
@@ -1868,70 +1765,86 @@ function disableStatePopup() {
   statePopup.style.display = "none";
 }
 
-function lightResponse() {
-  // requires ordering of the abundances needs to be otu_id ASC, sample_id ASC
-  createLoadingMessage();
-  fetch(API_URLS.ordered_sampleotu).then(response => {
-    response.json().then(result => {
-      data = result.data;
-      abundance_dict = {
-        data: []
-      };
-      abundance_dict.data = data.otus.map(otu => {
-        otuEntry = {
-          "": otu
+window.local_tags = [];
+function initializeSelect() {
+  $("#filter").select2({
+    placeholder: "Type to filter by classification and metadata",
+    multiple: true,
+    allowClear: true,
+    width: 400,
+    ajax: {
+      url: API_URLS.local_filter_options,
+      delay: 250,
+      data: function(params) {
+        // TODO: build the query instead of get all options.
+        // TODO: Add pagination
+        return API_URLS.local_filter_options;
+      },
+      processResults: function(response) {
+        let data = response.data;
+        let index = 0;
+        window.otuLookup = {};
+        let taxonOptions = data.taxonomy_options.map(taxon => {
+          // return structure = { pk, otu code }
+          let option = {
+            id: taxon[1],
+            text: taxon[0],
+            group: "taxon"
+          };
+          index++;
+          window.otuLookup[taxon[0]] = taxon[1];
+          return option;
+        });
+        let contextOptions = data.context_options.map(context => {
+          option = {
+            // TODO: add value functionality
+            id: index,
+            text: context,
+            group: "context"
+          };
+          index++;
+          return option;
+        });
+        groupedOptions = {
+          results: [
+            {
+              text: "Custom",
+              children: window.local_tags
+            },
+            {
+              text: "Taxonomic",
+              children: taxonOptions
+            },
+            {
+              text: "Contextual",
+              children: contextOptions
+            }
+          ]
         };
-        data.sites.map(site => {
-          otuEntry[site] = 0;
-        });
-        return otuEntry;
-      });
-      // tuple structure: otuid, sampleid, count.
-      for (let tuple in data.abundances) {
-        let otu_index = data.abundances[tuple][0];
-        let sample = data.sites[data.abundances[tuple][1]];
-        let value = data.abundances[tuple][2];
-        try {
-          abundance_dict.data[otu_index - 1][sample] = value;
-        } catch (err) {
-          console.log(
-            "Error at otu index: %s, sample key: %s, value: %d",
-            otu_index,
-            sample,
-            value
-          );
-        }
+        return groupedOptions;
       }
-      disableStatePopup();
-      metadataRequest = new Request(API_URLS.filtered_meta);
-      fetch(metadataRequest).then(metaResponse => {
-        metaResponse.json().then(metaResults => {
-          siteData = metaResults;
-          handleResults(abundance_dict, siteData);
-          leafletGraphControl.update(siteMetrics);
-        });
-      });
-    });
-  });
-}
-
-function loadFromFile() {
-  // Loads from local .tsv files. Called if the request throws an error
-  Papa.parse("active-abundance-data.tsv", {
-    download: true,
-    header: true,
-    dynamicTyping: true,
-    // once water data parsed, parse waterdata metadata and pass them both into handleResults.
-    complete: function(results) {
-      Papa.parse("active-meta-data.tsv", {
-        download: true,
-        header: true,
-        dynamicTyping: true,
-        complete: function(meta) {
-          handleResults(results, meta);
-          leafletGraphControl.update(siteMetrics);
-        }
-      });
+    },
+    tags: true,
+    createTag: function(params) {
+      console.log("create tag function called");
+      var term = params.term;
+      // var term = $.trim(params.text);
+      if (term === "") {
+        return null;
+      }
+      let newTag = {
+        id: term,
+        text: term,
+        newTag: true // add additional parameters
+      };
+      return newTag;
     }
   });
+  $("#filter").change(function() {
+    console.log("change function called");
+    window.location.hash = encodeURIComponent($(this).val());
+    var filters = $(this).select2("data");
+    fetchSampleOtus(filters);
+  });
 }
+initializeSelect();
