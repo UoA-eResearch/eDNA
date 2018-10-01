@@ -275,6 +275,7 @@ function getFilterData() {
  */
 function fetchFilterData(q) {
   // TODO: If more scalability needed, add pagination and as-you-type suggestions.
+  console.log(q);
   fetch(API_URLS.local_filter_options).then(response => {
     response.json().then(result => {
       let data = result.data;
@@ -1776,9 +1777,9 @@ function initializeSelect() {
       url: API_URLS.local_filter_options,
       delay: 250,
       data: function(params) {
-        // TODO: build the query instead of get all options.
-        // TODO: Add pagination
-        return API_URLS.local_filter_options;
+        return {
+          q: params.term
+        };
       },
       processResults: function(response) {
         let data = response.data;
@@ -1821,6 +1822,7 @@ function initializeSelect() {
             }
           ]
         };
+        console.log(groupedOptions);
         return groupedOptions;
       }
     },
