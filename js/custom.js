@@ -1716,29 +1716,30 @@ function initializeSelect() {
     multiple: true,
     allowClear: true,
     width: 500,
+    minimumInputLength: 1,
+    // cache: true,
+    tags: true,
     ajax: {
       // url: API_URLS.local_filter_options,
-      url: function(params) {
-        console.log("URL");
-        return API_URLS.local_filter_options;
-      },
+      url: API_URLS.local_filter_options,
       delay: 250,
       data: function(params) {
         console.log(params);
-        let urlConcat = {
+        let query = {
           q: params.term,
-          page: params.page || 0,
-          page_size: 50
+          page: params.page || 1,
+          page_size: params.page_size || 50
         };
-        console.log(urlConcat);
-        return urlConcat;
+        console.log(query);
+        return query;
       },
-      processResults: function(response) {
-        // console.log("PROCESS");
-        // console.log(response);
+      processResults: function(response, params) {
+        // don't really know why this params page thing is necessary but it is.
+        params.page = params.page || 1;
+        params.page_size = params.page_size || 50;
+        console.log(params);
         let data = response.data;
-        let more_taxon_options = data.more_taxonomy_results;
-        console.log(more_taxon_options);
+        let total_results = data.total_results;
         let index = 0;
         window.otuLookup = {};
         let taxonOptions = data.taxonomy_options.map(taxon => {
@@ -1752,6 +1753,7 @@ function initializeSelect() {
           window.otuLookup[taxon[0]] = taxon[1];
           return option;
         });
+        console.log(taxonOptions[0]);
         let contextOptions = data.context_options.map(context => {
           option = {
             // TODO: add value functionality
@@ -1778,17 +1780,24 @@ function initializeSelect() {
             }
           ],
           pagination: {
-            more: more_taxon_options
+            more: params.page * params.page_size < total_results
           }
         };
         // console.log(groupedOptions);
-        return groupedOptions;
+        // return groupedOptions;
+        // console.log(params.page * params.page_size);
+        // console.log(total_results);
+        let more = params.page * params.page_size < total_results;
+        // console.log(more);
+        return {
+          results: taxonOptions,
+          pagination: {
+            more: more
+          }
+        };
       }
     },
-    tags: true,
     createTag: function(params) {
-      console.log("CREATE TAG FUNCTION CALL. PARAMS BELOW");
-      console.log(params);
       let term = $.trim(params.term);
       if (term === "") {
         return null;
@@ -1806,7 +1815,6 @@ function initializeSelect() {
     }
   });
   $("#filter").change(function() {
-    console.log("change function called");
     window.location.hash = encodeURIComponent($(this).val());
     let filters = $(this).select2("data");
     fetchSampleOtus(filters);
