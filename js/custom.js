@@ -9,7 +9,7 @@ const API_URLS = {
   test_sample_otu_pk: local_base_url + "abundance?otu=",
   test_nested_abundances: local_base_url + "abundance?id=",
   local_metadata_id: local_base_url + "metadata?id=",
-  local_filter_options: local_base_url + "filter-options?q="
+  local_filter_options: local_base_url + "filter-options?"
 };
 
 function round(x, dp) {
@@ -267,63 +267,6 @@ function getFilterData() {
     });
   }
   return options;
-}
-
-/**
- * Requests all the taxon entries + metadata fields from the OTU and SampleContextual tables on the server. Places the options in the filter.
- * @param {*} q
- */
-function fetchFilterData(q) {
-  // TODO: If more scalability needed, add pagination and as-you-type suggestions.
-  console.log(q);
-  fetch(API_URLS.local_filter_options).then(response => {
-    response.json().then(result => {
-      let data = result.data;
-      // console.log(data);
-      let index = 0;
-      // TODO: make this smartly iterate the data array then the elements so it's a nested map instead of 2 maps. slightly better readability.
-      window.otuLookup = {};
-      let taxonOptions = data.taxonomy_options.map(taxon => {
-        // return structure = { pk, otu code }
-        let option = {
-          id: taxon[1],
-          text: taxon[0],
-          group: "taxon"
-        };
-        index++;
-        window.otuLookup[taxon[0]] = taxon[1];
-        return option;
-      });
-
-      let contextOptions = data.context_options.map(context => {
-        option = {
-          // TODO: add value functionality
-          id: index,
-          text: context,
-          group: "context"
-        };
-        index++;
-        return option;
-      });
-      groupedOptions = {
-        results: [
-          {
-            text: "Taxonomic",
-            children: taxonOptions
-          },
-          {
-            text: "Contextual",
-            children: contextOptions
-          }
-        ]
-      };
-      console.log(groupedOptions);
-      // $("#filter").select2({
-      //   data: groupedOptions
-      // });
-      return groupedOptions;
-    });
-  });
 }
 
 /**
@@ -1772,17 +1715,30 @@ function initializeSelect() {
     placeholder: "Type to filter by classification and metadata",
     multiple: true,
     allowClear: true,
-    width: 400,
+    width: 500,
     ajax: {
-      url: API_URLS.local_filter_options,
+      // url: API_URLS.local_filter_options,
+      url: function(params) {
+        console.log("URL");
+        return API_URLS.local_filter_options;
+      },
       delay: 250,
       data: function(params) {
-        return {
-          q: params.term
+        console.log(params);
+        let urlConcat = {
+          q: params.term,
+          page: params.page || 0,
+          page_size: 50
         };
+        console.log(urlConcat);
+        return urlConcat;
       },
       processResults: function(response) {
+        // console.log("PROCESS");
+        // console.log(response);
         let data = response.data;
+        let more_taxon_options = data.more_taxonomy_results;
+        console.log(more_taxon_options);
         let index = 0;
         window.otuLookup = {};
         let taxonOptions = data.taxonomy_options.map(taxon => {
@@ -1808,10 +1764,10 @@ function initializeSelect() {
         });
         groupedOptions = {
           results: [
-            {
-              text: "Custom",
-              children: window.local_tags
-            },
+            // {
+            //   text: "Custom",
+            //   children: window.local_tags
+            // },
             {
               text: "Taxonomic",
               children: taxonOptions
@@ -1820,17 +1776,20 @@ function initializeSelect() {
               text: "Contextual",
               children: contextOptions
             }
-          ]
+          ],
+          pagination: {
+            more: more_taxon_options
+          }
         };
-        console.log(groupedOptions);
+        // console.log(groupedOptions);
         return groupedOptions;
       }
     },
     tags: true,
     createTag: function(params) {
-      console.log("create tag function called");
-      var term = params.term;
-      // var term = $.trim(params.text);
+      console.log("CREATE TAG FUNCTION CALL. PARAMS BELOW");
+      console.log(params);
+      let term = $.trim(params.term);
       if (term === "") {
         return null;
       }
@@ -1839,13 +1798,17 @@ function initializeSelect() {
         text: term,
         newTag: true // add additional parameters
       };
+      // TODO: just re-add the local tags to the returns options everytime.
+      // TODO: Alternatively, clear the local taxon and meta tags everytime.
+      // window.local_tags.push(newTag);
+      // console.log(window.local_tags);
       return newTag;
     }
   });
   $("#filter").change(function() {
     console.log("change function called");
     window.location.hash = encodeURIComponent($(this).val());
-    var filters = $(this).select2("data");
+    let filters = $(this).select2("data");
     fetchSampleOtus(filters);
   });
 }
