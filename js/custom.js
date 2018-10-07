@@ -297,6 +297,7 @@ function fetchSampleOtus(params) {
   fetch(url).then(response => {
     response.json().then(jsonResponse => {
       let sampleOtuJson = jsonResponse;
+      // TODO: No longer use local_metadata by id endpoint.
       let sampleContextualUrl = API_URLS.local_metadata_id;
       fetch(sampleContextualUrl)
         .then(response => response.json())
@@ -1709,13 +1710,13 @@ function disableStatePopup() {
   statePopup.style.display = "none";
 }
 
-window.local_tags = [];
+window.taxonTags = [];
 function initializeSelect() {
   $("#filter").select2({
     placeholder: "Type to filter by classification and metadata",
     multiple: true,
     allowClear: true,
-    width: 500,
+    width: "100%",
     minimumInputLength: 1,
     // cache: true,
     tags: true,
@@ -1724,13 +1725,11 @@ function initializeSelect() {
       url: API_URLS.local_filter_options,
       delay: 250,
       data: function(params) {
-        console.log(params);
         let query = {
           q: params.term,
           page: params.page || 1,
           page_size: params.page_size || 50
         };
-        console.log(query);
         return query;
       },
       processResults: function(response, params) {
@@ -1753,7 +1752,13 @@ function initializeSelect() {
           window.otuLookup[taxon[0]] = taxon[1];
           return option;
         });
-        console.log(taxonOptions[0]);
+
+        // making window lookup, not necessary until later really.
+        // dont need to look up a primary key if you already have it.
+        // var taxonLookup = window.otuLookup;
+        // console.log(taxonLookup);
+        // console.log(taxonOptions[0]);
+
         let contextOptions = data.context_options.map(context => {
           option = {
             // TODO: add value functionality
@@ -1764,37 +1769,27 @@ function initializeSelect() {
           index++;
           return option;
         });
+        let moreResults = params.page * params.page_size < total_results;
+        let taxonTags = window.taxonTags;
         groupedOptions = {
           results: [
-            // {
-            //   text: "Custom",
-            //   children: window.local_tags
-            // },
+            {
+              text: "Custom",
+              children: taxonTags
+            },
             {
               text: "Taxonomic",
               children: taxonOptions
-            },
-            {
-              text: "Contextual",
-              children: contextOptions
             }
           ],
           pagination: {
-            more: params.page * params.page_size < total_results
+            more: moreResults
           }
         };
-        // console.log(groupedOptions);
-        // return groupedOptions;
+        console.log(groupedOptions);
+        return groupedOptions;
         // console.log(params.page * params.page_size);
         // console.log(total_results);
-        let more = params.page * params.page_size < total_results;
-        // console.log(more);
-        return {
-          results: taxonOptions,
-          pagination: {
-            more: more
-          }
-        };
       }
     },
     createTag: function(params) {
@@ -1809,7 +1804,7 @@ function initializeSelect() {
       };
       // TODO: just re-add the local tags to the returns options everytime.
       // TODO: Alternatively, clear the local taxon and meta tags everytime.
-      // window.local_tags.push(newTag);
+      window.taxonTags.push(newTag);
       // console.log(window.local_tags);
       return newTag;
     }
@@ -1820,4 +1815,56 @@ function initializeSelect() {
     fetchSampleOtus(filters);
   });
 }
+
+window.contextTags = [];
+function initializeSelectContextual(json) {
+  let data = json.data.context_options.map(field => {
+    return {
+      id: field,
+      text: field
+    };
+  });
+
+  console.log(json.data);
+  $("#filterContextual").select2({
+    placeholder: "Search by sample contextual metadata",
+    multiple: true,
+    allowClear: true,
+    width: "100%",
+    // cache: true,
+    tags: true,
+    data: data,
+    createTag: function(params) {
+      let term = $.trim(params.term);
+      if (term === "") {
+        return null;
+      }
+      let newTag = {
+        id: term,
+        text: term,
+        newTag: true // add additional parameters
+      };
+      // TODO: just re-add the local tags to the returns options everytime.
+      // TODO: Alternatively, clear the local taxon and meta tags everytime.
+      window.contextTags.push(newTag);
+      // console.log(window.local_tags);
+      return newTag;
+    },
+    insertTag: function(data, tag) {
+      console.log("insert tag");
+      console.log(data);
+    }
+  });
+  $("#filterContextual").change(function() {
+    window.location.hash = encodeURIComponent($(this).val());
+    let filters = $(this).select2("data");
+    fetchSampleOtus(filters);
+  });
+}
+
 initializeSelect();
+// load contextual options up front.
+let url = API_URLS.local_filter_options + "q=&page=1&page_size=200";
+fetch(url).then(response => {
+  response.json().then(initializeSelectContextual);
+});
