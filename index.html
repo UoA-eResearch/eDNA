@@ -60,8 +60,17 @@
   <body>
     <div id="map"></div>
     <div id="filterWrapper">
-      <select id="filter" multiple="multiple">
-      </select><br>
+      <label for="filter" Filter by organism>
+          <select id="filter" multiple="multiple">
+          </select>
+          <br>
+      </label>
+      <br>
+      <label for="filter" Filter by sample properties>
+          <select id="filterContextual" multiple="multiple">
+          </select>
+          <br>
+      </label>  
       <span id="numberResults"></span> points
     </div>
     <!--<div id="chart"></div> -->
