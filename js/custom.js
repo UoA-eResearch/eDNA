@@ -1149,7 +1149,6 @@ function addSiteMetrics(siteAggregates) {
     site.shannonDiversity *= -1;
     site.effectiveAlpha = Math.exp(site.shannonDiversity);
   }
-  console.log(siteAggregates);
   return siteAggregates;
 }
 
@@ -1163,10 +1162,11 @@ function createColorRange(siteAggregates) {
   // gets value from drop down and creates colour scale from the select option.
   const metric = document.getElementById("meta-select").value;
   const sites = [];
-  for (var site in siteAggregates) {
-    sites.push(siteAggregates[site]);
+  for (var siteId in siteAggregates) {
+    sites.push(window.sampleContextLookup[siteId]);
   }
   const min = d3.min(sites, function(d) {
+    console.log(d);
     return d[metric];
   });
   const max = d3.max(sites, function(d) {
@@ -1207,9 +1207,8 @@ let randomRange = (upper, lower) => {
  * Converts siteAggregates to an easier format for d3 use. Updates existing datapoints, enters new additional datapoints
  * @param {*} siteAggregates
  */
-function updateGraph(siteAggs) {
-  console.log("calling update graph");
-  let siteAggregates = addSiteMetrics(siteAggs);
+function updateGraph(siteAggregates) {
+  siteAggregates = addSiteMetrics(siteAggregates);
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   var metricColour = createColorRange(siteAggregates);
   var colourMetric = document.getElementById("meta-select").value;
@@ -1224,31 +1223,36 @@ function updateGraph(siteAggs) {
     };
   }
 
-  var dataSet = [];
-  for (var key in siteAggregates) {
-    var site = siteAggregates[key];
-    dataSet.push(makeNestableObject(site, "OTU richness", site.richness));
-    dataSet.push(
-      makeNestableObject(site, "Shannon entropy", site.shannonDiversity)
+  console.log(window.sampleContextLookup);
+  console.log(siteAggregates);
+  var plotData = [];
+  for (const [siteId, site] of Object.entries(siteAggregates)) {
+    plotData.push(makeNestableObject(site, "OTU richness", site.richness));
+    plotData.push(
+      makeNestableObject(siteId, "Shannon entropy", site.shannonDiversity)
     );
-    dataSet.push(
-      makeNestableObject(site, "Sequence abundance", site.abundance)
+    plotData.push(
+      makeNestableObject(siteId, "Sequence abundance", site.abundance)
     );
-    dataSet.push(
-      makeNestableObject(site, "Effective alpha diversity", site.effectiveAlpha)
+    plotData.push(
+      makeNestableObject(
+        siteId,
+        "Effective alpha diversity",
+        site.effectiveAlpha
+      )
     );
   }
 
-  var nestedData = d3
+  var nestedPlotData = d3
     .nest()
     .key(function(d) {
       return d.Metric;
     })
-    .entries(dataSet);
+    .entries(plotData);
   // console.log(nestedData);
 
   //within the svg, within the g tags, select the class datapoints
-  var update = g.selectAll(".datapoints").data(nestedData, function(d) {
+  var update = g.selectAll(".datapoints").data(nestedPlotData, function(d) {
     return d.values;
   });
   update
