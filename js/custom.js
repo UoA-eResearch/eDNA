@@ -1220,8 +1220,6 @@ function updateGraph(siteAggregates) {
     };
   }
 
-  console.log(window.sampleContextLookup);
-  console.log(siteAggregates);
   var plotData = [];
   for (const [siteId, site] of Object.entries(siteAggregates)) {
     plotData.push(makeNestableObject(site, "OTU richness", site.richness));
