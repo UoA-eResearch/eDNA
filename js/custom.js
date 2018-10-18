@@ -73,7 +73,7 @@ function checkFragment(f, species, site) {
   return false;
 }
 
-var siteMetrics;
+var siteAggregates;
 //Called by handeResults
 function getSiteWeights(filters) {
   var sites = {};
@@ -83,7 +83,7 @@ function getSiteWeights(filters) {
   gridCellLookup = makeGridLookup(grid);
   //console.log(grid);
   //Site metrics: Adding dictionary of site metrics for calculations.
-  siteMetrics = {};
+  siteAggregates = {};
   //loop through parsed global result data.
   for (var i in window.results.data) {
     let taxon_row = window.results.data[i];
@@ -115,8 +115,8 @@ function getSiteWeights(filters) {
           }
           // Add sample-otu value to sites dictionary
           sites[taxon_column] += taxon_row[taxon_column];
-          //add values to sitemetrics {} dictionary for visualization.
-          if (siteMetrics[taxon_column] == null) {
+          //add values to siteAggregates {} dictionary for visualization.
+          if (siteAggregates[taxon_column] == null) {
             createSiteMetric();
           }
           addValuesToSiteMetric();
@@ -133,8 +133,8 @@ function getSiteWeights(filters) {
   $("#numberResults").text(n_points);
   // console.log(grid);
   // console.log(sites);
-  // console.log(siteMetrics);
-  calculateSiteMetrics(siteMetrics);
+  // console.log(siteAggregates);
+  addSiteMetrics(siteAggregates);
   drawGrid(grid);
   return sites;
 
@@ -164,17 +164,17 @@ function getSiteWeights(filters) {
   }
 
   function addValuesToSiteMetric() {
-    siteMetrics[taxon_column].abundance += taxon_row[taxon_column];
-    siteMetrics[taxon_column].richness++;
+    siteAggregates[taxon_column].abundance += taxon_row[taxon_column];
+    siteAggregates[taxon_column].richness++;
     // Adding key, value for species assuming there's only one entry for a species in the data.
-    siteMetrics[taxon_column].species[taxon_name] = taxon_row[taxon_column];
+    siteAggregates[taxon_column].species[taxon_name] = taxon_row[taxon_column];
   }
 
   function createSiteMetric() {
-    siteMetrics[taxon_column] = site;
-    siteMetrics[taxon_column].abundance = 0;
-    siteMetrics[taxon_column].richness = 0;
-    siteMetrics[taxon_column].species = {};
+    siteAggregates[taxon_column] = site;
+    siteAggregates[taxon_column].abundance = 0;
+    siteAggregates[taxon_column].richness = 0;
+    siteAggregates[taxon_column].species = {};
   }
 }
 
@@ -272,75 +272,43 @@ function getFilterData() {
 /**
  * Use filter params to request abundance api and handle response.
  */
-function fetchSampleOtus(params) {
-  // replace the comma delimimter with '+'
+function fetchSampleOtus(taxonParams, contextParams) {
+  // Formatting and adding otu arguments
   let ontologyIds = [];
-  for (let i in params) {
-    let param = params[i];
-    // if param is in taxon group
-    if (param.group == "taxon") {
-      let idChain = param.id.split(",").join("+");
-      ontologyIds.push(idChain);
-    } else {
-      // TODO:WIP: Add meta field searching
-      // use the field name then use either equals/gt or
-      console.log(param.text);
-    }
+  for (let i in taxonParams) {
+    let taxonIdChain = taxonParams[i];
+    let idChain = taxonIdChain.id.split(",").join("+");
+    ontologyIds.push(idChain);
   }
-  // convert idChain list into a string and append to the url
-  // TODO: Possibly make it figure out the lowest common ancestor to increase performance.
-
   let url = API_URLS.test_sample_otu_pk;
   url += ontologyIds.join("&otu=");
+
+  // Formatting and adding contextual filters to url
+  if (contextParams.length > 0) {
+    let s = contextParams
+      .map(param => {
+        let paramEncoded = param.text;
+        paramEncoded = paramEncoded.replace("<", "$lt");
+        paramEncoded = paramEncoded.replace(">", "$gt");
+        paramEncoded = paramEncoded.replace("=", "$eq");
+        return "&q=" + paramEncoded;
+      })
+      .join("");
+    url += s;
+  }
   console.log(url);
+
   // fetch the url
   fetch(url).then(response => {
-    response.json().then(jsonResponse => {
-      let sampleOtuJson = jsonResponse;
-      // TODO: No longer use local_metadata by id endpoint.
-      let sampleContextualUrl = API_URLS.local_metadata_id;
-      fetch(sampleContextualUrl)
-        .then(response => response.json())
-        .then(sampleContextJson => {
-          handleResponseData(sampleOtuJson.data, sampleContextJson.data);
-        });
+    response.json().then(responseData => {
+      handleResponseData(responseData);
     });
   });
-
-  results = [];
-  // if there are no params the map function will not run so this allows it to run a blank query.
-
-  // get the abundances
-  // TEMP:START: Not using up until the fix me for now.
-  // fetch(sampleOtuUrl)
-  //   .then(response => response.json())
-  //   .then(sampleOtuJson => {
-  //     let sampleContextualsToRequest = [];
-  //     sampleOtuJson.data.map(tuple => {
-  //       if (!sampleContextualsToRequest.includes(tuple[1])) {
-  //         sampleContextualsToRequest.push(tuple[1]);
-  //       }
-  //     });
-  //     let sampleContextualUrl = API_URLS.local_metadata_id;
-  //     sampleContextualsToRequest.map((id, index) => {
-  //       if (index == 0) {
-  //         sampleContextualUrl += id;
-  //       } else {
-  //         sampleContextualUrl += "&id=" + id;
-  //       }
-  //     });
-  //     fetch(sampleContextualUrl)
-  //       .then(response => response.json())
-  //       .then(sampleContextJson => {
-  //         handleResponseData(sampleOtuJson.data, sampleContextJson.data);
-  //       });
-  //   });
-  // TEMP:END:
-  // FIXME: need to avoid getting duplicate results too.
-  // TODO: handle params categorically using param.group props.
 }
 
-function handleResponseData(sampleOtus, sampleContexts) {
+function handleResponseData(responseData) {
+  let sampleOtus = responseData.sample_otu_data;
+  let sampleContexts = responseData.sample_contextual_data;
   // display amount of abundances from a search below the filter
   $("#numberResults").text(sampleOtus.length);
   // restructure the sample contexts by pk
@@ -369,7 +337,7 @@ function handleResponseData(sampleOtus, sampleContexts) {
   //   "weightedSites",
   //   gridSitesLayerGroup
   // );
-  calculateSiteMetrics(siteAggs);
+  updateGraph(siteAggs);
 }
 
 /**
@@ -404,6 +372,7 @@ function aggregateBySite(sampleOtus) {
       siteAgg.otus[otuId].count++;
     }
   }
+  console.log(siteAggs);
   return siteAggs;
 }
 
@@ -1165,39 +1134,37 @@ function disableHighlightLayer(layer) {
 }
 
 /**
- * Calculates site metric max abundance, richness and shannon entropy for chart
- * visualization then calls updateGraph.
- * Different from calculateGridMaxes which targets cell-aggregated data.
- * @param {siteMetrics} siteMetrics
+ * Adds additional metrics to site aggregated data.
  */
-function calculateSiteMetrics(siteMetrics) {
-  for (let site_index in siteMetrics) {
-    let site = siteMetrics[site_index];
+function addSiteMetrics(siteAggregates) {
+  // entries released in es6.
+  for (const [siteId, site] of Object.entries(siteAggregates)) {
     site.shannonDiversity = 0;
-    for (let taxon_name in site.species) {
-      speciesAbundance = site.species[taxon_name];
+    for (const [otuId, otu] of Object.entries(site.otus)) {
+      let otuAbundance = otu.abundance;
       site.shannonDiversity +=
-        (speciesAbundance / site.abundance) *
-        Math.log(speciesAbundance / site.abundance);
+        (otuAbundance / site.abundance) *
+        Math.log(otuAbundance / site.abundance);
     }
     site.shannonDiversity *= -1;
     site.effectiveAlpha = Math.exp(site.shannonDiversity);
   }
-  updateGraph(siteMetrics);
+  console.log(siteAggregates);
+  return siteAggregates;
 }
 
 /**
  * Calculates queries max and minimum site metrics.
  * Returns colour range with spectrum from minimum value metric to max value metric.
  * @param {*} metric
- * @param {*} siteMetrics
+ * @param {*} siteAggregates
  */
-function createColorRange(siteMetrics) {
+function createColorRange(siteAggregates) {
   // gets value from drop down and creates colour scale from the select option.
   const metric = document.getElementById("meta-select").value;
   const sites = [];
-  for (var site in siteMetrics) {
-    sites.push(siteMetrics[site]);
+  for (var site in siteAggregates) {
+    sites.push(siteAggregates[site]);
   }
   const min = d3.min(sites, function(d) {
     return d[metric];
@@ -1237,13 +1204,14 @@ let randomRange = (upper, lower) => {
 };
 
 /**
- * Converts siteMetrics to an easier format for d3 use. Updates existing datapoints, enters new additional datapoints
- * @param {*} siteMetrics
+ * Converts siteAggregates to an easier format for d3 use. Updates existing datapoints, enters new additional datapoints
+ * @param {*} siteAggregates
  */
-function updateGraph(siteMetrics) {
-  console.log(siteMetrics);
+function updateGraph(siteAggs) {
+  console.log("calling update graph");
+  let siteAggregates = addSiteMetrics(siteAggs);
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
-  var metricColour = createColorRange(siteMetrics);
+  var metricColour = createColorRange(siteAggregates);
   var colourMetric = document.getElementById("meta-select").value;
 
   function makeNestableObject(site, metricName, value) {
@@ -1255,11 +1223,10 @@ function updateGraph(siteMetrics) {
       meta: site
     };
   }
-  console.log(siteMetrics);
 
   var dataSet = [];
-  for (var key in siteMetrics) {
-    var site = siteMetrics[key];
+  for (var key in siteAggregates) {
+    var site = siteAggregates[key];
     dataSet.push(makeNestableObject(site, "OTU richness", site.richness));
     dataSet.push(
       makeNestableObject(site, "Shannon entropy", site.shannonDiversity)
@@ -1474,8 +1441,8 @@ proj4.defs(
 );
 
 //gets the params from the search bar
-var params = new URLSearchParams(window.location.search);
-var mode = params.get("mode");
+var taxonParams = new URLSearchParams(window.location.search);
+var mode = taxonParams.get("mode");
 window.circles = [];
 
 var detailLevel = 60;
@@ -1563,7 +1530,7 @@ leafletGraphControl.onAdd = function() {
 
 leafletGraphControl.update = function() {
   // TODO: use map function to list the site meta fields for the options.
-  // TODO: To make this able to procedurally generate the options, needs to be called after siteMetrics has been set up.
+  // TODO: To make this able to procedurally generate the options, needs to be called after siteAggregates has been set up.
 
   // Creates the same thing so that it wont throw reference errors. I think so calculations occur using the metric values before the elements exist.
   const selectionTemplate = text => {
@@ -1583,7 +1550,7 @@ leafletGraphControl.update = function() {
       </select>
     </label>`;
   };
-  if (siteMetrics != null) {
+  if (siteAggregates != null) {
     // using back ticks
     this._div.innerHeight = selectionTemplate("");
   } else {
@@ -1602,7 +1569,7 @@ leafletGraphControl.update = function() {
  */
 function selectColorChange(e) {
   var metric = document.getElementById("meta-select").value;
-  var metricColour = createColorRange(siteMetrics);
+  var metricColour = createColorRange(siteAggregates);
   d3.selectAll(".enter")
     .transition()
     .duration(400)
@@ -1742,14 +1709,15 @@ function initializeSelect() {
         let index = 0;
         window.otuLookup = {};
         let taxonOptions = data.taxonomy_options.map(taxon => {
-          // return structure = { pk, otu code }
+          // return structure = { pk, otu code, otu pk }
           let option = {
             id: taxon[1],
             text: taxon[0],
             group: "taxon"
           };
           index++;
-          window.otuLookup[taxon[0]] = taxon[1];
+          window.otuLookup[taxon[2]] = taxon[0];
+          // window.otuLookup[taxon[2]] = taxon[1];
           return option;
         });
 
@@ -1811,8 +1779,9 @@ function initializeSelect() {
   });
   $("#filter").change(function() {
     window.location.hash = encodeURIComponent($(this).val());
-    let filters = $(this).select2("data");
-    fetchSampleOtus(filters);
+    let taxonFilters = $(this).select2("data");
+    let contextFilters = $("#filterContextual").select2("data");
+    fetchSampleOtus(taxonFilters, contextFilters);
   });
 }
 
@@ -1824,8 +1793,6 @@ function initializeSelectContextual(json) {
       text: field
     };
   });
-
-  console.log(json.data);
   $("#filterContextual").select2({
     placeholder: "Search by sample contextual metadata",
     multiple: true,
@@ -1834,6 +1801,7 @@ function initializeSelectContextual(json) {
     // cache: true,
     tags: true,
     data: data,
+    tokenSeparators: [",", " "],
     createTag: function(params) {
       let term = $.trim(params.term);
       if (term === "") {
@@ -1849,21 +1817,26 @@ function initializeSelectContextual(json) {
       window.contextTags.push(newTag);
       // console.log(window.local_tags);
       return newTag;
-    },
-    insertTag: function(data, tag) {
-      console.log("insert tag");
-      console.log(data);
     }
+    // insertTag: function(data, tag) {
+    //    wanting to place custom tags at the end.
+    //    data.push(tag);
+    // }
   });
   $("#filterContextual").change(function() {
     window.location.hash = encodeURIComponent($(this).val());
-    let filters = $(this).select2("data");
-    fetchSampleOtus(filters);
+    let contextualFilters = $(this).select2("data");
+    let taxonFilters = $("#filter").select2("data");
+    console.log(contextualFilters);
+    console.log(taxonFilters);
+    // something for hanlding meta filters.
+    fetchSampleOtus(taxonFilters, contextualFilters);
   });
 }
 
 initializeSelect();
-// load contextual options up front.
+// load contextual options up front. Hardcoding some params.
+// possibly separate into a different API later on if we have time or a need.
 let url = API_URLS.local_filter_options + "q=&page=1&page_size=200";
 fetch(url).then(response => {
   response.json().then(initializeSelectContextual);
