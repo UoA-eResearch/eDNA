@@ -1187,7 +1187,6 @@ function createColorRange(siteAggregates) {
   }
   const colourRange = d3
     .scaleLinear()
-    // ? Not sure if interpolate is best visibility choice.
     .interpolate(d3.interpolateRgb)
     .domain([min, max])
     .range(colorRange);
@@ -1196,8 +1195,6 @@ function createColorRange(siteAggregates) {
 
 /**
  * Returns a random amount between upper and lower. For jittering the plots.
- * @param {*} upper
- * @param {*} lower
  */
 let randomRange = (upper, lower) => {
   return Math.random() * (upper - lower) + lower;
