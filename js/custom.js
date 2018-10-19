@@ -1213,7 +1213,7 @@ function updateGraph(siteAggregates) {
       siteId: siteId,
       Metric: metricName,
       value: value,
-      meta: site
+      meta: sampleContextLookup[siteId]
     };
   }
 
@@ -1292,6 +1292,7 @@ function updateGraph(siteAggregates) {
         .attr("fill", function(d) {
           //TODO: Create a function to get the select dropdown values. For here and onchange.
           //console.log(d.meta[metric]);
+          console.log(d);
           return metricColour(d.meta[colourMetric]);
         })
         .on("mouseover", function(d) {
