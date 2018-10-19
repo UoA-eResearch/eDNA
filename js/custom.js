@@ -134,7 +134,6 @@ function getSiteWeights(filters) {
   // console.log(grid);
   // console.log(sites);
   // console.log(siteAggregates);
-  addSiteMetrics(siteAggregates);
   drawGrid(grid);
   return sites;
 
@@ -317,10 +316,10 @@ function handleResponseData(responseData) {
     let sampleContext = sampleContexts[i];
     window.sampleContextLookup[sampleContext.id] = sampleContext;
   }
-  let siteAggs = aggregateBySite(sampleOtus);
-  let heatLayer = renderHeatLayer(siteAggs);
-  let cellAggs = aggregateByCell(siteAggs, sampleContexts);
-  let featureCollection = makeFeatureCollection(cellAggs);
+  let siteAggregatedData = aggregateBySite(sampleOtus);
+  let heatLayer = renderHeatLayer(siteAggregatedData);
+  let cellAggregatedData = aggregateByCell(siteAggregatedData, sampleContexts);
+  let featureCollection = makeFeatureCollection(cellAggregatedData);
   renderFeatureCollection(
     featureCollection,
     "weightedAbundance",
@@ -337,7 +336,8 @@ function handleResponseData(responseData) {
   //   "weightedSites",
   //   gridSitesLayerGroup
   // );
-  updateGraph(siteAggs);
+  siteAggregatedData = addSiteMetrics(siteAggregatedData);
+  updateGraph(siteAggregatedData);
 }
 
 /**
@@ -1166,7 +1166,6 @@ function createColorRange(siteAggregates) {
     sites.push(window.sampleContextLookup[siteId]);
   }
   const min = d3.min(sites, function(d) {
-    console.log(d);
     return d[metric];
   });
   const max = d3.max(sites, function(d) {
@@ -1205,15 +1204,13 @@ let randomRange = (upper, lower) => {
  * @param {*} siteAggregates
  */
 function updateGraph(siteAggregates) {
-  siteAggregates = addSiteMetrics(siteAggregates);
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   var metricColour = createColorRange(siteAggregates);
   var colourMetric = document.getElementById("meta-select").value;
 
-  function makeNestableObject(site, metricName, value) {
-    // helper to make tuples that can be nested using d3
+  function makeNestableObject(siteId, site, metricName, value) {
     return {
-      siteId: site.site,
+      siteId: siteId,
       Metric: metricName,
       value: value,
       meta: site
@@ -1222,21 +1219,26 @@ function updateGraph(siteAggregates) {
 
   var plotData = [];
   for (const [siteId, site] of Object.entries(siteAggregates)) {
-    plotData.push(makeNestableObject(site, "OTU richness", site.richness));
     plotData.push(
-      makeNestableObject(siteId, "Shannon entropy", site.shannonDiversity)
+      makeNestableObject(siteId, site, "OTU richness", site.richness)
     );
     plotData.push(
-      makeNestableObject(siteId, "Sequence abundance", site.abundance)
+      makeNestableObject(siteId, site, "Shannon entropy", site.shannonDiversity)
+    );
+    plotData.push(
+      makeNestableObject(siteId, site, "Sequence abundance", site.abundance)
     );
     plotData.push(
       makeNestableObject(
         siteId,
+        site,
         "Effective alpha diversity",
         site.effectiveAlpha
       )
     );
   }
+
+  console.log(plotData);
 
   var nestedPlotData = d3
     .nest()
