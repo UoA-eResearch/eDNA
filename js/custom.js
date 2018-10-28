@@ -596,12 +596,12 @@ function renderFeatureCollection(featureCollection, property, layerGroup) {
                     : d > 0.0
                       ? "#FFFFCC"
                       : "#9ECAE1";
-  const updatedLayer = L.geoJSON(featureCollection, {
+  const layer = L.geoJSON(featureCollection, {
     style: layerStyle,
     onEachFeature: onEachFeature
   });
   layerGroup.clearLayers();
-  layerGroup.addLayer(updatedLayer);
+  layerGroup.addLayer(layer);
 
   function layerStyle(feature) {
     return {
@@ -1281,7 +1281,7 @@ function updateGraph(siteAggregates) {
         .enter()
         .append("circle")
         .attr("class", "enter")
-        .attr("id", d => d.siteId)
+        .attr("id", d => d.id)
         //.attr('cy', y(d.key))
         .attr("cy", function(circle) {
           // * If no jitter wanted then set jitter 0, 0.
@@ -1292,12 +1292,11 @@ function updateGraph(siteAggregates) {
         .attr("fill", function(d) {
           //TODO: Create a function to get the select dropdown values. For here and onchange.
           //console.log(d.meta[metric]);
-          console.log(d);
           return metricColour(d.meta[colourMetric]);
         })
         .on("mouseover", function(d) {
           d3.select(this.parentNode.parentNode)
-            .selectAll("#" + d.siteId)
+            .selectAll("#" + d.id)
             .transition()
             .attr("r", 14)
             .duration(250);
@@ -1307,7 +1306,7 @@ function updateGraph(siteAggregates) {
             .duration(250);
           tooltip
             .html(
-              strongLine(d.siteId) +
+              strongLine(d.meta.site) +
                 strongHeader(d.Metric, d.value) +
                 strongHeader(
                   document.getElementById("meta-select").value,
@@ -1320,20 +1319,25 @@ function updateGraph(siteAggregates) {
             .style("z-index", 1000);
           var circle = d3.select(this);
           var site = circle.attr("id");
+
           //Uses grid cell look-up to zoom to
-          var featureIndex = gridCellLookup[site];
-          //e>layers>feature>properties> index == featureIndex. Then highlight.
+          // var featureIndex = gridCellLookup[site];
+          // //e>layers>feature>properties> index == featureIndex. Then highlight.
+          // map.eachLayer(function(layer) {
+          //   if (layer.feature != null) {
+          //     if (layer.feature.properties.index == featureIndex) {
+          //       highlightLayer(layer);
+          //     }
+          //   }
+          // });
+
           map.eachLayer(function(layer) {
-            if (layer.feature != null) {
-              if (layer.feature.properties.index == featureIndex) {
-                highlightLayer(layer);
-              }
-            }
+            console.log(layer);
           });
         })
         .on("mouseout", function(d) {
           d3.select(this.parentNode.parentNode)
-            .selectAll("#" + d.siteId)
+            .selectAll("#" + d.id)
             .transition()
             .attr("r", 7)
             .duration(250);
