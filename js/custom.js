@@ -21,7 +21,6 @@ function round(x, dp) {
 
 /**
  * Simple helper to wrap contents in strong tags followed by a line break.
- * @param {content} s
  */
 const strongLine = s => {
   return "<strong>" + s + "</strong>" + "<br />";
@@ -29,49 +28,10 @@ const strongLine = s => {
 
 /**
  * Helper function to make a strong field label with a value.
- * @param {header} h
- * @param {value} s
  */
-const strongHeader = (h, s) => {
-  return "<strong>" + h + ": </strong> " + s + "<br />";
+const strongHeader = (header, text) => {
+  return "<strong>" + header + ": </strong> " + text + "<br />";
 };
-
-function checkFragment(f, species, site) {
-  let ampIndex = f.indexOf("&");
-  let ltIndex = f.indexOf("<");
-  let gtIndex = f.indexOf(">");
-  let eqIndex = f.indexOf("=");
-  //Splits if ampersand or greater than found, recursively calls the split string.
-  // When no &'s left return filters results
-  if (ampIndex > 0) {
-    var left = f.substring(0, ampIndex).trim();
-    var right = f.substring(ampIndex + 1).trim();
-    return (
-      checkFragment(left, species, site) && checkFragment(right, species, site)
-    );
-  } else if (ltIndex > 0) {
-    var left = f.substring(0, ltIndex).trim();
-    var right = f.substring(ltIndex + 1).trim();
-    if (site[left] < right) {
-      return true;
-    }
-  } else if (gtIndex > 0) {
-    var left = f.substring(0, gtIndex).trim();
-    var right = f.substring(gtIndex + 1).trim();
-    if (site[left] > right) {
-      return true;
-    }
-  } else if (eqIndex > 0) {
-    var left = f.substring(0, eqIndex).trim();
-    var right = f.substring(eqIndex + 1).trim();
-    if (site[left] == right) {
-      return true;
-    }
-  } else {
-    return species.startsWith(f);
-  }
-  return false;
-}
 
 /**
  * Called by handleresults. Populates search bar dropdown.
