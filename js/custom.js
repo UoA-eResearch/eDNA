@@ -583,6 +583,9 @@ function makeFeatureCollection(cellAggs) {
     }
     popupContent += "</ul><br />";
     for (let otuId in cell.otus) {
+      if (window.otuLookup[otuId] === undefined) {
+        console.log("couldn't find otu name using otu id.");
+      }
       popupContent +=
         strongLine(window.otuLookup[otuId]) +
         strongHeader("Abundance in cell", cell.otus[otuId].abundance) +
@@ -1719,7 +1722,9 @@ function initializeSelect() {
         let data = response.data;
         let total_results = data.total_results;
         let index = 0;
-        window.otuLookup = {};
+        if (window.otuLookup == null || window.otuLookup === undefined) {
+          window.otuLookup = {};
+        }
         let taxonOptions = data.taxonomy_options.map(taxon => {
           // return structure = { pk, otu code, otu pk }
           let option = {
