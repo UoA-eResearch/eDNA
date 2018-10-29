@@ -367,6 +367,7 @@ function addLayerIdToSampleContext(layerGroup) {
  */
 function aggregateBySite(sampleOtus) {
   let siteAggs = {};
+  let missingOtus = [];
   for (let i in sampleOtus) {
     let tuple = sampleOtus[i];
     let otuId = tuple[0];
@@ -584,7 +585,10 @@ function makeFeatureCollection(cellAggs) {
     popupContent += "</ul><br />";
     for (let otuId in cell.otus) {
       if (window.otuLookup[otuId] === undefined) {
-        console.log("couldn't find otu name using otu id.");
+        // console.log(otuId);
+        // console.log(Object.keys(window.otuLookup).length);
+        // console.log(Object.keys(cell.otus).length);
+        // console.log("couldn't find otu name using otu id.");
       }
       popupContent +=
         strongLine(window.otuLookup[otuId]) +
@@ -808,156 +812,6 @@ function makeGridLookup(grid) {
     let rowIndex = Math.floor(latDiff / latOffset);
     let gridCellIndex = rowIndex * detailLevel + colIndex;
     return gridCellIndex;
-  }
-}
-
-/**
- * @param {*} grid
- */
-function drawGrid(grid) {
-  //TODO: refactor this
-  const cells = grid.cells;
-  const gridMaxes = CalculateGridMaxes(cells);
-  const maxRichness = gridMaxes.richness;
-  const maxAbundance = gridMaxes.abundance;
-  const maxSiteCount = gridMaxes.siteCount;
-  let features = [];
-  let cellId = 0;
-  for (let index in cells) {
-    const cell = cells[index];
-    //if grid doesn't contain any sites then don't add to map.
-    if (!cell.hasSamples) {
-      continue;
-    }
-    const weightedRichness = cell.richness / maxRichness;
-    const weightedAbundance = cell.abundance / maxAbundance;
-    const weightedSites = cell.cellSites.length / maxSiteCount;
-    //Add cell statistics within popup.
-    //Cell coordinates
-    let popupContent =
-      strongHeader("Cell id", cellId) +
-      strongHeader("Cell Richness", cell.richness) +
-      strongHeader("Cell Abundance", cell.abundance) +
-      strongHeader("Cell Site Count", cell.cellSites.length) +
-      strongHeader(
-        "Longitude",
-        cell.coordinates[0][0] + " to " + cell.coordinates[2][0]
-      ) +
-      strongHeader(
-        "Latitude",
-        cell.coordinates[0][1] + " to " + cell.coordinates[2][1]
-      ) +
-      "<br />";
-    cellId++;
-    //list all sites within the cell.
-    popupContent += strongLine("Sites in cell: ") + "<ul>";
-    for (let site in cell.cellSites) {
-      popupContent += "<li>" + cell.cellSites[site] + "</li>";
-    }
-    popupContent += "</ul><br />";
-    let speciesInCell = cell.cellSpecies;
-    console.log(speciesInCell);
-    //lists all the species within a cell.
-    popupContent += strongLine("Search results in cell: ") + " <br />";
-    for (let species in speciesInCell) {
-      popupContent +=
-        strongLine(species) +
-        strongHeader("Frequency in cell", speciesInCell[species].count) +
-        strongHeader("Abundance in cell", speciesInCell[species].value) +
-        "<br />";
-    }
-    const cellPolygon = {
-      type: "Feature",
-      properties: {
-        index,
-        weightedAbundance,
-        weightedRichness,
-        speciesInCell,
-        weightedSites,
-        cellSites: cell.cellSites,
-        hasSamples: cell.hasSamples,
-        popupContent: popupContent
-      },
-      geometry: {
-        type: "Polygon",
-        coordinates: [cell.coordinates]
-      }
-    };
-    features.push(cellPolygon);
-  }
-  let featureCollection = {
-    type: "FeatureCollection",
-    features: features
-  };
-  //Clear count layer and add new one to layergroup.
-  const gridRichnessLayer = L.geoJSON(featureCollection, {
-    style: CellCountStyle,
-    onEachFeature: onEachFeature
-  });
-  gridRichnessLayerGroup.clearLayers();
-  gridRichnessLayerGroup.addLayer(gridRichnessLayer);
-
-  //Clear count layer, add new one to layergroup.
-  const gridAbundanceLayer = L.geoJSON(featureCollection, {
-    style: CellValueStyle,
-    onEachFeature: onEachFeature
-  });
-  gridAbundanceLayerGroup.clearLayers();
-  gridAbundanceLayerGroup.addLayer(gridAbundanceLayer);
-
-  //Clear site count layer, add new one to layergroup.
-  const gridSitesLayer = L.geoJSON(featureCollection, {
-    style: CellSitesStyle,
-    onEachFeature: onEachFeature
-  });
-  gridSitesLayerGroup.clearLayers();
-  gridSitesLayerGroup.addLayer(gridSitesLayer);
-
-  function CellSitesStyle(feature) {
-    return {
-      fillColor: GetFillColor(feature.properties.weightedSites),
-      weight: 1,
-      opacity: getOutlineOpacity(),
-      color: GetOutlineColour(),
-      fillOpacity: GetFillOpacity(
-        feature.properties.weightedSites,
-        feature.properties.hasSamples
-      )
-    };
-  }
-
-  /**
-   * returns feature style based on feature properties value/abundance.
-   * @param {*} feature
-   */
-  function CellValueStyle(feature) {
-    return {
-      fillColor: GetFillColor(feature.properties.weightedAbundance),
-      weight: 1,
-      opacity: getOutlineOpacity(),
-      color: GetOutlineColour(),
-      fillOpacity: GetFillOpacity(
-        feature.properties.weightedAbundance,
-        feature.properties.hasSamples
-      )
-    };
-  }
-
-  /**
-   * returns feature style based on feature properties count/richness.
-   * @param {*} feature
-   */
-  function CellCountStyle(feature) {
-    return {
-      fillColor: GetFillColor(feature.properties.weightedRichness),
-      weight: 1,
-      opacity: getOutlineOpacity(),
-      color: GetOutlineColour(),
-      fillOpacity: GetFillOpacity(
-        feature.properties.weightedRichness,
-        feature.properties.hasSamples
-      )
-    };
   }
 }
 
