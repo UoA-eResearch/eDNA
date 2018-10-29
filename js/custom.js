@@ -320,23 +320,36 @@ function handleResponseData(responseData) {
   let heatLayer = renderHeatLayer(siteAggregatedData);
   let cellAggregatedData = aggregateByCell(siteAggregatedData, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggregatedData);
-  renderFeatureCollection(
+  let abundanceLayer = renderFeatureCollection(
     featureCollection,
     "weightedAbundance",
     gridAbundanceLayerGroup
   );
-  renderFeatureCollection(
+  let richnessLayer = renderFeatureCollection(
     featureCollection,
     "weightedRichness",
     gridRichnessLayerGroup
   );
-  // NOTE: disabling this one for quick comparison between the layers while the coordinates are mismatching.
+  // NOTE: disabling  site layer for quick comparison: rectangles are distorted.
   // renderFeatureCollection(
   //   featureCollection,
   //   "weightedSites",
   //   gridSitesLayerGroup
   // );
   siteAggregatedData = addSiteMetrics(siteAggregatedData);
+
+  // creating site -> leaflet layer reference.
+  map.eachLayer(function(layer) {
+    let leafletId = L.stamp(layer);
+    console.log(leafletId);
+    let sites = (((layer || {}).feature || {}).properties || {}).sites;
+    if (sites !== undefined) {
+      sites.forEach(siteId => {
+        window.sampleContextLookup[siteId].leafletId = leafletId;
+      });
+    }
+  });
+
   updateGraph(siteAggregatedData);
 }
 
@@ -372,7 +385,6 @@ function aggregateBySite(sampleOtus) {
       siteAgg.otus[otuId].count++;
     }
   }
-  console.log(siteAggs);
   return siteAggs;
 }
 
@@ -397,11 +409,11 @@ function renderHeatLayer(siteAggs) {
 }
 
 /**
- * Iterates the site aggregates and sums the values by grid cell coordinates.
+ * Iterates the site aggregates and sums the values by grid cell coordinates. Returns a dictionary which keys indicate positional offsets.
  * @param {*} siteAggs
  * @param {*} sampleContexts
  */
-function aggregateByCell(siteAggs, sampleContexts) {
+function aggregateByCell(siteAggs) {
   // setting up grid parameters
   makeGrid(detailLevel);
   console.log("aggregate by cell");
@@ -440,7 +452,6 @@ function aggregateByCell(siteAggs, sampleContexts) {
     let cell = cellAggs[cellKey];
     cell.abundance += site.abundance;
     cell.sites.push(siteId);
-    // Evaluate if the species is new to the site, if so, make a new otu entry and increment richness
     for (let otuId in site.otus) {
       let siteOtu = site.otus[otuId];
       if (!(otuId in cell.otus)) {
@@ -503,9 +514,11 @@ function makeFeatureCollection(cellAggs) {
     featureCollection.features.push({
       type: "Feature",
       properties: {
+        id: key,
         weightedAbundance,
         weightedRichness,
         weightedSites,
+        sites: cell.sites,
         popupContent
       },
       geometry: {
@@ -602,6 +615,7 @@ function renderFeatureCollection(featureCollection, property, layerGroup) {
   });
   layerGroup.clearLayers();
   layerGroup.addLayer(layer);
+  return layer;
 
   function layerStyle(feature) {
     return {
@@ -688,8 +702,7 @@ function makeGrid(detailLevel) {
   southEast = hardBounds.getSouthEast();
   const latOffset = (northWest.lat - southWest.lat) / detailLevel;
   const lngOffset = (northEast.lng - northWest.lng) / detailLevel;
-  console.log("make grid");
-  console.log(latOffset, lngOffset);
+  // console.log(latOffset, lngOffset);
   // The bounds method seems to make the rectangle less distorted
   // const latOffset = (gridStart[1] - gridEnd[1]) / detailLevel;
   // const lngOffset = (gridEnd[0] - gridStart[0]) / detailLevel;
@@ -1317,23 +1330,8 @@ function updateGraph(siteAggregates) {
             .style("top", d3.event.pageY - 10 + "px")
             .style("opacity", 0.9)
             .style("z-index", 1000);
-          var circle = d3.select(this);
-          var site = circle.attr("id");
-
-          //Uses grid cell look-up to zoom to
-          // var featureIndex = gridCellLookup[site];
-          // //e>layers>feature>properties> index == featureIndex. Then highlight.
-          // map.eachLayer(function(layer) {
-          //   if (layer.feature != null) {
-          //     if (layer.feature.properties.index == featureIndex) {
-          //       highlightLayer(layer);
-          //     }
-          //   }
-          // });
-
-          map.eachLayer(function(layer) {
-            console.log(layer);
-          });
+          let layer = GetLayerBySampleContextId(d.siteId);
+          highlightLayer(layer);
         })
         .on("mouseout", function(d) {
           d3.select(this.parentNode.parentNode)
@@ -1346,41 +1344,14 @@ function updateGraph(siteAggregates) {
             .style("opacity", 0)
             .style("z-index", 1000)
             .duration(250);
-
-          var circle = d3.select(this);
-          var site = circle.attr("id");
-          //Uses grid cell look-up to zoom to
-          //TODO: feature index doesn't match up with popup content index. Reduce grid to only include sampled cells.
-          var featureIndex = gridCellLookup[site];
-
-          //e>layers>feature>properties> index == featureIndex. Then highlight.
-          map.eachLayer(function(layer) {
-            if (layer.feature != null) {
-              if (layer.feature.properties.index == featureIndex) {
-                disableHighlightLayer(layer);
-              }
-            }
-          });
+          let layer = GetLayerBySampleContextId(d.siteId);
+          disableHighlightLayer(layer);
         })
         .on("click", function(d) {
-          var circle = d3.select(this);
-          var site = circle.attr("id");
-          //Uses grid cell look-up to zoom to
-
-          //TODO: feature index doesn't match up with popup content index. Reduce grid to only include sampled cells.
-          var featureIndex = gridCellLookup[site];
-
-          //e>layers>feature>properties> index == featureIndex. Then highlight.
-          map.eachLayer(function(layer) {
-            if (layer.feature != null) {
-              if (layer.feature.properties.index == featureIndex) {
-                var bounds = layer.getBounds();
-                //var centre = bounds.getCenter();
-                map.flyToBounds(bounds, { padding: [100, 100] });
-                //highlightLayer(layer);
-              }
-            }
-          });
+          let layer = GetLayerBySampleContextId(d.siteId);
+          disableHighlightLayer(layer);
+          let bounds = layer.getBounds();
+          map.flyToBounds(bounds, { padding: [300, 300] });
         })
         .merge(circle)
         .transition()
@@ -1493,6 +1464,23 @@ input.onAdd = map => {
   return this._div;
 };
 input.addTo(map);
+
+/**
+ * Takes in a sample contextual index, iterates through all active and stamped map layers, then returns the last matching layer with leaflet id. Assumes sample contextual contains a leafletId value.
+ * @param {integer} id
+ */
+function GetLayerBySampleContextId(id) {
+  let targetLeafletId = window.sampleContextLookup[id].leafletId;
+  // for now just iterate through all layers, find first match, break then highlight.
+  let targetLayer;
+  map.eachLayer(function(layer) {
+    if (layer._leaflet_id == targetLeafletId) {
+      targetLayer = layer;
+    }
+  });
+  return targetLayer;
+}
+
 //function for input change
 function changeSliderValue(value) {
   //slider slider.slider refers to the handle.
