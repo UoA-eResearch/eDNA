@@ -320,12 +320,12 @@ function handleResponseData(responseData) {
   let heatLayer = renderHeatLayer(siteAggregatedData);
   let cellAggregatedData = aggregateByCell(siteAggregatedData, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggregatedData);
-  let abundanceLayer = renderFeatureCollection(
+  let abundanceLayer = featureCollectionToLayer(
     featureCollection,
     "weightedAbundance",
     gridAbundanceLayerGroup
   );
-  let richnessLayer = renderFeatureCollection(
+  let richnessLayer = featureCollectionToLayer(
     featureCollection,
     "weightedRichness",
     gridRichnessLayerGroup
@@ -338,19 +338,27 @@ function handleResponseData(responseData) {
   // );
   siteAggregatedData = addSiteMetrics(siteAggregatedData);
 
-  // creating site -> leaflet layer reference.
-  map.eachLayer(function(layer) {
+  // creating site -> leaflet layer references for each layer.
+  addLayerIdToSampleContext(abundanceLayer);
+  addLayerIdToSampleContext(richnessLayer);
+
+  updateGraph(siteAggregatedData);
+}
+
+function addLayerIdToSampleContext(layerGroup) {
+  layerGroup.eachLayer(function(layer) {
     let leafletId = L.stamp(layer);
-    console.log(leafletId);
     let sites = (((layer || {}).feature || {}).properties || {}).sites;
     if (sites !== undefined) {
       sites.forEach(siteId => {
-        window.sampleContextLookup[siteId].leafletId = leafletId;
+        let sampleContext = window.sampleContextLookup[siteId];
+        if (sampleContext.leafletIds == null) {
+          sampleContext.leafletIds = [];
+        }
+        sampleContext.leafletIds.push(leafletId);
       });
     }
   });
-
-  updateGraph(siteAggregatedData);
 }
 
 /**
@@ -585,7 +593,7 @@ function makeFeatureCollection(cellAggs) {
   }
 }
 
-function renderFeatureCollection(featureCollection, property, layerGroup) {
+function featureCollectionToLayer(featureCollection, property, layerGroup) {
   const outlineOpacity = 0.15;
   const outlineColor = "#000000";
   const fillOpacity = d => (d > 0.0 ? 0.8 : 0.2);
@@ -609,13 +617,14 @@ function renderFeatureCollection(featureCollection, property, layerGroup) {
                     : d > 0.0
                       ? "#FFFFCC"
                       : "#9ECAE1";
-  const layer = L.geoJSON(featureCollection, {
+  const geoJSONLayer = L.geoJSON(featureCollection, {
     style: layerStyle,
     onEachFeature: onEachFeature
   });
   layerGroup.clearLayers();
-  layerGroup.addLayer(layer);
-  return layer;
+  layerGroup.addLayer(geoJSONLayer);
+
+  return geoJSONLayer;
 
   function layerStyle(feature) {
     return {
@@ -641,37 +650,39 @@ function renderFeatureCollection(featureCollection, property, layerGroup) {
       select: highlightLayer
     });
 
+    /**
+     * Function called when layer is selected.
+     * @param {*} e
+     */
     function handleCellClick(e) {
       var layer = e.target;
-      console.log("layer index is " + layer.feature.properties.index);
-      var speciesInCell = layer.feature.properties.speciesInCell;
-      var speciesAmount = Object.keys(speciesInCell).length;
-      console.log("Number of unique classifications in cell: " + speciesAmount);
+      var layerProps = layer.feature.properties.speciesInCell;
     }
 
     function handleMouseOver(e) {
       let layer = e.target;
-      let siteList = layer.feature.properties.cellSites;
-      for (site in siteList) {
-        let circle = d3.selectAll("#" + siteList[site]);
+      layer.feature.properties.sites.forEach(siteId => {
+        // needs to use sitecode as you cannot select in css using a number "#123"
+        let siteCode = window.sampleContextLookup[siteId].site;
+        let circle = d3.selectAll("#" + siteCode);
         circle
           .transition()
           .duration(250)
           .attr("r", 14);
-      }
+      });
     }
 
     function handleMouseOut(e) {
       let layer = e.target;
-      //console.log(layer.feature.properties.cellSites);
-      let siteList = layer.feature.properties.cellSites;
-      for (site in siteList) {
-        let circle = d3.selectAll("#" + siteList[site]);
+      layer.feature.properties.sites.forEach(siteId => {
+        // needs to use sitecode as you cannot select in css using a number "#123"
+        let siteCode = window.sampleContextLookup[siteId].site;
+        let circle = d3.selectAll("#" + siteCode);
         circle
           .transition()
           .duration(250)
           .attr("r", 7);
-      }
+      });
     }
 
     function highlightLayer(layer) {
@@ -841,7 +852,8 @@ function drawGrid(grid) {
       popupContent += "<li>" + cell.cellSites[site] + "</li>";
     }
     popupContent += "</ul><br />";
-    const speciesInCell = cell.cellSpecies;
+    let speciesInCell = cell.cellSpecies;
+    console.log(speciesInCell);
     //lists all the species within a cell.
     popupContent += strongLine("Search results in cell: ") + " <br />";
     for (let species in speciesInCell) {
@@ -1259,7 +1271,6 @@ function updateGraph(siteAggregates) {
       return d.Metric;
     })
     .entries(plotData);
-  // console.log(nestedData);
 
   //within the svg, within the g tags, select the class datapoints
   var update = g.selectAll(".datapoints").data(nestedPlotData, function(d) {
@@ -1294,7 +1305,7 @@ function updateGraph(siteAggregates) {
         .enter()
         .append("circle")
         .attr("class", "enter")
-        .attr("id", d => d.id)
+        .attr("id", d => d.meta.site)
         //.attr('cy', y(d.key))
         .attr("cy", function(circle) {
           // * If no jitter wanted then set jitter 0, 0.
@@ -1309,7 +1320,7 @@ function updateGraph(siteAggregates) {
         })
         .on("mouseover", function(d) {
           d3.select(this.parentNode.parentNode)
-            .selectAll("#" + d.id)
+            .selectAll("#" + d.meta.site)
             .transition()
             .attr("r", 14)
             .duration(250);
@@ -1323,7 +1334,8 @@ function updateGraph(siteAggregates) {
                 strongHeader(d.Metric, d.value) +
                 strongHeader(
                   document.getElementById("meta-select").value,
-                  d.meta[document.getElementById("meta-select").value]
+                  // d.meta[document.getElementById("meta-select").value]
+                  d.meta["elev"]
                 )
             )
             .style("left", d3.event.pageX + "px")
@@ -1331,11 +1343,13 @@ function updateGraph(siteAggregates) {
             .style("opacity", 0.9)
             .style("z-index", 1000);
           let layer = GetLayerBySampleContextId(d.siteId);
-          highlightLayer(layer);
+          if (layer != null && layer !== undefined) {
+            highlightLayer(layer);
+          }
         })
         .on("mouseout", function(d) {
           d3.select(this.parentNode.parentNode)
-            .selectAll("#" + d.id)
+            .selectAll("#" + d.meta.site)
             .transition()
             .attr("r", 7)
             .duration(250);
@@ -1345,13 +1359,16 @@ function updateGraph(siteAggregates) {
             .style("z-index", 1000)
             .duration(250);
           let layer = GetLayerBySampleContextId(d.siteId);
-          disableHighlightLayer(layer);
+          if (layer != null && layer !== undefined) {
+            disableHighlightLayer(layer);
+          }
         })
         .on("click", function(d) {
           let layer = GetLayerBySampleContextId(d.siteId);
-          disableHighlightLayer(layer);
-          let bounds = layer.getBounds();
-          map.flyToBounds(bounds, { padding: [300, 300] });
+          if (layer != null && layer !== undefined) {
+            let bounds = layer.getBounds();
+            map.flyToBounds(bounds, { padding: [300, 300] });
+          }
         })
         .merge(circle)
         .transition()
@@ -1470,11 +1487,12 @@ input.addTo(map);
  * @param {integer} id
  */
 function GetLayerBySampleContextId(id) {
-  let targetLeafletId = window.sampleContextLookup[id].leafletId;
-  // for now just iterate through all layers, find first match, break then highlight.
+  let targetLeafletIds = window.sampleContextLookup[id].leafletIds;
+  // for now just iterate through all layers. Final layer that matches is returned.
   let targetLayer;
   map.eachLayer(function(layer) {
-    if (layer._leaflet_id == targetLeafletId) {
+    // if (layer._leaflet_id == targetLeafletId) {
+    if (targetLeafletIds.includes(layer._leaflet_id)) {
       targetLayer = layer;
     }
   });
