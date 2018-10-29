@@ -1393,44 +1393,28 @@ slider.addTo(map);
 const leafletGraphControl = L.control({ position: "bottomright" });
 leafletGraphControl.onAdd = function() {
   this._div = L.DomUtil.create("div", "info"); //creates div with class "info"
-  this.update();
+  this._div.innerHTML = `<div id="chart" style="display:none;">
+  </div>
+  <br />
+  <button onclick="toggleGraph()">Toggle Graph</button>
+  <label> Colour by: 
+    <select id="meta-select" onChange="selectColorChange(this.value)" >
+      <option selected value="elev">elev</option>
+      <option value="mid_ph">Mid pH</option>
+      <option value="mean_C_percent">Mean carbon concentration</option>
+      <option value="prec_mean">Mean Precipitation</option>
+      <option value="ave_logNconcen">Average log Nitrogen concentration</option>
+      <option value="water2">Water 2</option>
+      <option value="freshwater">Freshwater</option>
+    </select>
+  </label>
+  <label> Colour type: 
+    <select id="color-scheme-select" onChange="selectColorChange(this.value)" >
+      <option selected value="sequential">Sequential</option>
+      <option value="diverging">Diverging</option>
+    </select>
+  </label>`;
   return this._div;
-};
-
-leafletGraphControl.update = function() {
-  // TODO: use map function to list the site meta fields for the options.
-  // TODO: To make this able to procedurally generate the options, needs to be called after siteAggregates has been set up.
-
-  // Creates the same thing so that it wont throw reference errors. I think so calculations occur using the metric values before the elements exist.
-  const selectionTemplate = text => {
-    return `<div id="chart" style="display:none;">
-    </div>
-    <br />
-    <button onclick="toggleGraph()">Toggle Graph</button>
-    <label> Colour by: 
-      <select id="meta-select" onChange="selectColorChange(this.value)" >
-      ${text}
-      </select>
-    </label>
-    <label> Colour type: 
-      <select id="color-scheme-select" onChange="selectColorChange(this.value)" >
-        <option selected value="sequential">Sequential</option>
-        <option value="diverging">Diverging</option>
-      </select>
-    </label>`;
-  };
-  if (siteAggregates != null) {
-    // using back ticks
-    this._div.innerHeight = selectionTemplate("");
-  } else {
-    this._div.innerHTML = selectionTemplate(` <option selected value="elev">elev</option>
-    <option value="mid_ph">Mid pH</option>
-    <option value="mean_C_percent">Mean carbon concentration</option>
-    <option value="prec_mean">Mean Precipitation</option>
-    <option value="ave_logNconcen">Average log Nitrogen concentration</option>
-    <option value="water2">Water 2</option>
-    <option value="freshwater">Freshwater</option>`);
-  }
 };
 
 /**
