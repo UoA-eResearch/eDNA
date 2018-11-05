@@ -444,8 +444,18 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
       var layer = e.target;
       let popup = layer.getPopup();
       // popup.setPopupContent(makePopupContent(layer.feature.properties));
-      popup.setPopupContent("secondary content.");
-      popup.update();
+      console.log("clicked");
+      popup.bindPopup(test(popup));
+    }
+
+    function test() {
+      fetch("http://localhost:8000/edna/api/v1.0/otu/?id=5").then(response => {
+        response.json().then(jsonResponse => {
+          console.log(otu_names[0].code);
+          popup.setContent(jsonResponse.otu_names[0].code);
+          popup.updatePopup();
+        });
+      });
     }
 
     function handleMouseOver(e) {
