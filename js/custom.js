@@ -284,7 +284,6 @@ function makeFeatureCollection(cellAggs) {
     const weightedRichness = cell.richness / maxes.richness;
     const weightedAbundance = cell.abundance / maxes.abundance;
     const weightedSites = cell.siteCount / maxes.sites;
-    const popupContent = makePopupContent(cell);
     featureCollection.features.push({
       type: "Feature",
       properties: {
@@ -293,7 +292,8 @@ function makeFeatureCollection(cellAggs) {
         weightedRichness,
         weightedSites,
         sites: cell.sites,
-        popupContent
+        otus: cell.otus,
+        coordinates: cell.coordinates
       },
       geometry: {
         type: "Polygon",
@@ -325,44 +325,58 @@ function makeFeatureCollection(cellAggs) {
       sites
     };
   }
+}
 
-  function makePopupContent(cell) {
-    let popupContent =
-      strongHeader("Cell Richness", cell.richness) +
-      strongHeader("Cell Abundance", cell.abundance) +
-      strongHeader("Cell Site Count", cell.siteCount) +
-      strongHeader(
-        "Longitude",
-        cell.coordinates[0][0] + " to " + cell.coordinates[2][0]
-      ) +
-      strongHeader(
-        "Latitude",
-        cell.coordinates[0][1] + " to " + cell.coordinates[2][1]
-      ) +
-      "<br />";
-    //list all sites within the cell.
-    popupContent += strongLine("Sites in cell: ") + "<ul>";
-    for (let i in cell.sites) {
-      siteId = cell.sites[i];
-      popupContent +=
-        "<li>" + window.sampleContextLookup[siteId].site + "</li>";
-    }
-    popupContent += "</ul><br />";
-    for (let otuId in cell.otus) {
-      if (window.otuLookup[otuId] === undefined) {
-        // console.log(otuId);
-        // console.log(Object.keys(window.otuLookup).length);
-        // console.log(Object.keys(cell.otus).length);
-        // console.log("couldn't find otu name using otu id.");
-      }
-      popupContent +=
-        strongLine(window.otuLookup[otuId]) +
-        strongHeader("Abundance in cell", cell.otus[otuId].abundance) +
-        strongHeader("Frequency in cell", cell.otus[otuId].count) +
-        "<br />";
-    }
-    return popupContent;
+function makePopupContent(featureProps) {
+  console.log("calling make popup content.");
+  let popupContent =
+    strongHeader("Cell Richness", featureProps.weightedRichness) +
+    strongHeader("Cell Abundance", featureProps.weightedAbundance) +
+    strongHeader("Cell Site Count", featureProps.sites.length) +
+    strongHeader(
+      "Longitude",
+      featureProps.coordinates[0][0] + " to " + featureProps.coordinates[2][0]
+    ) +
+    strongHeader(
+      "Latitude",
+      featureProps.coordinates[0][1] + " to " + featureProps.coordinates[2][1]
+    ) +
+    "<br />";
+  //list all sites within the cell.
+  popupContent += strongLine("Sites in cell: ") + "<ul>";
+  for (let i in featureProps.sites) {
+    siteId = featureProps.sites[i];
+    popupContent += "<li>" + window.sampleContextLookup[siteId].site + "</li>";
   }
+  popupContent += "</ul><br />";
+
+  // TEST:START: getting the missing id lookups.
+  let missingIds = [];
+  Object.keys(featureProps.otus).forEach(otuId => {
+    if (!(otuId in window.otuLookup) && !missingIds.includes("id=" + otuId)) {
+      missingIds.push("id=" + otuId);
+    }
+  });
+  console.log(Object.keys(window.otuLookup).length);
+  console.log("missing id count: " + missingIds.length);
+  let base_url = "http://localhost:8000/edna/api/v1.0/otu/?";
+  base_url += missingIds.join("&");
+  fetch(base_url).then(response => {
+    response.json().then(json => {
+      json.otu_names.forEach(otu_name => {
+        window.otuLookup[otu_name.id] = otu_name.code;
+      });
+    });
+  });
+  // TEST:END:
+  for (let otuId in featureProps.otus) {
+    popupContent +=
+      strongLine(window.otuLookup[otuId]) +
+      strongHeader("Abundance in cell", featureProps.otus[otuId].abundance) +
+      strongHeader("Frequency in cell", featureProps.otus[otuId].count) +
+      "<br />";
+  }
+  return popupContent;
 }
 
 function featureCollectionToLayer(featureCollection, property, layerGroup) {
@@ -409,12 +423,12 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
   }
 
   function onEachFeature(feature, layer) {
-    if (feature.properties && feature.properties.popupContent) {
-      var popup = layer.bindPopup(feature.properties.popupContent, {
-        maxWidth: 4000,
-        maxHeight: 150
-      });
-    }
+    // setting popup size constraint.
+    layer.bindPopup("Loading...", {
+      // layer.bindPopup(feature.properties.popupContent, {
+      maxWidth: 4000,
+      maxHeight: 150
+    });
     layer.on({
       mouseover: handleMouseOver,
       mouseout: handleMouseOut,
@@ -428,7 +442,10 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
      */
     function handleCellClick(e) {
       var layer = e.target;
-      var layerProps = layer.feature.properties.speciesInCell;
+      let popup = layer.getPopup();
+      // popup.setPopupContent(makePopupContent(layer.feature.properties));
+      popup.setPopupContent("secondary content.");
+      popup.update();
     }
 
     function handleMouseOver(e) {
@@ -1295,7 +1312,6 @@ function disableStatePopup() {
   statePopup.style.display = "none";
 }
 
-window.taxonTags = [];
 function initializeSelect() {
   $("#filter").select2({
     placeholder: "Type to filter by classification and metadata",
@@ -1392,7 +1408,7 @@ function initializeSelect() {
       };
       // TODO: just re-add the local tags to the returns options everytime.
       // TODO: Alternatively, clear the local taxon and meta tags everytime.
-      window.taxonTags.push(newTag);
+      // window.taxonTags.push(newTag);
       // console.log(window.local_tags);
       return newTag;
     }
