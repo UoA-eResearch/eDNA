@@ -327,53 +327,34 @@ function makeFeatureCollection(cellAggs) {
   }
 }
 
-function makePopupContent(featureProps) {
+function makePopupContent(properties) {
   console.log("calling make popup content.");
   let popupContent =
-    strongHeader("Cell Richness", featureProps.weightedRichness) +
-    strongHeader("Cell Abundance", featureProps.weightedAbundance) +
-    strongHeader("Cell Site Count", featureProps.sites.length) +
+    strongHeader("Cell Richness", properties.weightedRichness) +
+    strongHeader("Cell Abundance", properties.weightedAbundance) +
+    strongHeader("Cell Site Count", properties.sites.length) +
     strongHeader(
       "Longitude",
-      featureProps.coordinates[0][0] + " to " + featureProps.coordinates[2][0]
+      properties.coordinates[0][0] + " to " + properties.coordinates[2][0]
     ) +
     strongHeader(
       "Latitude",
-      featureProps.coordinates[0][1] + " to " + featureProps.coordinates[2][1]
+      properties.coordinates[0][1] + " to " + properties.coordinates[2][1]
     ) +
     "<br />";
   //list all sites within the cell.
   popupContent += strongLine("Sites in cell: ") + "<ul>";
-  for (let i in featureProps.sites) {
-    siteId = featureProps.sites[i];
+  for (let i in properties.sites) {
+    siteId = properties.sites[i];
     popupContent += "<li>" + window.sampleContextLookup[siteId].site + "</li>";
   }
   popupContent += "</ul><br />";
 
-  // TEST:START: getting the missing id lookups.
-  let missingIds = [];
-  Object.keys(featureProps.otus).forEach(otuId => {
-    if (!(otuId in window.otuLookup) && !missingIds.includes("id=" + otuId)) {
-      missingIds.push("id=" + otuId);
-    }
-  });
-  console.log(Object.keys(window.otuLookup).length);
-  console.log("missing id count: " + missingIds.length);
-  let base_url = "http://localhost:8000/edna/api/v1.0/otu/?";
-  base_url += missingIds.join("&");
-  fetch(base_url).then(response => {
-    response.json().then(json => {
-      json.otu_names.forEach(otu_name => {
-        window.otuLookup[otu_name.id] = otu_name.code;
-      });
-    });
-  });
-  // TEST:END:
-  for (let otuId in featureProps.otus) {
+  for (let otuId in properties.otus) {
     popupContent +=
       strongLine(window.otuLookup[otuId]) +
-      strongHeader("Abundance in cell", featureProps.otus[otuId].abundance) +
-      strongHeader("Frequency in cell", featureProps.otus[otuId].count) +
+      strongHeader("Abundance in cell", properties.otus[otuId].abundance) +
+      strongHeader("Frequency in cell", properties.otus[otuId].count) +
       "<br />";
   }
   return popupContent;
@@ -435,7 +416,7 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
       click: handleCellClick,
       select: highlightLayer
     });
-
+    // console.log(layer.feature);
     /**
      * Function called when layer is selected.
      * @param {*} e
@@ -443,15 +424,32 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
     function handleCellClick(e) {
       var layer = e.target;
       let popup = layer.getPopup();
-      // popup.setPopupContent(makePopupContent(layer.feature.properties));
-      console.log("clicked");
-      popup.bindPopup(test(popup));
+      popup.bindPopup(findMissingOtuLookups(layer, popup));
     }
 
-    function test() {
+    function findMissingOtuLookups(layer, popup) {
+      let missingIds = [];
+      for (const [otuId] of Object.entries(layer.feature.properties.otus)) {
+        if (!(otuId in window.otuLookup)) {
+          missingIds.push(otuId);
+        }
+      }
+      f_url = "http://localhost:8000/edna/api/v1.0/otu/?";
+      f_url += "id=" + missingIds.join("&id=");
+      console.log(f_url);
+      fetch(f_url).then(response => {
+        response.json().then(jsonResponse => {
+          console.log(jsonResponse);
+          popup.setContent(makePopupContent(layer.feature.properties));
+          popup.updatePopup();
+        });
+      });
+    }
+
+    function generatePopupContent(popup) {
       fetch("http://localhost:8000/edna/api/v1.0/otu/?id=5").then(response => {
         response.json().then(jsonResponse => {
-          console.log(otu_names[0].code);
+          console.log(jsonResponse.otu_names[0].code);
           popup.setContent(jsonResponse.otu_names[0].code);
           popup.updatePopup();
         });
