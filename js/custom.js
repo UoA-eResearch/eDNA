@@ -327,13 +327,14 @@ function makeFeatureCollection(cellAggs) {
   }
 }
 
-function makePopupContent(properties, jsonResponse) {
-  // console.log(jsonResponse);
-  jsonResponse.otu_names.forEach(otu => {
-    console.log(otu.code);
-    window.otuLookup[otu.id] = otu.code;
-  });
-  console.log("calling make popup content.");
+function makePopupContent(properties, jsonResponse = null) {
+  // filling in missing otu entries here.
+  if (jsonResponse != null && jsonResponse !== undefined) {
+    jsonResponse.otu_names.forEach(otu => {
+      window.otuLookup[otu.id] = otu.code;
+    });
+  }
+
   let popupContent =
     strongHeader("Cell Richness", properties.weightedRichness) +
     strongHeader("Cell Abundance", properties.weightedAbundance) +
@@ -356,9 +357,6 @@ function makePopupContent(properties, jsonResponse) {
   popupContent += "</ul><br />";
 
   for (let otuId in properties.otus) {
-    if (window.otuLookup[otuId] === undefined) {
-      console.log(otuId + "not found");
-    }
     popupContent +=
       strongLine(window.otuLookup[otuId]) +
       strongHeader("Abundance in cell", properties.otus[otuId].abundance) +
@@ -442,18 +440,21 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
           missingIds.push(otuId);
         }
       }
-      f_url = "http://localhost:8000/edna/api/v1.0/otu/?";
-      f_url += "id=" + missingIds.join("&id=");
-      console.log(f_url);
-      fetch(f_url).then(response => {
-        response.json().then(jsonResponse => {
-          console.log(jsonResponse);
-          popup.setContent(
-            makePopupContent(layer.feature.properties, jsonResponse)
-          );
-          popup.updatePopup();
+      if (missingIds.length > 0) {
+        f_url = "http://localhost:8000/edna/api/v1.0/otu/?";
+        f_url += "id=" + missingIds.join("&id=");
+        console.log(f_url);
+        fetch(f_url).then(response => {
+          response.json().then(jsonResponse => {
+            console.log(jsonResponse);
+            popup.setContent(
+              makePopupContent(layer.feature.properties, jsonResponse)
+            );
+          });
         });
-      });
+      } else {
+        popup.setContent(makePopupContent(layer.feature.properties));
+      }
     }
 
     function generatePopupContent(popup) {
