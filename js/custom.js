@@ -327,7 +327,12 @@ function makeFeatureCollection(cellAggs) {
   }
 }
 
-function makePopupContent(properties) {
+function makePopupContent(properties, jsonResponse) {
+  // console.log(jsonResponse);
+  jsonResponse.otu_names.forEach(otu => {
+    console.log(otu.code);
+    window.otuLookup[otu.id] = otu.code;
+  });
   console.log("calling make popup content.");
   let popupContent =
     strongHeader("Cell Richness", properties.weightedRichness) +
@@ -351,6 +356,9 @@ function makePopupContent(properties) {
   popupContent += "</ul><br />";
 
   for (let otuId in properties.otus) {
+    if (window.otuLookup[otuId] === undefined) {
+      console.log(otuId + "not found");
+    }
     popupContent +=
       strongLine(window.otuLookup[otuId]) +
       strongHeader("Abundance in cell", properties.otus[otuId].abundance) +
@@ -368,22 +376,22 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
     d > 0.9
       ? "#800026"
       : d > 0.8
-        ? "#BD0026"
-        : d > 0.7
-          ? "#E31A1C"
-          : d > 0.6
-            ? "#FC4E2A"
-            : d > 0.5
-              ? "#FD8D3C"
-              : d > 0.4
-                ? "#FEB24C"
-                : d > 0.3
-                  ? "#FED976"
-                  : d > 0.2
-                    ? "#FFEDA0"
-                    : d > 0.0
-                      ? "#FFFFCC"
-                      : "#9ECAE1";
+      ? "#BD0026"
+      : d > 0.7
+      ? "#E31A1C"
+      : d > 0.6
+      ? "#FC4E2A"
+      : d > 0.5
+      ? "#FD8D3C"
+      : d > 0.4
+      ? "#FEB24C"
+      : d > 0.3
+      ? "#FED976"
+      : d > 0.2
+      ? "#FFEDA0"
+      : d > 0.0
+      ? "#FFFFCC"
+      : "#9ECAE1";
   const geoJSONLayer = L.geoJSON(featureCollection, {
     style: layerStyle,
     onEachFeature: onEachFeature
@@ -440,7 +448,9 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
       fetch(f_url).then(response => {
         response.json().then(jsonResponse => {
           console.log(jsonResponse);
-          popup.setContent(makePopupContent(layer.feature.properties));
+          popup.setContent(
+            makePopupContent(layer.feature.properties, jsonResponse)
+          );
           popup.updatePopup();
         });
       });
@@ -741,22 +751,22 @@ function GetFillColor(d) {
   return d > 0.9
     ? "#800026"
     : d > 0.8
-      ? "#BD0026"
-      : d > 0.7
-        ? "#E31A1C"
-        : d > 0.6
-          ? "#FC4E2A"
-          : d > 0.5
-            ? "#FD8D3C"
-            : d > 0.4
-              ? "#FEB24C"
-              : d > 0.3
-                ? "#FED976"
-                : d > 0.2
-                  ? "#FFEDA0"
-                  : d > 0.0
-                    ? "#FFFFCC"
-                    : "#9ecae1";
+    ? "#BD0026"
+    : d > 0.7
+    ? "#E31A1C"
+    : d > 0.6
+    ? "#FC4E2A"
+    : d > 0.5
+    ? "#FD8D3C"
+    : d > 0.4
+    ? "#FEB24C"
+    : d > 0.3
+    ? "#FED976"
+    : d > 0.2
+    ? "#FFEDA0"
+    : d > 0.0
+    ? "#FFFFCC"
+    : "#9ecae1";
 }
 
 /**
