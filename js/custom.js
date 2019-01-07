@@ -60,6 +60,12 @@ function fetchSampleOtus(taxonParams, contextParams) {
       .join("");
     url += s;
   }
+  if (document.getElementById("endemic-checkbox").checked) {
+    console.log("endemic is true");
+    url += "&endemic=True";
+  } else {
+    console.log("endemic is false");
+  }
   console.log(url);
 
   // fetch the url
