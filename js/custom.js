@@ -1,15 +1,17 @@
-const local_base_url = "http://localhost:8000/edna/api/";
-const nectar_base_url = "https://edna.nectar.auckland.ac.nz/edna/api/";
+const dev_url = "http://localhost:8000/edna/api/v1.0/";
+const prod_url = "https://edna.nectar.auckland.ac.nz/edna/api/";
 // change active depending on the situation.
-const active_base_url = local_base_url;
+const active_base_url = dev_url;
 const API_URLS = {
-  filtered_abundance: nectar_base_url + "abundance?otu=",
-  filtered_meta: nectar_base_url + "metadata?term=",
-  ordered_sampleotu: nectar_base_url + "sample_otu_ordered",
-  test_sample_otu_pk: local_base_url + "abundance?otu=",
-  test_nested_abundances: local_base_url + "abundance?id=",
-  local_metadata_id: local_base_url + "metadata?id=",
-  local_filter_options: local_base_url + "filter-options?"
+  // prod
+  filtered_abundance: prod_url + "abundance?otu=",
+  filtered_meta: prod_url + "metadata?term=",
+  ordered_sampleotu: prod_url + "sample_otu_ordered",
+
+  // dev
+  test_sample_otu_pk: dev_url + "abundance?otu=",
+  dev_contextual_id: dev_url + "metadata?id=",
+  filter_suggestions: dev_url + "filter-options?"
 };
 
 function round(x, dp) {
@@ -469,16 +471,6 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
       } else {
         popup.setContent(makePopupContent(layer.feature.properties));
       }
-    }
-
-    function generatePopupContent(popup) {
-      fetch("http://localhost:8000/edna/api/v1.0/otu/?id=5").then(response => {
-        response.json().then(jsonResponse => {
-          console.log(jsonResponse.otu_names[0].code);
-          popup.setContent(jsonResponse.otu_names[0].code);
-          popup.updatePopup();
-        });
-      });
     }
 
     function handleMouseOver(e) {
@@ -1368,7 +1360,7 @@ function initializeSelect() {
     tags: true,
     ajax: {
       // url: API_URLS.local_filter_options,
-      url: API_URLS.local_filter_options,
+      url: API_URLS.filter_suggestions,
       delay: 250,
       data: function(params) {
         let query = {
@@ -1526,9 +1518,9 @@ initializeEndemicRadio();
 initializeOperatorSelect();
 initializeSelect();
 
-// load contextual options up front. Hardcoding some params.
+// NOTE: load contextual options up front. Hardcoding some params.
 // possibly separate into a different API later on if we have time or a need.
-let url = API_URLS.local_filter_options + "q=&page=1&page_size=200";
+let url = API_URLS.filter_suggestions + "q=&page=1&page_size=200";
 fetch(url).then(response => {
   response.json().then(initializeSelectContextual);
 });
