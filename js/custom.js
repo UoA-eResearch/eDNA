@@ -11,7 +11,8 @@ const API_URLS = {
   // dev
   test_sample_otu_pk: dev_url + "abundance?otu=",
   dev_contextual_id: dev_url + "metadata?id=",
-  filter_suggestions: dev_url + "filter-options?"
+  filter_suggestions: dev_url + "filter-options?",
+  otu_code_by_id: dev_url + "otu/?id="
 };
 
 function round(x, dp) {
@@ -212,6 +213,10 @@ function aggregateByCell(siteAggs) {
   const northWest = hardBounds.getNorthWest();
   const northEast = hardBounds.getNorthEast();
   const southWest = hardBounds.getSouthWest();
+  // NOTE: alternative way of calculating is incorrectly plotting. some strange offset.
+  // const northWest = L.latLng(start[0], start[1]);
+  // const northEast = L.latLng(start[0], end[1]);
+  // const southWest = L.latLng(end[0], start[1]);
   const latOffset = (northWest.lat - southWest.lat) / detailLevel;
   const lngOffset = (northEast.lng - northWest.lng) / detailLevel;
   // using the params for generating the keys
@@ -457,8 +462,9 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
         }
       }
       if (missingIds.length > 0) {
-        f_url = "http://localhost:8000/edna/api/v1.0/otu/?";
-        f_url += "id=" + missingIds.join("&id=");
+        // f_url = "http://localhost:8000/edna/api/v1.0/otu/?";
+        // f_url += "id=" + missingIds.join("&id=");
+        f_url = API_URLS.otu_code_by_id + missingIds.join("&id=");
         console.log(f_url);
         fetch(f_url).then(response => {
           response.json().then(jsonResponse => {
