@@ -341,6 +341,7 @@ function makeFeatureCollection(cellAggs) {
 }
 
 function makePopupContent(properties, jsonResponse = null) {
+  // TODO: Add pagination to long popup contents. Unable to request over 500 ids at once.
   // filling in missing otu entries here.
   if (jsonResponse != null && jsonResponse !== undefined) {
     jsonResponse.otu_names.forEach(otu => {
