@@ -48,34 +48,31 @@
         margin: 0;
         padding: 0;
       }
-      #filterWrapper {
-        position: absolute;
-        right: 10px;
-        top: 10px;
-        z-index: 1000;
-      }
     </style>
     <link rel="stylesheet" href="css/custom.css">
   </head>
   <body>
-    <div id="map"></div>
-    <div id="filterWrapper">
-      <label for="filter" Filter by organism>
-          <select id="filter" multiple="multiple">
-          </select>
-          <br>
-      </label>
+    <div id="map" class="map"></div>
+    <div class="search" id="filterWrapper">
+      <select id="select-taxonomic" class="search-filter" multiple="multiple">
+      </select>
       <br>
-      <label for="filter" Filter by sample properties>
-          <select id="filterContextual" multiple="multiple">
-          </select>
-          <br>
-      </label>  
-      <label for="endemic-radio" Endemic only>
-      Endemic only <input id="endemic-checkbox" type="checkbox" name="endemic only" value="true">
-      </label>  
+        <select id="select-operator" class="search--right" >
+          <option value="or">OR</option>
+          <option value="and">AND</option>
+        </select>
       <br>
-      <span id="numberResults"></span> points
+      <select id="select-contextual" multiple="multiple">
+      </select>
+      <br>
+      <div class="search--right">
+        Endemic only <input id="endemic-checkbox" type="checkbox" name="endemic only" value="true">
+        <br>
+        <br>
+        <button class="search__button">Search</button>
+        <br>
+        <span id="numberResults"></span> points
+      </div>
     </div>
     <!--<div id="chart"></div> -->
     <script src="js/custom.js"></script>

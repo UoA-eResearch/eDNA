@@ -83,6 +83,15 @@ div.tooltip {
     left: 0;
 }
 
-#filterWrapper {
-    width: 50%;
+.search {
+    width: 50%;        
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 1000;
+}
+
+.search--right {
+    text-align: right;
+    float: right;
 }

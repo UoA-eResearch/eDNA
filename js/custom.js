@@ -34,9 +34,11 @@ const strongHeader = (header, text) => {
 };
 
 /**
- * Use filter params to request abundance api and handle response.
+ * Gets all filter element values and uses them as parameters for an API request.
  */
-function fetchSampleOtus(taxonParams, contextParams) {
+function fetchSampleOtus() {
+  let contextParams = $("#select-contextual").select2("data");
+  let taxonParams = $("#select-taxonomic").select2("data");
   // Formatting and adding otu arguments
   let ontologyIds = [];
   for (let i in taxonParams) {
@@ -62,9 +64,14 @@ function fetchSampleOtus(taxonParams, contextParams) {
   }
   if (document.getElementById("endemic-checkbox").checked) {
     console.log("endemic is true");
-    url += "&endemic=True";
+    url += "&endemic=true";
   } else {
     console.log("endemic is false");
+  }
+  if (document.getElementById("select-operator").value == "and") {
+    url += "&operator=union";
+  } else {
+    url += "&operator=intersection";
   }
   console.log(url);
 
@@ -1164,20 +1171,32 @@ function GetLayerBySampleContextId(id) {
 }
 
 //function for input change
+/**
+ * synchronises slider handle position and input field values.
+ *
+ * @param   {integer}  value  value to update grid to
+ *
+ * @return  {void}
+ */
+
 function changeSliderValue(value) {
   //slider slider.slider refers to the handle.
   slider.slider.value = value;
   slider._expand();
   slider._sliderValue.innerHTML = value;
   detailLevel = value;
-  $("#filter").trigger("change");
+  $("#select-taxonomic").trigger("change");
 }
 
 //Adding leaflet slider to map for grip control.
+/**
+ * adding slider to map
+ */
 var slider = L.control.slider(
   function(value) {
     detailLevel = value;
-    $("#filter").trigger("change");
+    // TODO: directly call fetchSampleOTU data instead of triggering a change.
+    $("#select-taxonomic").trigger("change");
   },
   {
     id: slider,
@@ -1338,7 +1357,7 @@ function disableStatePopup() {
 }
 
 function initializeSelect() {
-  $("#filter").select2({
+  let taxonSelect = $("#select-taxonomic").select2({
     placeholder: "Type to filter by classification and metadata",
     multiple: true,
     allowClear: true,
@@ -1438,12 +1457,10 @@ function initializeSelect() {
       return newTag;
     }
   });
-  $("#filter").change(function() {
-    window.location.hash = encodeURIComponent($(this).val());
-    let taxonFilters = $(this).select2("data");
-    let contextFilters = $("#filterContextual").select2("data");
-    fetchSampleOtus(taxonFilters, contextFilters);
+  $("#select-taxonomic").change(function() {
+    fetchSampleOtus();
   });
+  return taxonSelect;
 }
 
 window.contextTags = [];
@@ -1454,7 +1471,7 @@ function initializeSelectContextual(json) {
       text: field
     };
   });
-  $("#filterContextual").select2({
+  $("#select-contextual").select2({
     placeholder: "Search by sample contextual metadata",
     multiple: true,
     allowClear: true,
@@ -1484,21 +1501,36 @@ function initializeSelectContextual(json) {
     //    data.push(tag);
     // }
   });
-  $("#filterContextual").change(function() {
-    window.location.hash = encodeURIComponent($(this).val());
-    let contextualFilters = $(this).select2("data");
-    let taxonFilters = $("#filter").select2("data");
-    console.log(contextualFilters);
-    console.log(taxonFilters);
-    // something for hanlding meta filters.
-    fetchSampleOtus(taxonFilters, contextualFilters);
+  $("#select-contextual").change(function() {
+    fetchSampleOtus();
   });
 }
 
+function initializeEndemicRadio() {
+  let radio = document.getElementById("endemic-checkbox");
+  radio.onchange = function() {
+    fetchSampleOtus();
+  };
+}
+
+function initializeOperatorSelect() {
+  let selectOperator = document.getElementById("select-operator");
+  console.log(selectOperator);
+  selectOperator.onchange = function() {
+    fetchSampleOtus();
+  };
+}
+
+initializeEndemicRadio();
+initializeOperatorSelect();
 initializeSelect();
+
 // load contextual options up front. Hardcoding some params.
 // possibly separate into a different API later on if we have time or a need.
 let url = API_URLS.local_filter_options + "q=&page=1&page_size=200";
 fetch(url).then(response => {
   response.json().then(initializeSelectContextual);
 });
+
+// TODO: fix layer rendering only workng when contextual filter has conditions. Something to do with the backend not returning results when no contextual present.
+// TODO: standardise abundance values from 0-1 or something like that.
