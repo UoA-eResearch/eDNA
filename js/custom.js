@@ -68,7 +68,7 @@ function fetchSampleOtus() {
   } else {
     console.log("endemic is false");
   }
-  if (document.getElementById("select-operator").value == "and") {
+  if (document.getElementById("select-operator").value == "or") {
     url += "&operator=union";
   } else {
     url += "&operator=intersection";
