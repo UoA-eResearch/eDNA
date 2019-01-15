@@ -933,8 +933,6 @@ function updateGraph(siteAggregates) {
     );
   }
 
-  console.log(plotData);
-
   var nestedPlotData = d3
     .nest()
     .key(function(d) {
@@ -1514,16 +1512,23 @@ function initializeEndemicRadio() {
 
 function initializeOperatorSelect() {
   let selectOperator = document.getElementById("select-operator");
-  console.log(selectOperator);
   selectOperator.onchange = function() {
     fetchSampleOtus();
   };
 }
 
-initializeEndemicRadio();
+function initializeSearchButton() {
+  let submitButton = document.getElementById("search-button");
+  submitButton.onclick = function() {
+    console.log("clicked");
+    fetchSampleOtus();
+  };
+}
+
 initializeOperatorSelect();
 initializeSelect();
-
+initializeEndemicRadio();
+initializeSearchButton();
 // NOTE: load contextual options up front. Hardcoding some params.
 // possibly separate into a different API later on if we have time or a need.
 let url = API_URLS.filter_suggestions + "q=&page=1&page_size=200";
