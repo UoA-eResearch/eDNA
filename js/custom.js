@@ -1520,7 +1520,6 @@ function initializeOperatorSelect() {
 function initializeSearchButton() {
   let submitButton = document.getElementById("search-button");
   submitButton.onclick = function() {
-    console.log("clicked");
     fetchSampleOtus();
   };
 }
