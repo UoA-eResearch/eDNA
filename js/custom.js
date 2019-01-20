@@ -9,7 +9,7 @@ const API_URLS = {
   ordered_sampleotu: prod_url + "sample_otu_ordered",
 
   // dev
-  test_sample_otu_pk: dev_url + "abundance?otu=",
+  test_sample_otu_pk: dev_url + "abundance?",
   dev_contextual_id: dev_url + "metadata?id=",
   filter_suggestions: dev_url + "filter-options?",
   otu_code_by_id: dev_url + "otu/?id="
@@ -50,7 +50,7 @@ function fetchSampleOtus() {
     ontologyIds.push(idChain);
   }
   let url = API_URLS.test_sample_otu_pk;
-  url += ontologyIds.join("&otu=");
+  url += "otu=" + ontologyIds.join("&otu=");
 
   // Formatting and adding contextual filters to url
   if (contextParams.length > 0) {
@@ -66,17 +66,14 @@ function fetchSampleOtus() {
     url += s;
   }
   if (document.getElementById("endemic-checkbox").checked) {
-    console.log("endemic is true");
     url += "&endemic=true";
   } else {
-    console.log("endemic is false");
   }
   if (document.getElementById("select-operator").value == "or") {
     url += "&operator=union";
   } else {
     url += "&operator=intersection";
   }
-  console.log(url);
 
   // fetch the url
   fetch(url).then(response => {
