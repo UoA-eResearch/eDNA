@@ -1119,14 +1119,14 @@ var heatLayerGroup = L.layerGroup();
 var baseMaps = {
   Base: tileLayer
 };
-var overlays = {
+var overlayLayerGroup = {
   "Grid: Abundance": gridAbundanceLayerGroup,
   "Grid: Richness": gridRichnessLayerGroup,
   "Heat: Abundance": heatLayerGroup,
   "Grid: Site Count": gridSitesLayerGroup
 };
-var layerMenu = L.control
-  .layers(baseMaps, overlays, {
+var layerMenuControl = L.control
+  .layers(baseMaps, overlayLayerGroup, {
     position: "bottomleft",
     hideSingleBase: true,
     sortLayers: true,
@@ -1135,17 +1135,17 @@ var layerMenu = L.control
   .addTo(map);
 
 //Adding input field for alternative grid slider control
-var input = L.control({
+var gridResolutionInput = L.control({
   position: "bottomleft"
 });
-input.onAdd = map => {
+gridResolutionInput.onAdd = map => {
   this._div = L.DomUtil.create("div", "info");
   // todo: Shrink down the input field to 4/5 numbers.
   this._div.innerHTML =
     '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
   return this._div;
 };
-input.addTo(map);
+gridResolutionInput.addTo(map);
 
 /**
  * Takes in a sample contextual index, iterates through all active and stamped map layers, then returns the last matching layer with leaflet id. Assumes sample contextual contains a leafletId value.
@@ -1164,7 +1164,6 @@ function GetLayerBySampleContextId(id) {
   return targetLayer;
 }
 
-//function for input change
 /**
  * synchronises slider handle position and input field values.
  *
@@ -1208,6 +1207,30 @@ var slider = L.control.slider(
   }
 );
 slider.addTo(map);
+
+
+function initializeDisplayOptionsControl() {
+  let displayControlRoot = L.control({
+    position: "bottomleft"
+  });
+  displayControlRoot.onAdd = map => {
+    let displayControlRoot = L.DomUtil.create("div", "display-controls-root");
+    displayControlRoot.className = "info leaflet-control";
+    displayControlRoot.appendChild(slider.getContainer());
+    displayControlRoot.appendChild(gridResolutionInput.getContainer());
+    displayControlRoot.appendChild(layerMenuControl.getContainer());
+    let displayControlVisibleButton = L.DomUtil.create(
+      "button",
+      "display-controls-root-button"
+    );
+    displayControlVisibleButton.innerHTML = "Hi";
+    displayControlVisibleButton.className = "info leaflet-control";
+    displayControlRoot.appendChild(displayControlVisibleButton);
+    return displayControlRoot;
+  };
+  displayControlRoot.addTo(map);
+}
+initializeDisplayOptionsControl();
 
 //Adding custom control for Andrew's Visualization Copy.
 const leafletGraphControl = L.control({ position: "bottomright" });
