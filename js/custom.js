@@ -1219,22 +1219,38 @@ function initializeDisplayOptionsControl() {
   });
   displayControlRoot.onAdd = map => {
     let displayControlRoot = L.DomUtil.create("div", "display-controls-root");
+    displayControlRoot.id = "display-controls-root";
     displayControlRoot.className = "info leaflet-control";
-    displayControlRoot.appendChild(slider.getContainer());
-    displayControlRoot.appendChild(gridResolutionInput.getContainer());
-    displayControlRoot.appendChild(layerMenuControl.getContainer());
+
+    let togglableElements = document.createElement("div");
+    togglableElements.id = "display-controls-togglable";
+    togglableElements.className = "display-controls-togglable";
+    displayControlRoot.appendChild(togglableElements);
+
+    togglableElements.appendChild(slider.getContainer());
+    togglableElements.appendChild(gridResolutionInput.getContainer());
+    togglableElements.appendChild(layerMenuControl.getContainer());
     let displayControlVisibleButton = L.DomUtil.create(
       "button",
       "display-controls-root-button"
     );
-    displayControlVisibleButton.innerHTML = "Hi";
+    displayControlVisibleButton.id = "display-controls-root-button";
+    displayControlVisibleButton.innerHTML = "Display Settings";
     displayControlVisibleButton.className = "info leaflet-control";
     displayControlRoot.appendChild(displayControlVisibleButton);
     return displayControlRoot;
   };
   displayControlRoot.addTo(map);
 }
-initializeDisplayOptionsControl();
+
+function initializeDisplayControlButton() {
+  document.getElementById("display-controls-root-button").onclick = function() {
+    // console.log("clicked toggle.");
+    $("#display-controls-togglable").toggle("slow");
+    // console.log($("#display-controls-togglable"));
+    // console.log($(""));
+  };
+}
 
 //Adding custom control for Andrew's Visualization Copy.
 const leafletGraphControl = L.control({ position: "bottomright" });
@@ -1277,10 +1293,6 @@ function updateGraphColours(metric) {
       return metricColour(d.meta[metric]);
     });
 }
-
-/**
- * Toggles the datapoint visualization visibility.
- */
 
 //Adding d3 visualization
 const { g, y, tooltip, x } = createGraph();
@@ -1543,6 +1555,9 @@ function initializeSearchButton() {
   };
 }
 
+/**
+ * Toggles the datapoint visualization visibility.
+ */
 const initializeGraphButton = () => {
   document.getElementById("graph-button").onclick = function() {
     $("#chart").toggle("slow");
@@ -1568,9 +1583,13 @@ initializeOperatorSelect();
 initializeSelect();
 initializeEndemicRadio();
 initializeSearchButton();
+
 initializeGraphButton();
 initializeGraphColourMetricSelect();
 initializeGraphColourSchemeSelect();
+
+initializeDisplayOptionsControl();
+initializeDisplayControlButton();
 
 // NOTE: load contextual options up front. Hardcoding some params.
 // possibly separate into a different API later on if we have time or a need.
