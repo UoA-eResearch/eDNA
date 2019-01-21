@@ -1,3 +1,9 @@
+// Globals ---------------------------------------------------------------------------
+window.circles = [];
+window.contextTags = [];
+window.siteAggregates = {};
+window.sampleContextLookup = {};
+
 const dev_url = "http://localhost:8000/edna/api/v1.0/";
 const prod_url = "https://edna.nectar.auckland.ac.nz/edna/api/";
 // change active depending on the situation.
@@ -14,6 +20,8 @@ const API_URLS = {
   filter_suggestions: dev_url + "filter-options?",
   otu_code_by_id: dev_url + "otu/?id="
 };
+
+// helper functions ------------------------------------------------------------------
 
 function round(x, dp) {
   var factor = Math.pow(10, dp);
@@ -89,7 +97,6 @@ function handleResponseData(responseData) {
   // display amount of abundances from a search below the filter
   $("#numberResults").text(sampleOtus.length);
   // restructure the sample contexts by pk
-  window.sampleContextLookup = {};
   for (let i in sampleContexts) {
     let sampleContext = sampleContexts[i];
     window.sampleContextLookup[sampleContext.id] = sampleContext;
@@ -115,11 +122,10 @@ function handleResponseData(responseData) {
   //   gridSitesLayerGroup
   // );
   siteAggregatedData = addSiteMetrics(siteAggregatedData);
-
+  window.siteAggregates = siteAggregatedData;
   // creating site -> leaflet layer references for each layer.
   addLayerIdToSampleContext(abundanceLayer);
   addLayerIdToSampleContext(richnessLayer);
-
   updateGraph(siteAggregatedData);
 }
 
@@ -864,7 +870,7 @@ function createColorRange(siteAggregates) {
     return d[metric];
   });
   console.log("visualization plot min, max:", min, max);
-  const colorScheme = document.getElementById("color-scheme-select").value;
+  const colorScheme = document.getElementById("colour-scheme-select").value;
   let colorRange = [];
   switch (colorScheme) {
     case "sequential":
@@ -1102,7 +1108,6 @@ proj4.defs(
 //gets the params from the search bar
 var taxonParams = new URLSearchParams(window.location.search);
 var mode = taxonParams.get("mode");
-window.circles = [];
 
 var detailLevel = 60;
 //warrick map additions
@@ -1208,7 +1213,6 @@ var slider = L.control.slider(
 );
 slider.addTo(map);
 
-
 function initializeDisplayOptionsControl() {
   let displayControlRoot = L.control({
     position: "bottomleft"
@@ -1239,9 +1243,9 @@ leafletGraphControl.onAdd = function() {
   this._div.innerHTML = `<div id="chart" style="display:none;">
   </div>
   <br />
-  <button onclick="toggleGraph()">Toggle Graph</button>
+  <button id = "graph-button" >Toggle Graph</button>
   <label> Colour by: 
-    <select id="meta-select" onChange="selectColorChange(this.value)" >
+    <select id="meta-select" >
       <option selected value="elev">elev</option>
       <option value="mid_ph">Mid pH</option>
       <option value="mean_C_percent">Mean carbon concentration</option>
@@ -1252,20 +1256,20 @@ leafletGraphControl.onAdd = function() {
     </select>
   </label>
   <label> Colour type: 
-    <select id="color-scheme-select" onChange="selectColorChange(this.value)" >
+    <select id="colour-scheme-select">
       <option selected value="sequential">Sequential</option>
       <option value="diverging">Diverging</option>
     </select>
   </label>`;
   return this._div;
 };
+leafletGraphControl.addTo(map);
 
 /**
  * Selects all .enter elements and changes fill to the current option of the meta-select element.
  */
-function selectColorChange(e) {
-  var metric = document.getElementById("meta-select").value;
-  var metricColour = createColorRange(siteAggregates);
+function updateGraphColours(metric) {
+  var metricColour = createColorRange(window.siteAggregates);
   d3.selectAll(".enter")
     .transition()
     .duration(400)
@@ -1277,10 +1281,6 @@ function selectColorChange(e) {
 /**
  * Toggles the datapoint visualization visibility.
  */
-function toggleGraph() {
-  $("#chart").toggle("slow");
-}
-leafletGraphControl.addTo(map);
 
 //Adding d3 visualization
 const { g, y, tooltip, x } = createGraph();
@@ -1480,7 +1480,6 @@ function initializeSelect() {
   return taxonSelect;
 }
 
-window.contextTags = [];
 function initializeSelectContextual(json) {
   let data = json.data.context_options.map(field => {
     return {
@@ -1544,10 +1543,35 @@ function initializeSearchButton() {
   };
 }
 
+const initializeGraphButton = () => {
+  document.getElementById("graph-button").onclick = function() {
+    $("#chart").toggle("slow");
+  };
+};
+
+const initializeGraphColourMetricSelect = () => {
+  let metaSelect = document.getElementById("meta-select");
+  metaSelect.onchange = function() {
+    updateGraphColours(this.value);
+  };
+};
+
+const initializeGraphColourSchemeSelect = () => {
+  let colourSchemeSelect = document.getElementById("colour-scheme-select");
+  colourSchemeSelect.onchange = function() {
+    updateGraphColours(this.value);
+  };
+};
+
+// Adding functions to elements -----------------------------------------
 initializeOperatorSelect();
 initializeSelect();
 initializeEndemicRadio();
 initializeSearchButton();
+initializeGraphButton();
+initializeGraphColourMetricSelect();
+initializeGraphColourSchemeSelect();
+
 // NOTE: load contextual options up front. Hardcoding some params.
 // possibly separate into a different API later on if we have time or a need.
 let url = API_URLS.filter_suggestions + "q=&page=1&page_size=200";
