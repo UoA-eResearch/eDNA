@@ -1,3 +1,7 @@
+import $ from "jquery";
+import d3 from "d3";
+// import L from "leaflet";
+
 // Globals ---------------------------------------------------------------------------
 window.circles = [];
 window.contextTags = [];
@@ -1100,10 +1104,10 @@ map.setMaxBounds(bounds);
 //Defines how the proj4 function is to convert.
 //in this case proj4 is being set up to convert longlat to cartesian.
 // TODO: coordinate conversion: Change EPSG:2193 to EPSG:4326? To match the bulk convert.
-proj4.defs(
-  "EPSG:2193",
-  "+proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 +x_0=1600000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-);
+// proj4.defs(
+//   "EPSG:2193",
+//   "+proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 +x_0=1600000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+// );
 
 //gets the params from the search bar
 var taxonParams = new URLSearchParams(window.location.search);
