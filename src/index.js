@@ -1,6 +1,10 @@
-import $ from "jquery";
-import d3 from "d3";
-// import L from "leaflet";
+import * as L from "leaflet";
+import * as d3 from "d3";
+import * as $ from "jquery";
+import "../js/leaflet.heat";
+import "../js/leaflet-slider";
+import select2 from "../js/select2.min.js";
+import "../js/L.Control.Range";
 
 // Globals ---------------------------------------------------------------------------
 window.circles = [];
@@ -52,6 +56,7 @@ const strongHeader = (header, text) => {
  * Gets all filter element values and uses them as parameters for an API request.
  */
 function fetchSampleOtus() {
+  console.log("fet sample otu call");
   let contextParams = $("#select-contextual").select2("data");
   let taxonParams = $("#select-taxonomic").select2("data");
   // Formatting and adding otu arguments
@@ -169,7 +174,7 @@ function aggregateBySite(sampleOtus) {
         otus: {}
       };
     }
-    siteAgg = siteAggs[siteId];
+    let siteAgg = siteAggs[siteId];
     siteAgg.abundance += abundance;
     // same default object creation principle applied to the otus sub-object.
     if (!(otuId in siteAgg.otus)) {
@@ -534,10 +539,9 @@ function makeGrid(detailLevel) {
   const gridEnd = [178.858982, -49.66352];
 
   const hardBounds = L.latLngBounds(gridStart, gridEnd);
-  northWest = hardBounds.getNorthWest();
-  northEast = hardBounds.getNorthEast();
-  southWest = hardBounds.getSouthWest();
-  southEast = hardBounds.getSouthEast();
+  let northWest = hardBounds.getNorthWest();
+  let northEast = hardBounds.getNorthEast();
+  let southWest = hardBounds.getSouthWest();
   const latOffset = (northWest.lat - southWest.lat) / detailLevel;
   const lngOffset = (northEast.lng - northWest.lng) / detailLevel;
   // console.log(latOffset, lngOffset);
@@ -1143,19 +1147,6 @@ var layerMenuControl = L.control
   })
   .addTo(map);
 
-//Adding input field for alternative grid slider control
-var gridResolutionInput = L.control({
-  position: "bottomleft"
-});
-gridResolutionInput.onAdd = map => {
-  this._div = L.DomUtil.create("div", "info");
-  // todo: Shrink down the input field to 4/5 numbers.
-  this._div.innerHTML =
-    '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
-  return this._div;
-};
-gridResolutionInput.addTo(map);
-
 /**
  * Takes in a sample contextual index, iterates through all active and stamped map layers, then returns the last matching layer with leaflet id. Assumes sample contextual contains a leafletId value.
  * @param {integer} id
@@ -1389,7 +1380,7 @@ function disableStatePopup() {
   statePopup.style.display = "none";
 }
 
-function initializeSelect() {
+function initializeOtuSelect() {
   let taxonSelect = $("#select-taxonomic").select2({
     placeholder: "Type to filter by classification and metadata",
     multiple: true,
@@ -1403,6 +1394,7 @@ function initializeSelect() {
       url: API_URLS.filter_suggestions,
       delay: 250,
       data: function(params) {
+        console.log("data call");
         let query = {
           q: params.term,
           page: params.page || 1,
@@ -1412,6 +1404,7 @@ function initializeSelect() {
       },
       processResults: function(response, params) {
         // don't really know why this params page thing is necessary but it is.
+        console.log("process results");
         params.page = params.page || 1;
         params.page_size = params.page_size || 50;
         console.log(params);
@@ -1433,30 +1426,19 @@ function initializeSelect() {
           // window.otuLookup[taxon[2]] = taxon[1];
           return option;
         });
+        console.log(taxonOptions);
 
         // making window lookup, not necessary until later really.
         // dont need to look up a primary key if you already have it.
         // var taxonLookup = window.otuLookup;
         // console.log(taxonLookup);
         // console.log(taxonOptions[0]);
-
-        let contextOptions = data.context_options.map(context => {
-          option = {
-            // TODO: add value functionality
-            id: index,
-            text: context,
-            group: "context"
-          };
-          index++;
-          return option;
-        });
         let moreResults = params.page * params.page_size < total_results;
-        let taxonTags = window.taxonTags;
-        groupedOptions = {
+        let groupedOptions = {
           results: [
             {
               text: "Custom",
-              children: taxonTags
+              children: window.taxonTags
             },
             {
               text: "Taxonomic",
@@ -1582,18 +1564,35 @@ const initializeGraphColourSchemeSelect = () => {
   };
 };
 
+//Adding input field for alternative grid slider control
+const initializeGridResolutionInput = () => {
+  let gridResolutionInput = L.control({
+    position: "bottomleft"
+  });
+  gridResolutionInput.onAdd = map => {
+    let _div = L.DomUtil.create("div", "info");
+    // todo: Shrink down the input field to 4/5 numbers.
+    _div.innerHTML =
+      '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
+    return _div;
+  };
+  gridResolutionInput.addTo(map);
+};
+
 // Adding functions to elements -----------------------------------------
-initializeOperatorSelect();
-initializeSelect();
-initializeEndemicRadio();
-initializeSearchButton();
+window.onload = () => {
+  initializeOperatorSelect();
+  initializeOtuSelect();
+  initializeEndemicRadio();
+  initializeSearchButton();
 
-initializeGraphButton();
-initializeGraphColourMetricSelect();
-initializeGraphColourSchemeSelect();
+  initializeGraphButton();
+  initializeGraphColourMetricSelect();
+  initializeGraphColourSchemeSelect();
 
-initializeDisplayOptionsControl();
-initializeDisplayControlButton();
+  initializeDisplayOptionsControl();
+  initializeDisplayControlButton();
+};
 
 // NOTE: load contextual options up front. Hardcoding some params.
 // possibly separate into a different API later on if we have time or a need.
