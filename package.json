@@ -11,6 +11,7 @@
     "leaflet": "^1.4.0",
     "leaflet.heat": "^0.2.0",
     "lodash": "^4.17.11",
+    "nouislider": "^12.1.0",
     "select2": "^4.0.6-rc.1",
     "style-loader": "^0.23.1",
     "typescript": "^2.9.2"

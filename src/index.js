@@ -1181,34 +1181,34 @@ function changeSliderValue(value) {
   $("#select-taxonomic").trigger("change");
 }
 
-//Adding leaflet slider to map for grip control.
 /**
  * adding slider to map
  */
-var slider = L.control.slider(
-  function(value) {
-    detailLevel = value;
-    // TODO: directly call fetchSampleOTU data instead of triggering a change.
-    $("#select-taxonomic").trigger("change");
-  },
-  {
-    id: slider,
-    min: 1,
-    //width not working.
-    size: "300px",
-    max: 1500,
-    step: 1,
-    value: detailLevel,
-    logo: "Grid",
-    increment: true,
-    orientation: "horiztonal",
-    position: "bottomleft",
-    syncSlider: true
-  }
-);
-slider.addTo(map);
 
 function initializeDisplayOptionsControl() {
+  let slider = L.control.slider(
+    function(value) {
+      detailLevel = value;
+      // TODO: directly call fetchSampleOTU data instead of triggering a change.
+      $("#select-taxonomic").trigger("change");
+    },
+    {
+      id: "grid-resolution-slider",
+      min: 1,
+      //width not working.
+      size: "300px",
+      max: 1500,
+      step: 1,
+      value: detailLevel,
+      logo: "Grid",
+      increment: true,
+      orientation: "horiztonal",
+      position: "bottomleft",
+      syncSlider: true
+    }
+  );
+  slider.addTo(map);
+
   let displayControlRoot = L.control({
     position: "bottomleft"
   });
@@ -1240,12 +1240,21 @@ function initializeDisplayOptionsControl() {
 
 function initializeDisplayControlButton() {
   document.getElementById("display-controls-root-button").onclick = function() {
-    // console.log("clicked toggle.");
     $("#display-controls-togglable").toggle("slow");
-    // console.log($("#display-controls-togglable"));
-    // console.log($(""));
   };
 }
+
+let gridResolutionInput = L.control({
+  position: "bottomleft"
+});
+gridResolutionInput.onAdd = map => {
+  let _div = L.DomUtil.create("div", "info");
+  // todo: Shrink down the input field to 4/5 numbers.
+  _div.innerHTML =
+    '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
+  return _div;
+};
+gridResolutionInput.addTo(map);
 
 //Adding custom control for Andrew's Visualization Copy.
 const leafletGraphControl = L.control({ position: "bottomright" });
@@ -1562,21 +1571,6 @@ const initializeGraphColourSchemeSelect = () => {
   colourSchemeSelect.onchange = function() {
     updateGraphColours(this.value);
   };
-};
-
-//Adding input field for alternative grid slider control
-const initializeGridResolutionInput = () => {
-  let gridResolutionInput = L.control({
-    position: "bottomleft"
-  });
-  gridResolutionInput.onAdd = map => {
-    let _div = L.DomUtil.create("div", "info");
-    // todo: Shrink down the input field to 4/5 numbers.
-    _div.innerHTML =
-      '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
-    return _div;
-  };
-  gridResolutionInput.addTo(map);
 };
 
 // Adding functions to elements -----------------------------------------
