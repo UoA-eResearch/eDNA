@@ -11,3 +11,5 @@
 * test click on plot point flies to grid cell.
 
 * test changing grid res updates gridcells
+
+* change slider input field: rerender plot, graph + alter slider position and expand slider.

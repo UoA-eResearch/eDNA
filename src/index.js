@@ -925,8 +925,7 @@ export function GetLayerBySampleContextId(id) {
  *
  * @return  {void}
  */
-
-function changeSliderValue(value) {
+function handleGridResInputChange(value, slider) {
   //slider slider.slider refers to the handle.
   slider.slider.value = value;
   slider._expand();
@@ -935,11 +934,7 @@ function changeSliderValue(value) {
   $("#select-taxonomic").trigger("change");
 }
 
-/**
- * adding slider to map
- */
-
-function initializeDisplayOptionsControl() {
+function initializeDisplayOptionsControls() {
   let gridResSlider = L.control.slider(
     function(value) {
       detailLevel = value;
@@ -969,7 +964,11 @@ function initializeDisplayOptionsControl() {
   gridResInput.onAdd = map => {
     let _div = L.DomUtil.create("div", "info");
     _div.innerHTML =
-      '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" onchange="changeSliderValue(this.value)"/>';
+      '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" />';
+    _div.onchange = event => {
+      let value = event.srcElement.value;
+      handleGridResInputChange(value, gridResSlider);
+    };
     return _div;
   };
   gridResInput.addTo(map);
@@ -1053,9 +1052,6 @@ function updateGraphColours(metric) {
       return metricColour(d.meta[metric]);
     });
 }
-
-//Adding d3 visualization
-export const { g, y, tooltip, x } = initPlotChart();
 
 var hashComponents = decodeURIComponent(
   window.location.hash.replace("#", "")
@@ -1265,6 +1261,9 @@ const initializeGraphColourSchemeSelect = () => {
   };
 };
 
+//Adding d3 visualization
+export const { g, y, tooltip, x } = initPlotChart();
+
 // Adding functions to elements -----------------------------------------
 window.onload = () => {
   initializeOperatorSelect();
@@ -1276,7 +1275,7 @@ window.onload = () => {
   initializeGraphColourMetricSelect();
   initializeGraphColourSchemeSelect();
 
-  initializeDisplayOptionsControl();
+  initializeDisplayOptionsControls();
   initializeDisplayControlButton();
 };
 
