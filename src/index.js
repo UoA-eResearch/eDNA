@@ -435,77 +435,92 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
       select: highlightLayer
     });
     // console.log(layer.feature);
-    /**
-     * Function called when layer is selected.
-     * @param {*} e
-     */
-    function handleCellClick(e) {
-      var layer = e.target;
-      let popup = layer.getPopup();
-      popup.bindPopup(findMissingOtuLookups(layer, popup));
-    }
+  }
+}
 
-    function findMissingOtuLookups(layer, popup) {
-      let missingIds = [];
-      for (const [otuId] of Object.entries(layer.feature.properties.otus)) {
-        if (!(otuId in window.otuLookup)) {
-          missingIds.push(otuId);
-        }
-      }
-      if (missingIds.length > 0) {
-        // f_url = "http://localhost:8000/edna/api/v1.0/otu/?";
-        // f_url += "id=" + missingIds.join("&id=");
-        let f_url = API_URLS.otu_code_by_id + missingIds.join("&id=");
-        console.log(f_url);
-        fetch(f_url).then(response => {
-          response.json().then(jsonResponse => {
-            console.log(jsonResponse);
-            popup.setContent(
-              makePopupContent(layer.feature.properties, jsonResponse)
-            );
-          });
-        });
-      } else {
-        popup.setContent(makePopupContent(layer.feature.properties));
-      }
-    }
-
-    function handleMouseOver(e) {
-      let layer = e.target;
-      layer.feature.properties.sites.forEach(siteId => {
-        // needs to use sitecode as you cannot select in css using a number "#123"
-        let siteCode = window.sampleContextLookup[siteId].site;
-        let circle = d3.selectAll("#" + siteCode);
-        circle
-          .transition()
-          .duration(250)
-          .attr("r", 14);
-      });
-    }
-
-    function handleMouseOut(e) {
-      let layer = e.target;
-      layer.feature.properties.sites.forEach(siteId => {
-        // needs to use sitecode as you cannot select in css using a number "#123"
-        let siteCode = window.sampleContextLookup[siteId].site;
-        let circle = d3.selectAll("#" + siteCode);
-        circle
-          .transition()
-          .duration(250)
-          .attr("r", 7);
-      });
-    }
-
-    function highlightLayer(layer) {
-      layer.setStyle({
-        weight: 5,
-        opacity: 0.9
-      });
-      if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-        layer.bringToFront();
-      }
+function findMissingOtuLookups(layer, popup) {
+  let missingIds = [];
+  for (const [otuId] of Object.entries(layer.feature.properties.otus)) {
+    if (!(otuId in window.otuLookup)) {
+      missingIds.push(otuId);
     }
   }
+  if (missingIds.length > 0) {
+    // f_url = "http://localhost:8000/edna/api/v1.0/otu/?";
+    // f_url += "id=" + missingIds.join("&id=");
+    let f_url = API_URLS.otu_code_by_id + missingIds.join("&id=");
+    console.log(f_url);
+    fetch(f_url).then(response => {
+      response.json().then(jsonResponse => {
+        console.log(jsonResponse);
+        popup.setContent(
+          makePopupContent(layer.feature.properties, jsonResponse)
+        );
+      });
+    });
+  } else {
+    popup.setContent(makePopupContent(layer.feature.properties));
+  }
+}
+
+/**
+ * Function called when layer is selected.
+ * @param {*} e
+ */
+function handleCellClick(e) {
+  var layer = e.target;
+  let popup = layer.getPopup();
+  popup.bindPopup(findMissingOtuLookups(layer, popup));
+}
+
+function handleMouseOver(e) {
+  let layer = e.target;
+  layer.feature.properties.sites.forEach(siteId => {
+    // needs to use sitecode as you cannot select in css using a number "#123"
+    let siteCode = window.sampleContextLookup[siteId].site;
+    let circle = d3.selectAll("#" + siteCode);
+    circle
+      .transition()
+      .duration(250)
+      .attr("r", 14);
+  });
+}
+
+function handleMouseOut(e) {
+  let layer = e.target;
+  layer.feature.properties.sites.forEach(siteId => {
+    // needs to use sitecode as you cannot select in css using a number "#123"
+    let siteCode = window.sampleContextLookup[siteId].site;
+    let circle = d3.selectAll("#" + siteCode);
+    circle
+      .transition()
+      .duration(250)
+      .attr("r", 7);
+  });
+}
+
+export function highlightLayer(layer) {
+  layer.setStyle({
+    weight: 5,
+    opacity: 0.9
+  });
+  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+    layer.bringToFront();
+  }
+}
+
+/**
+ * Resets layer outline weight and opacity to original values.
+ * Values are hardcoded due to geojson.reset() not working as planned.
+ * @param {*} layer
+ */
+export function disableHighlightLayer(layer) {
+  var properties = layer.feature.properties;
+  //console.log(properties);
+  layer.setStyle({
+    weight: 1,
+    opacity: getOutlineOpacity(properties.hasSamples)
+  });
 }
 
 /**
@@ -639,51 +654,6 @@ function onEachFeature(feature, layer) {
 }
 
 /**
- * Currently used for debugging. Logs cell layer metrics.
- * @param {*} e
- */
-function handleCellClick(e) {
-  var layer = e.target;
-  console.log("layer index is " + layer.feature.properties.index);
-  var speciesInCell = layer.feature.properties.speciesInCell;
-  var speciesAmount = Object.keys(speciesInCell).length;
-  console.log("Number of unique classifications in cell: " + speciesAmount);
-}
-
-/**
- * Highlights visualization datapoints contained within the cellSites property of the hovered feature.
- * @param {*} e mouse hover
- */
-function handleMouseOver(e) {
-  var layer = e.target;
-  var siteList = layer.feature.properties.cellSites;
-  for (site in siteList) {
-    var circle = d3.selectAll("#" + siteList[site]);
-    circle
-      .transition()
-      .duration(250)
-      .attr("r", 14);
-  }
-}
-
-/**
- * Reverts the datapoint style to default when mouse leaves the cell containing the datapoint.
- * @param {*} e
- */
-function handleMouseOut(e) {
-  var layer = e.target;
-  //console.log(layer.feature.properties.cellSites);
-  var siteList = layer.feature.properties.cellSites;
-  for (site in siteList) {
-    var circle = d3.selectAll("#" + siteList[site]);
-    circle
-      .transition()
-      .duration(250)
-      .attr("r", 7);
-  }
-}
-
-/**
  * Provides aggregate calculation for richness and adds it to the gridCell data.
  * Calculates and returns the maximums for cell richness, abundance and shannon entropy within the grid.
  * @param {*} gridCells
@@ -776,47 +746,33 @@ function GetFillColor(d) {
  * Function called when layer is clicked on
  * @param {*} layer
  */
-function highlightFeatureClick(layer) {
-  var layer = e.target;
-  layer.setStyle({
-    weight: 5,
-    color: "#666",
-    dashArray: "",
-    fillOpacity: 0.7
-  });
-  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-    layer.bringToFront();
-  }
-}
+// function highlightFeatureClick(layer) {
+//   var layer = e.target;
+//   layer.setStyle({
+//     weight: 5,
+//     color: "#666",
+//     dashArray: "",
+//     fillOpacity: 0.7
+//   });
+//   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+//     layer.bringToFront();
+//   }
+// }
 
 /**
  * Function to increase cell layer outline weight and opacity without
  * the need for mouseover/mouse click on the layer
  * @param {*} layer
  */
-export function highlightLayer(layer) {
-  layer.setStyle({
-    weight: 5,
-    opacity: 0.9
-  });
-  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-    layer.bringToFront();
-  }
-}
-
-/**
- * Resets layer outline weight and opacity to original values.
- * Values are hardcoded due to geojson.reset() not working as planned.
- * @param {*} layer
- */
-export function disableHighlightLayer(layer) {
-  var properties = layer.feature.properties;
-  //console.log(properties);
-  layer.setStyle({
-    weight: 1,
-    opacity: getOutlineOpacity(properties.hasSamples)
-  });
-}
+// function highlightLayer(layer) {
+//   layer.setStyle({
+//     weight: 5,
+//     opacity: 0.9
+//   });
+//   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+//     layer.bringToFront();
+//   }
+// }
 
 /**
  * Adds additional metrics to site aggregated data.
@@ -838,7 +794,7 @@ function addSiteMetrics(siteAggregates) {
 }
 
 //generating the map
-var tileLayer = L.tileLayer(
+const tileLayer = L.tileLayer(
   "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
   {
     attribution:
@@ -848,7 +804,7 @@ var tileLayer = L.tileLayer(
     minZoom: 5.75
   }
 );
-var map = L.map("map", {
+export const map = L.map("map", {
   zoomSnap: 0.25,
   zoomDelta: 0.25,
   layers: tileLayer,

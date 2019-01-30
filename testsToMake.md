@@ -13,3 +13,9 @@
 * test changing grid res updates gridcells
 
 * change slider input field: rerender plot, graph + alter slider position and expand slider.
+
+* clicking on grid cell should zoom to cell.
+
+* hovering on cell should black outline the cell.
+
+* hovering on plot should black highlight the cell.
