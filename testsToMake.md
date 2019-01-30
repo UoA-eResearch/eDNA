@@ -1,11 +1,13 @@
-test changing select then getting heat results.
+# Tests to make
 
-test clicking on a grid cell to load popup content.
+* test changing select then getting heat results.
 
-test hovering on plot point generates tooltip.
+* test clicking on a grid cell to load popup content.
 
-test hover on plot generates grid outline.
+* test hovering on plot point generates tooltip.
 
-test click on plot point flies to grid cell.
+* test hover on plot generates grid outline.
 
-test changing grid res updates gridcells
+* test click on plot point flies to grid cell.
+
+* test changing grid res updates gridcells
