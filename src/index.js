@@ -833,30 +833,6 @@ function updateGraphColours(metric) {
     });
 }
 
-var hashComponents = decodeURIComponent(
-  window.location.hash.replace("#", "")
-).split(",");
-
-function createLoadingMessage() {
-  let popupDiv = document.createElement("div");
-  popupDiv.id = "flex-container-state";
-  let state = document.createElement("h1");
-  state.id = "state-header";
-  state.textContent = "Fetching data...";
-  popupDiv.appendChild(state);
-  let map = document.getElementById("map");
-  map.appendChild(popupDiv);
-}
-
-function updateStatePopup(s) {
-  document.getElementById("state-header").textContent = s;
-}
-
-function disableStatePopup() {
-  let statePopup = document.getElementById("flex-container-state");
-  statePopup.style.display = "none";
-}
-
 function initializeOtuSelect() {
   let taxonSelect = $("#select-taxonomic").select2({
     placeholder: "Type to filter by classification and metadata",
