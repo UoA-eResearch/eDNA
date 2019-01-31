@@ -1,6 +1,6 @@
 import * as d3 from "d3";
+import { map } from "./map";
 import {
-  map,
   g,
   tooltip,
   x,
