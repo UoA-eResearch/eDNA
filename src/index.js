@@ -524,6 +524,13 @@ export function disableHighlightLayer(layer) {
 }
 
 /**
+ * centralised place to store value
+ */
+function getOutlineOpacity() {
+  return 0.15;
+}
+
+/**
  * Makes grid array for cells. Each cell starts off with only containing coordinates.
  * @param {*} detailLevel
  */
@@ -590,189 +597,6 @@ function makeGrid(detailLevel) {
     return cell;
   }
 }
-
-/**
- * Creates the grid lookup object/dictionary used for filling in the grid and calculating it's position.
- * @param {*} grid
- */
-function makeGridLookup(grid) {
-  let gridLookup = {};
-  const gridStart = grid.start;
-  const lngOffset = grid.lngOffset;
-  const latOffset = grid.latOffset;
-  const detailLevel = grid.detailLevel;
-
-  for (let siteName in window.meta) {
-    const site = window.meta[siteName];
-    if (gridLookup[siteName] == null) {
-      // siteLat/Lng so it can be in scope for the subfunction.
-      var siteLng = site.x;
-      var siteLat = site.y;
-      let gridCellIndex = calculateGridIndexFromCoordinates();
-      gridLookup[siteName] = gridCellIndex;
-      // Sets hasSamples to true from default false as a site is a sample.
-      // Also reduces processing uneccessary polygons
-      grid.cells[gridCellIndex].hasSamples = true;
-      if (!siteName in grid.cells[gridCellIndex].cellSites) {
-        grid.cells[gridCellIndex].cellSites.push(siteName);
-      }
-    }
-  }
-  return gridLookup;
-
-  /**
-   * Assumes coordinate system is WGS84. Uses rounding to find the index.
-   */
-  function calculateGridIndexFromCoordinates() {
-    let lngDiff = Math.abs(siteLng) - Math.abs(gridStart[0]);
-    let colIndex = Math.floor(lngDiff / lngOffset);
-    let latDiff = Math.abs(siteLat) - Math.abs(gridStart[1]);
-    let rowIndex = Math.floor(latDiff / latOffset);
-    let gridCellIndex = rowIndex * detailLevel + colIndex;
-    return gridCellIndex;
-  }
-}
-
-/**
- * Performs this function on every feature selected.
- * @param {*} feature
- * @param {*} layer
- */
-function onEachFeature(feature, layer) {
-  if (feature.properties && feature.properties.popupContent) {
-    var popup = layer.bindPopup(feature.properties.popupContent, {
-      maxWidth: 4000,
-      maxHeight: 150
-    });
-  }
-  layer.on({
-    mouseover: handleMouseOver,
-    mouseout: handleMouseOut,
-    click: handleCellClick,
-    select: highlightLayer
-  });
-}
-
-/**
- * Provides aggregate calculation for richness and adds it to the gridCell data.
- * Calculates and returns the maximums for cell richness, abundance and shannon entropy within the grid.
- * @param {*} gridCells
- */
-function CalculateGridMaxes(gridCells) {
-  let richness = 0;
-  let abundance = 0;
-  let siteCount = 0;
-  for (let i in gridCells) {
-    const cell = gridCells[i];
-    const cellRichness = Object.keys(cell.cellSpecies).length;
-    cell.richness = cellRichness;
-    if (cell.richness > richness) {
-      richness = cellRichness;
-    }
-    if (cell.abundance > abundance) {
-      abundance = cell.abundance;
-    }
-    if (cell.cellSites.length > siteCount) {
-      siteCount = cell.cellSites.length;
-    }
-  }
-  //console.log("max count ", maxCount, "max value ", maxValue);
-  var gridMaxes = {
-    richness,
-    abundance,
-    siteCount
-  };
-  return gridMaxes;
-}
-
-/**
- * Returns value for outline opacity. Currently hardcoded to 0.15.
- * Currently used to centralize style changes across multiple layers.
- */
-function getOutlineOpacity() {
-  return 0.15;
-}
-
-/**
- * Returns value for outline color. Currently hardcoded to 0.15.
- * Currently used to centralize style changes across multiple layers.
- */
-function GetOutlineColour() {
-  return "#000000";
-}
-
-/**
- * Returns value for fill opacity based on if has Samples or not.
- * Currently used to centralize style changes across multiple layers.
- * @param {*, *} hasSamples
- */
-function GetFillOpacity(d, hasSamples) {
-  //Should always eval to true as polygons aren't created unless hasSamples = true
-  if (hasSamples) {
-    return d > 0.0 ? 0.8 : 0.2;
-  } else {
-    return 0;
-  }
-}
-
-/**
- * Returns layer fill colour based on it's value within the range 0-1.
- * @param {*} d property value.
- */
-function GetFillColor(d) {
-  // ?: might be better to use leaflet chloropleth plugin for this
-  return d > 0.9
-    ? "#800026"
-    : d > 0.8
-    ? "#BD0026"
-    : d > 0.7
-    ? "#E31A1C"
-    : d > 0.6
-    ? "#FC4E2A"
-    : d > 0.5
-    ? "#FD8D3C"
-    : d > 0.4
-    ? "#FEB24C"
-    : d > 0.3
-    ? "#FED976"
-    : d > 0.2
-    ? "#FFEDA0"
-    : d > 0.0
-    ? "#FFFFCC"
-    : "#9ecae1";
-}
-
-/**
- * Function called when layer is clicked on
- * @param {*} layer
- */
-// function highlightFeatureClick(layer) {
-//   var layer = e.target;
-//   layer.setStyle({
-//     weight: 5,
-//     color: "#666",
-//     dashArray: "",
-//     fillOpacity: 0.7
-//   });
-//   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-//     layer.bringToFront();
-//   }
-// }
-
-/**
- * Function to increase cell layer outline weight and opacity without
- * the need for mouseover/mouse click on the layer
- * @param {*} layer
- */
-// function highlightLayer(layer) {
-//   layer.setStyle({
-//     weight: 5,
-//     opacity: 0.9
-//   });
-//   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-//     layer.bringToFront();
-//   }
-// }
 
 /**
  * Adds additional metrics to site aggregated data.
