@@ -8,13 +8,16 @@ import "../js/L.Control.Range";
 import { updateGraph, initPlotChart } from "./plot";
 import { strongHeader, strongLine } from "./utility";
 import { API_URLS } from "./constants";
-import { detailLevel, initializeMap } from "./map";
+import * as map from "./map";
 
 window.circles = [];
 window.contextTags = [];
 window.siteAggregates = {};
 window.otuLookup = {};
 window.sampleContextLookup = {};
+
+let detailLevel = map.detailLevel;
+console.log(detailLevel);
 
 /**
  * Gets all filter element values and uses them as parameters for an API request.
@@ -601,7 +604,7 @@ function addSiteMetrics(siteAggregates) {
   return siteAggregates;
 }
 
-initializeMap();
+map.initializeMap();
 
 /**
  * Takes in a sample contextual index, iterates through all active and stamped map layers, then returns the last matching layer with leaflet id. Assumes sample contextual contains a leafletId value.
