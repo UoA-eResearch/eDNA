@@ -1,3 +1,4 @@
+import * as _ from "lodash";
 import * as L from "leaflet";
 import * as d3 from "d3";
 import * as $ from "jquery";
@@ -89,6 +90,7 @@ function recalculateSampleOtuLayers(responseData) {
     window.sampleContextLookup[sampleContext.id] = sampleContext;
   }
   let siteAggregatedData = aggregateBySite(sampleOtus);
+  aggSite2Test(sampleOtus);
   let heatLayer = renderHeatLayer(siteAggregatedData, heatLayerGroup, map);
   let cellAggregatedData = aggregateByCell(siteAggregatedData, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggregatedData);
@@ -166,6 +168,15 @@ function aggregateBySite(sampleOtus) {
     }
   }
   return siteAggs;
+}
+
+function aggSite2Test(data) {
+  let siteGrouped = _.groupBy(data, function(tuple) {
+    return tuple[1];
+  });
+  _.each(siteGrouped, function(site) {
+    console.log(site);
+  });
 }
 
 /**
