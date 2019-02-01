@@ -1,15 +1,7 @@
 import * as d3 from "d3";
-import {
-  map,
-  g,
-  tooltip,
-  x,
-  y,
-  GetLayerBySampleContextId,
-  highlightLayer,
-  disableHighlightLayer
-} from "./index";
+import { map, g, tooltip, x, y, GetLayerBySampleContextId } from "./index";
 import { strongLine, strongHeader } from "./utility";
+import { highlightLayer, disableHighlightLayer } from "./map";
 
 function initPlotChart() {
   var margin = { top: 20, right: 30, bottom: 20, left: 160 },

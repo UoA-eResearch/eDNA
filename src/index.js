@@ -8,7 +8,7 @@ import "../js/L.Control.Range";
 import { updateGraph, initPlotChart } from "./plot";
 import { strongHeader, strongLine } from "./utility";
 import { API_URLS } from "./constants";
-import { renderHeatLayer } from "./map";
+import { renderHeatLayer, highlightLayer } from "./map";
 
 window.circles = [];
 window.contextTags = [];
@@ -461,37 +461,6 @@ function handleMouseOut(e) {
       .duration(250)
       .attr("r", 7);
   });
-}
-
-export function highlightLayer(layer) {
-  layer.setStyle({
-    weight: 5,
-    opacity: 0.9
-  });
-  if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-    layer.bringToFront();
-  }
-}
-
-/**
- * Resets layer outline weight and opacity to original values.
- * Values are hardcoded due to geojson.reset() not working as planned.
- * @param {*} layer
- */
-export function disableHighlightLayer(layer) {
-  var properties = layer.feature.properties;
-  //console.log(properties);
-  layer.setStyle({
-    weight: 1,
-    opacity: getOutlineOpacity(properties.hasSamples)
-  });
-}
-
-/**
- * centralised place to store value
- */
-function getOutlineOpacity() {
-  return 0.15;
 }
 
 /**
