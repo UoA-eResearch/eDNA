@@ -8,6 +8,7 @@ import "../js/L.Control.Range";
 import { updateGraph, initPlotChart } from "./plot";
 import { strongHeader, strongLine } from "./utility";
 import { API_URLS } from "./constants";
+import { renderHeatLayer } from "./map";
 
 window.circles = [];
 window.contextTags = [];
@@ -73,7 +74,7 @@ function handleResponseData(responseData) {
     window.sampleContextLookup[sampleContext.id] = sampleContext;
   }
   let siteAggregatedData = aggregateBySite(sampleOtus);
-  let heatLayer = renderHeatLayer(siteAggregatedData);
+  let heatLayer = renderHeatLayer(siteAggregatedData, heatLayerGroup, map);
   let cellAggregatedData = aggregateByCell(siteAggregatedData, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggregatedData);
   let abundanceLayer = featureCollectionToLayer(
@@ -150,26 +151,6 @@ function aggregateBySite(sampleOtus) {
     }
   }
   return siteAggs;
-}
-
-function renderHeatLayer(siteAggs) {
-  let heatData = [];
-  let maxWeight = 0;
-  for (let siteId in siteAggs) {
-    let siteMeta = window.sampleContextLookup[siteId];
-    let siteWeight = siteAggs[siteId].abundance;
-    if (maxWeight < siteWeight) {
-      maxWeight = siteWeight;
-    }
-    heatData.push([siteMeta.y, siteMeta.x, siteWeight]);
-  }
-  let heatLayer = L.heatLayer(heatData);
-  heatLayerGroup.clearLayers();
-  heatLayerGroup.addLayer(heatLayer);
-  heatLayer.setOptions({ max: maxWeight * 1.5, maxZoom: 6 });
-  heatLayer.setLatLngs(heatData);
-  map.addLayer(heatLayerGroup);
-  return heatLayer;
 }
 
 /**
