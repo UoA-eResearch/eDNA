@@ -17,7 +17,7 @@ window.otuLookup = {};
 window.sampleContextLookup = {};
 
 /**
- * Gets all filter element values and uses them as parameters for an API request.
+ * generates the request URL and calls recalculating data functions when data is received.
  */
 function fetchSampleOtus() {
   let contextParams = $("#select-contextual").select2("data");
@@ -58,12 +58,27 @@ function fetchSampleOtus() {
   // fetch the url
   fetch(url).then(response => {
     response.json().then(responseData => {
-      handleResponseData(responseData);
+      recalculateSampleOtuLayers(responseData);
     });
   });
 }
 
-function handleResponseData(responseData) {
+/**
+ * recalculates where data fits on the grid structure without fetching new data from the server.
+ */
+function recalculateGridLayer() {
+  if (window.previousResults) {
+    recalculateSampleOtuLayers(window.previousResults);
+  } else {
+    $("#select-taxonomic").trigger("change");
+  }
+}
+
+/**
+ * takes combined sampleOtu data and sampleContextual data and calculates their positions and generates layers.
+ */
+function recalculateSampleOtuLayers(responseData) {
+  window.previousResults = responseData;
   let sampleOtus = responseData.sample_otu_data;
   let sampleContexts = responseData.sample_contextual_data;
   // display amount of abundances from a search below the filter
@@ -644,7 +659,8 @@ function handleGridResInputChange(value, slider) {
   slider._expand();
   slider._sliderValue.innerHTML = value;
   detailLevel = value;
-  $("#select-taxonomic").trigger("change");
+  // TODO: Need to move this into a centralized way. needs to check if results null first then call fetch. Right now fetch makes the call to handle response but it should be the other way around.
+  recalculateGridLayer();
 }
 
 function initializeDisplayOptionsControls() {
@@ -652,7 +668,7 @@ function initializeDisplayOptionsControls() {
     function(value) {
       detailLevel = value;
       // TODO: directly call fetchSampleOTU data instead of triggering a change.
-      $("#select-taxonomic").trigger("change");
+      recalculateGridLayer();
     },
     {
       id: "grid-resolution-slider",
