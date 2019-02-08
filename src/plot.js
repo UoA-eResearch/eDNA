@@ -72,8 +72,12 @@ function initPlotChart() {
  */
 function updateGraph(siteAggregates) {
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
-  var metricColour = createColorRange(siteAggregates);
-  var colourMetric = document.getElementById("meta-select").value;
+  let metricColour = createColorRange(siteAggregates);
+  let colourMetric = document.getElementById("meta-select").value;
+  console.log(colourMetric);
+  if (colourMetric == null) {
+    colourMetric == "elev";
+  }
 
   function makeNestableObject(siteId, site, metricName, value) {
     return {
@@ -174,8 +178,8 @@ function updateGraph(siteAggregates) {
                 strongHeader(d.Metric, d.value) +
                 strongHeader(
                   document.getElementById("meta-select").value,
-                  // d.meta[document.getElementById("meta-select").value]
-                  d.meta["elev"]
+                  d.meta[document.getElementById(colourMetric).value]
+                  // d.meta["elev"]
                 )
             )
             .style("left", d3.event.pageX + "px")

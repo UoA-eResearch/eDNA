@@ -6,7 +6,7 @@ import "../js/leaflet.heat";
 import "../js/leaflet-slider";
 import select2 from "../js/select2.min.js";
 import "../js/L.Control.Range";
-import { updateGraph, initPlotChart } from "./plot";
+import { updateGraph, initPlotChart, createColorRange } from "./plot";
 import { strongHeader, strongLine } from "./utility";
 import { API_URLS } from "./constants";
 import { renderHeatLayer, highlightLayer } from "./map";
@@ -90,7 +90,6 @@ function recalculateSampleOtuLayers(responseData) {
     window.sampleContextLookup[sampleContext.id] = sampleContext;
   }
   let siteAggregatedData = aggregateBySite(sampleOtus);
-  aggSite2Test(sampleOtus);
   let heatLayer = renderHeatLayer(siteAggregatedData, heatLayerGroup, map);
   let cellAggregatedData = aggregateByCell(siteAggregatedData, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggregatedData);
@@ -168,15 +167,6 @@ function aggregateBySite(sampleOtus) {
     }
   }
   return siteAggs;
-}
-
-function aggSite2Test(data) {
-  let siteGrouped = _.groupBy(data, function(tuple) {
-    return tuple[1];
-  });
-  _.each(siteGrouped, function(site) {
-    console.log(site);
-  });
 }
 
 /**
