@@ -8,13 +8,8 @@ import select2 from "../js/select2.min.js";
 import "../js/L.Control.Range";
 import { updateGraph, initPlotChart, createColorRange } from "./plot";
 import { strongHeader, strongLine } from "./utility";
-<<<<<<< HEAD
 import { API_URLS, API_URLS_2 } from "./constants";
 import { renderHeatLayer, highlightLayer } from "./map";
-=======
-import { API_URLS } from "./constants";
-import * as map from "./map";
->>>>>>> 3619a1d0b27797497f79fa6f637b433af7e399a9
 
 window.circles = [];
 window.contextTags = [];
