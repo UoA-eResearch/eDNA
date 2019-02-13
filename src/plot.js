@@ -73,7 +73,7 @@ function initPlotChart() {
 function updateGraph(siteAggregates) {
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   let metricColour = createColorRange(siteAggregates);
-  let colourMetric = document.getElementById("meta-select").value;
+  let colourMetric = getActivePlotMetric();
   console.log(colourMetric);
   if (colourMetric == null) {
     colourMetric == "elev";
@@ -177,8 +177,8 @@ function updateGraph(siteAggregates) {
               strongLine(d.meta.site) +
                 strongHeader(d.Metric, d.value) +
                 strongHeader(
-                  document.getElementById("meta-select").value,
-                  d.meta[document.getElementById(colourMetric).value]
+                  getActivePlotMetric(),
+                  d.meta[getActivePlotColorOption()]
                   // d.meta["elev"]
                 )
             )
@@ -248,28 +248,41 @@ function updateGraph(siteAggregates) {
 }
 
 /**
+ * returns the current value on the plot metric selection.
+ */
+const getActivePlotMetric = () => {
+  return document.getElementById("meta-select").value.toLowerCase();
+};
+
+/**
+ * returns the current value of the plot coloring select element.
+ */
+const getActivePlotColorOption = () => {
+  return document.getElementById("colour-scheme-select").value;
+};
+
+/**
  * Calculates queries max and minimum site metrics.
  * Returns colour range with spectrum from minimum value metric to max value metric.
  * @param {*} metric
  * @param {*} siteAggregates
  */
 function createColorRange(siteAggregates) {
+  // TODO: not generating color ranges for certain metrics (mean c percent and nitrogen)
   // gets value from drop down and creates colour scale from the select option.
-  const metric = document.getElementById("meta-select").value;
-  console.log(metric);
+  const metric = getActivePlotMetric();
   const sites = [];
   for (var siteId in siteAggregates) {
     sites.push(window.sampleContextLookup[siteId]);
   }
   const min = d3.min(sites, function(d) {
-    console.log(d);
     return d[metric];
   });
   const max = d3.max(sites, function(d) {
     return d[metric];
   });
-  console.log("visualization plot min, max:", min, max);
-  const colorScheme = document.getElementById("colour-scheme-select").value;
+  console.log(metric + " visualization plot min, max:", min, max);
+  const colorScheme = getActivePlotColorOption();
   let colorRange = [];
   switch (colorScheme) {
     case "sequential":
