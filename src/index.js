@@ -8,7 +8,7 @@ import select2 from "../js/select2.min.js";
 import "../js/L.Control.Range";
 import { updateGraph, initPlotChart, createColorRange } from "./plot";
 import { strongHeader, strongLine } from "./utility";
-import { API_URLS } from "./constants";
+import { API_URLS, API_URLS_2 } from "./constants";
 import { renderHeatLayer, highlightLayer } from "./map";
 
 window.circles = [];
@@ -30,7 +30,7 @@ function fetchSampleOtus() {
     let idChain = taxonIdChain.id.split(",").join("+");
     ontologyIds.push(idChain);
   }
-  let url = API_URLS.test_sample_otu_pk;
+  let url = API_URLS_2.sampleOtus;
   url += "otu=" + ontologyIds.join("&otu=");
 
   // Formatting and adding contextual filters to url
@@ -426,13 +426,10 @@ function findMissingOtuLookups(layer, popup) {
     }
   }
   if (missingIds.length > 0) {
-    // f_url = "http://localhost:8000/edna/api/v1.0/otu/?";
-    // f_url += "id=" + missingIds.join("&id=");
-    let f_url = API_URLS.otu_code_by_id + missingIds.join("&id=");
-    console.log(f_url);
+    console.log("missing some otu codes, requesting from server.");
+    let f_url = API_URLS_2.otu_code_by_id + missingIds.join("&id=");
     fetch(f_url).then(response => {
       response.json().then(jsonResponse => {
-        console.log(jsonResponse);
         popup.setContent(
           makePopupContent(layer.feature.properties, jsonResponse)
         );
@@ -794,10 +791,11 @@ function initializeOtuSelect() {
     tags: true,
     ajax: {
       // url: API_URLS.local_filter_options,
-      url: API_URLS.filter_suggestions,
+      // url: API_URLS.filter_suggestions,
+      url: API_URLS_2.otuSuggestions,
       delay: 250,
       data: function(params) {
-        console.log("data call");
+        console.log("requesting more search suggestions");
         let query = {
           q: params.term,
           page: params.page || 1,
@@ -807,10 +805,9 @@ function initializeOtuSelect() {
       },
       processResults: function(response, params) {
         // don't really know why this params page thing is necessary but it is.
-        console.log("process results");
+        console.log("updating selection options from request.");
         params.page = params.page || 1;
         params.page_size = params.page_size || 50;
-        console.log(params);
         let data = response.data;
         let total_results = data.total_results;
         let index = 0;
@@ -829,7 +826,6 @@ function initializeOtuSelect() {
           // window.otuLookup[taxon[2]] = taxon[1];
           return option;
         });
-        console.log(taxonOptions);
 
         // making window lookup, not necessary until later really.
         // dont need to look up a primary key if you already have it.
@@ -852,7 +848,6 @@ function initializeOtuSelect() {
             more: moreResults
           }
         };
-        console.log(groupedOptions);
         return groupedOptions;
         // console.log(params.page * params.page_size);
         // console.log(total_results);
@@ -987,7 +982,7 @@ window.onload = () => {
 
 // NOTE: load contextual options up front. Hardcoding some params.
 // possibly separate into a different API later on if we have time or a need.
-let url = API_URLS.filter_suggestions + "q=&page=1&page_size=200";
+let url = API_URLS_2.otuSuggestions + "q=&page=1&page_size=200";
 fetch(url).then(response => {
   response.json().then(initializeSelectContextual);
 });

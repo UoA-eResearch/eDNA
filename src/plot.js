@@ -256,11 +256,13 @@ function updateGraph(siteAggregates) {
 function createColorRange(siteAggregates) {
   // gets value from drop down and creates colour scale from the select option.
   const metric = document.getElementById("meta-select").value;
+  console.log(metric);
   const sites = [];
   for (var siteId in siteAggregates) {
     sites.push(window.sampleContextLookup[siteId]);
   }
   const min = d3.min(sites, function(d) {
+    console.log(d);
     return d[metric];
   });
   const max = d3.max(sites, function(d) {
@@ -294,4 +296,4 @@ const randomRange = (upper, lower) => {
   return Math.random() * (upper - lower) + lower;
 };
 
-export { updateGraph, initPlotChart };
+export { updateGraph, initPlotChart, createColorRange };

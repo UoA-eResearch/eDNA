@@ -1,18 +1,29 @@
-const dev_url = "http://localhost:8000/edna/api/v1.0/";
-const prod_url = "https://edna.nectar.auckland.ac.nz/edna/api/";
+const DEV_BASE_URL = "http://localhost:8000/edna/api/v1.0/";
+const PRD_BASE_URL = "https://edna.nectar.auckland.ac.nz/edna/api/v1.0/";
 // change active depending on the situation.
-const active_base_url = dev_url;
+const activeUrl = PRD_BASE_URL;
 const API_URLS = {
   // prod
-  filtered_abundance: prod_url + "abundance?otu=",
-  filtered_meta: prod_url + "metadata?term=",
-  ordered_sampleotu: prod_url + "sample_otu_ordered",
+  filtered_abundance: PRD_BASE_URL + "abundance?",
+  filtered_meta: PRD_BASE_URL + "metadata?term=",
+  ordered_sampleotu: PRD_BASE_URL + "sample_otu_ordered",
+
+  // prod test (? lol)
+  prod_filter_suggestions: PRD_BASE_URL + "filter-options?",
 
   // dev
-  test_sample_otu_pk: dev_url + "abundance?",
-  dev_contextual_id: dev_url + "metadata?id=",
-  filter_suggestions: dev_url + "filter-options?",
-  otu_code_by_id: dev_url + "otu/?id="
+  test_sample_otu_pk: DEV_BASE_URL + "abundance?",
+  dev_contextual_id: DEV_BASE_URL + "metadata?id=",
+  filter_suggestions: DEV_BASE_URL + "filter-options?",
+  otu_code_by_id: DEV_BASE_URL + "otu/?id="
 };
 
-export { dev_url, prod_url, API_URLS, active_base_url };
+const API_URLS_2 = {
+  // prod
+  sampleOtus: activeUrl + "abundance?",
+  metaData: activeUrl + "metadata?term=",
+  otuSuggestions: activeUrl + "filter-options?",
+  otu_code_by_id: activeUrl + "otu/?id="
+};
+
+export { DEV_BASE_URL, PRD_BASE_URL, API_URLS, activeUrl, API_URLS_2 };
