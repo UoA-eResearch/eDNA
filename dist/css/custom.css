@@ -68,7 +68,6 @@ div.tooltip {
     pointer-events: none;
 }
 
-
 .svg-container {
     display: inline-block;
     position: relative;
@@ -82,4 +81,17 @@ div.tooltip {
     position: absolute;
     top: 10px;
     left: 0;
+}
+
+.search {
+    width: 50%;        
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 1000;
+}
+
+.search--right {
+    text-align: right;
+    float: right;
 }

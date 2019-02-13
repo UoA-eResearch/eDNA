@@ -1,0 +1,40 @@
+{
+  "name": "edna",
+  "version": "1.0.0",
+  "description": "Goal of this pilot project is to produce a working example of a visualization system used to geographically display eDNA data from New Zealand. The display is, by default, a scalable grid of NZ, with samples falling into bins based on their latitude/longitude. The bins display as a heat map based on abundance. This will toggle between a sample view (where each sample contributes a count of one to the heat map), and a species view (where the heat map is made by summing abundances of all species). These heat map visualizations can be sub-selected by search functions of the metadata. Ultimately, it should be possible to sub-select any combination of metadata, but for the pilot this can just be some simple examples (e.g. elevation, basic environment type). This may also include some broad taxonomic divisions selectable as clickboxes (e.g. bacteria/archaea/animals/plants/fungi/protists). The species view should have a toggle between normalizing the heat-map to the number of samples from that grid bin, or not.",
+  "dependencies": {
+    "css-loader": "^1.0.1",
+    "d3": "^5.8.0",
+    "file-loader": "^2.0.0",
+    "jest": "^23.6.0",
+    "jquery": "^3.3.1",
+    "leaflet": "^1.4.0",
+    "leaflet.heat": "^0.2.0",
+    "lodash": "^4.17.11",
+    "nouislider": "^12.1.0",
+    "select2": "^4.0.6-rc.1",
+    "style-loader": "^0.23.1",
+    "typescript": "^2.9.2"
+  },
+  "devDependencies": {
+    "webpack": "^4.29.0",
+    "webpack-cli": "^3.2.1",
+    "webpack-dev-server": "^3.1.14"
+  },
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack-dev-server --open",
+    "watch": "webpack --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UoA-eResearch/eDNA.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UoA-eResearch/eDNA/issues"
+  },
+  "homepage": "https://github.com/UoA-eResearch/eDNA#readme"
+}
