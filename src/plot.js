@@ -1,18 +1,5 @@
 import * as d3 from "d3";
-<<<<<<< HEAD
 import { map, g, tooltip, x, y, GetLayerBySampleContextId } from "./index";
-=======
-import { map } from "./map";
-import {
-  g,
-  tooltip,
-  x,
-  y,
-  GetLayerBySampleContextId,
-  highlightLayer,
-  disableHighlightLayer
-} from "./index";
->>>>>>> 3619a1d0b27797497f79fa6f637b433af7e399a9
 import { strongLine, strongHeader } from "./utility";
 import { highlightLayer, disableHighlightLayer } from "./map";
 
