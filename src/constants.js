@@ -1,8 +1,11 @@
 const DEV_BASE_URL = "http://localhost:8000/edna/api/v1.0/";
 const PRD_BASE_URL = "https://edna.nectar.auckland.ac.nz/edna/api/v1.0/";
 // change active depending on the situation.
-const activeUrl = PRD_BASE_URL;
-const API_URLS = {
+
+// const activeUrl = PRD_BASE_URL;
+const activeUrl = DEV_BASE_URL;
+
+const API_URLS_OLD = {
   // prod
   filtered_abundance: PRD_BASE_URL + "abundance?",
   filtered_meta: PRD_BASE_URL + "metadata?term=",
@@ -18,7 +21,7 @@ const API_URLS = {
   otu_code_by_id: DEV_BASE_URL + "otu/?id="
 };
 
-const API_URLS_2 = {
+const API_URLS = {
   // prod
   sampleOtus: activeUrl + "abundance?",
   metaData: activeUrl + "metadata?term=",
@@ -26,4 +29,4 @@ const API_URLS_2 = {
   otu_code_by_id: activeUrl + "otu/?id="
 };
 
-export { DEV_BASE_URL, PRD_BASE_URL, API_URLS, activeUrl, API_URLS_2 };
+export { DEV_BASE_URL, PRD_BASE_URL, activeUrl, API_URLS };
