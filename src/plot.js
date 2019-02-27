@@ -169,7 +169,7 @@ function updateGraph(siteAggregates) {
                 strongHeader(d.Metric, d.value) +
                 strongHeader(
                   getActivePlotMetric(),
-                  d.meta[getActivePlotColorOption()]
+                  d.meta[getActivePlotMetric()]
                   // d.meta["elev"]
                 )
             )

@@ -29,4 +29,4 @@ const API_URLS = {
   otu_code_by_id: activeUrl + "otu/?id="
 };
 
-export { DEV_BASE_URL, PRD_BASE_URL, activeUrl, API_URLS };
+export { PRD_BASE_URL, activeUrl, API_URLS };
