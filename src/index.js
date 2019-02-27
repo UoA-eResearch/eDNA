@@ -59,7 +59,7 @@ function fetchSampleOtus() {
   // fetch the url
   fetch(url).then(response => {
     response.json().then(responseData => {
-      recalculateSampleOtuLayers(responseData);
+      calculateSampleOtuData(responseData);
     });
   });
 }
@@ -69,7 +69,7 @@ function fetchSampleOtus() {
  */
 function recalculateGridLayer() {
   if (window.previousResults) {
-    recalculateSampleOtuLayers(window.previousResults);
+    calculateSampleOtuData(window.previousResults);
   } else {
     $("#select-taxonomic").trigger("change");
   }
@@ -78,7 +78,7 @@ function recalculateGridLayer() {
 /**
  * takes combined sampleOtu data and sampleContextual data and calculates their positions and generates layers.
  */
-function recalculateSampleOtuLayers(responseData) {
+function calculateSampleOtuData(responseData) {
   window.previousResults = responseData;
   let sampleOtus = responseData.sample_otu_data;
   let sampleContexts = responseData.sample_contextual_data;
@@ -93,27 +93,32 @@ function recalculateSampleOtuLayers(responseData) {
   let heatLayer = renderHeatLayer(siteAggregatedData, heatLayerGroup, map);
   let cellAggregatedData = aggregateByCell(siteAggregatedData, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggregatedData);
+
   let abundanceLayer = featureCollectionToLayer(
     featureCollection,
     "weightedAbundance",
     gridAbundanceLayerGroup
   );
+  addLayerIdToSampleContext(abundanceLayer);
+
   let richnessLayer = featureCollectionToLayer(
     featureCollection,
     "weightedRichness",
     gridRichnessLayerGroup
   );
+  addLayerIdToSampleContext(richnessLayer);
+
   // NOTE: disabling  site layer for quick comparison: rectangles are distorted.
-  // renderFeatureCollection(
-  //   featureCollection,
-  //   "weightedSites",
-  //   gridSitesLayerGroup
-  // );
+  let siteLayer = featureCollectionToLayer(
+    featureCollection,
+    "weightedSites",
+    gridSitesLayerGroup
+  );
+  addLayerIdToSampleContext(siteLayer);
+
   siteAggregatedData = addSiteMetrics(siteAggregatedData);
   window.siteAggregates = siteAggregatedData;
   // creating site -> leaflet layer references for each layer.
-  addLayerIdToSampleContext(abundanceLayer);
-  addLayerIdToSampleContext(richnessLayer);
   updateGraph(siteAggregatedData);
 }
 
