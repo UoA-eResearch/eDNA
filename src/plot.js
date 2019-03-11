@@ -174,11 +174,11 @@ function updateGraph(siteAggregates) {
             .duration(250);
           tooltip
             .html(
-              strongLine(d.meta.site) +
+              strongLine(d.meta.sample_identifier) +
                 strongHeader(d.Metric, d.value) +
                 strongHeader(
                   getActivePlotMetric(),
-                  d.meta[getActivePlotColorOption()]
+                  d.meta[getActivePlotMetric()]
                   // d.meta["elev"]
                 )
             )
@@ -258,6 +258,7 @@ const getActivePlotMetric = () => {
  * returns the current value of the plot coloring select element.
  */
 const getActivePlotColorOption = () => {
+  console.log(document.getElementById("colour-scheme-select").value);
   return document.getElementById("colour-scheme-select").value;
 };
 

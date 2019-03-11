@@ -195,8 +195,8 @@ function aggregateByCell(siteAggs) {
   for (let siteId in siteAggs) {
     let site = siteAggs[siteId];
     let sampleContext = window.sampleContextLookup[siteId];
-    let x = sampleContext.x;
-    let y = sampleContext.y;
+    let x = sampleContext.longitude;
+    let y = sampleContext.latitude;
     let cellKey = generateCellKey(x, y, start, lngOffset, latOffset);
     // if doesn't exist, create the cell.
     if (!(cellKey in cellAggs)) {
@@ -344,7 +344,8 @@ function makePopupContent(properties, jsonResponse = null) {
   popupContent += strongLine("Sites in cell: ") + "<ul>";
   for (let i in properties.sites) {
     let siteId = properties.sites[i];
-    popupContent += "<li>" + window.sampleContextLookup[siteId].site + "</li>";
+    popupContent +=
+      "<li>" + window.sampleContextLookup[siteId].sample_identifier + "</li>";
   }
   popupContent += "</ul><br />";
 
@@ -454,7 +455,8 @@ function handleMouseOver(e) {
   let layer = e.target;
   layer.feature.properties.sites.forEach(siteId => {
     // needs to use sitecode as you cannot select in css using a number "#123"
-    let siteCode = window.sampleContextLookup[siteId].site;
+    console.log(window.sampleContextLookup);
+    let siteCode = window.sampleContextLookup[siteId].sample_identifier;
     let circle = d3.selectAll("#" + siteCode);
     circle
       .transition()
@@ -748,13 +750,9 @@ leafletGraphControl.onAdd = function() {
   <button id = "graph-button" >Toggle Graph</button>
   <label> Colour by: 
     <select id="meta-select" >
-      <option selected value="elev">elev</option>
-      <option value="mid_ph">Mid pH</option>
-      <option value="mean_C_percent">Mean carbon concentration</option>
-      <option value="prec_mean">Mean Precipitation</option>
-      <option value="ave_logNconcen">Average log Nitrogen concentration</option>
-      <option value="water2">Water 2</option>
-      <option value="freshwater">Freshwater</option>
+      <option selected value="elevation">Elevation</option>
+      <option value="latitude">Latitude</option>
+      <option value="longitude">Longitude</option>
     </select>
   </label>
   <label> Colour type: 

@@ -9,7 +9,7 @@ export function renderHeatLayer(siteAggs, heatLayerGroup, map) {
     if (maxWeight < siteWeight) {
       maxWeight = siteWeight;
     }
-    heatData.push([siteMeta.y, siteMeta.x, siteWeight]);
+    heatData.push([siteMeta.latitude, siteMeta.longitude, siteWeight]);
   }
   let heatLayer = L.heatLayer(heatData);
   heatLayerGroup.clearLayers();
