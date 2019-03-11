@@ -10,7 +10,6 @@ const API_URLS = {
   filtered_meta: PRD_BASE_URL + "metadata?term=",
   ordered_sampleotu: PRD_BASE_URL + "sample_otu_ordered",
 
-  // prod test (? lol)
   prod_filter_suggestions: PRD_BASE_URL + "filter-options?",
 
   // dev
