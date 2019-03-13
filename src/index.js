@@ -52,12 +52,18 @@ function fetchSampleOtus() {
 
   // amplicon filtering
   if (ampliconFilters.length > 0) {
+    let useAny = false;
     let ampliconUrlSegment = ampliconFilters
       .map(filter => {
+        if (filter.text == "Any") {
+          useAny = true;
+        }
         return "&q=amplicon$eq" + filter.text;
       })
       .join("");
-    url += ampliconUrlSegment;
+    if (!useAny) {
+      url += ampliconUrlSegment;
+    }
   }
 
   if (document.getElementById("endemic-checkbox").checked) {
@@ -471,7 +477,6 @@ function handleMouseOver(e) {
   let layer = e.target;
   layer.feature.properties.sites.forEach(siteId => {
     // needs to use sitecode as you cannot select in css using a number "#123"
-    console.log(window.sampleContextLookup);
     let siteCode = window.sampleContextLookup[siteId].sample_identifier;
     let circle = d3.selectAll("#" + siteCode);
     circle
@@ -942,6 +947,10 @@ const initAmpliconSearch = () => {
     tags: true,
     data: [
       {
+        text: "Any",
+        id: "Any"
+      },
+      {
         text: "16S",
         id: "16S"
       },
@@ -952,6 +961,14 @@ const initAmpliconSearch = () => {
       {
         text: "26S",
         id: "26S"
+      },
+      {
+        text: "COI",
+        id: "COI"
+      },
+      {
+        text: "ITS",
+        id: "ITS"
       }
     ]
   });
