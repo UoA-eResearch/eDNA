@@ -21,12 +21,15 @@ window.sampleContextLookup = {};
  * generates the request URL and calls recalculating data functions when data is received.
  */
 function fetchSampleOtus() {
-  let contextParams = $("#select-contextual").select2("data");
-  let taxonParams = $("#select-taxonomic").select2("data");
+  let contextFilters = $("#select-contextual").select2("data");
+  let taxonFilters = $("#select-taxonomic").select2("data");
+  let ampliconFilters = $("#select-amplicon").select2("data");
+  console.log(ampliconFilters);
+
   // Formatting and adding otu arguments
   let ontologyIds = [];
-  for (let i in taxonParams) {
-    let taxonIdChain = taxonParams[i];
+  for (let i in taxonFilters) {
+    let taxonIdChain = taxonFilters[i];
     let idChain = taxonIdChain.id.split(",").join("+");
     ontologyIds.push(idChain);
   }
@@ -34,8 +37,8 @@ function fetchSampleOtus() {
   url += "otu=" + ontologyIds.join("&otu=");
 
   // Formatting and adding contextual filters to url
-  if (contextParams.length > 0) {
-    let s = contextParams
+  if (contextFilters.length > 0) {
+    let s = contextFilters
       .map(param => {
         let paramEncoded = param.text;
         paramEncoded = paramEncoded.replace("<", "$lt");
@@ -46,6 +49,17 @@ function fetchSampleOtus() {
       .join("");
     url += s;
   }
+
+  // amplicon filtering
+  if (ampliconFilters.length > 0) {
+    let ampliconUrlSegment = ampliconFilters
+      .map(filter => {
+        return "&q=amplicon$eq" + filter.text;
+      })
+      .join("");
+    url += ampliconUrlSegment;
+  }
+
   if (document.getElementById("endemic-checkbox").checked) {
     url += "&endemic=true";
   } else {
@@ -55,6 +69,8 @@ function fetchSampleOtus() {
   } else {
     url += "&operator=intersection";
   }
+
+  console.log("request url: " + url);
 
   // fetch the url
   fetch(url).then(response => {
@@ -915,6 +931,36 @@ function initializeSelectContextual(json) {
     fetchSampleOtus();
   });
 }
+
+const initAmpliconSearch = () => {
+  $("#select-amplicon").select2({
+    placeholder: "Select amplicon",
+    multiple: true,
+    allowClear: true,
+    width: "100%",
+    // cache: true,
+    tags: true,
+    data: [
+      {
+        text: "16S",
+        id: "16S"
+      },
+      {
+        text: "18S",
+        id: "18S"
+      },
+      {
+        text: "26S",
+        id: "26S"
+      }
+    ]
+  });
+  $("#select-amplicon").change(function() {
+    fetchSampleOtus();
+  });
+};
+
+initAmpliconSearch();
 
 function initializeEndemicRadio() {
   let radio = document.getElementById("endemic-checkbox");
