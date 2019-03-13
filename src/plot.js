@@ -34,13 +34,7 @@ function initPlotChart() {
   var y = d3
     .scalePoint()
     //.domain(nested.map( function(d) { return d.key }) )
-    .domain([
-      "OTU richness",
-      "Sequence abundance",
-      "Shannon entropy",
-      "Effective alpha diversity",
-      "Orders"
-    ])
+    .domain(["OTU richness", "Sequence abundance", "Effective alpha diversity"])
     .range([0, height - 20])
     .padding(0.1);
   var yAxis = d3.axisLeft().scale(y);
@@ -92,9 +86,6 @@ function updateGraph(siteAggregates) {
   for (const [siteId, site] of Object.entries(siteAggregates)) {
     plotData.push(
       makeNestableObject(siteId, site, "OTU richness", site.richness)
-    );
-    plotData.push(
-      makeNestableObject(siteId, site, "Shannon entropy", site.shannonDiversity)
     );
     plotData.push(
       makeNestableObject(siteId, site, "Sequence abundance", site.abundance)
