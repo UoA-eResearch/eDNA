@@ -8,7 +8,7 @@ import select2 from "../js/select2.min.js";
 import "../js/L.Control.Range";
 import { updateGraph, initPlotChart, createColorRange } from "./plot";
 import { strongHeader, strongLine } from "./utility";
-import { API_URLS, API_URLS_2 } from "./constants";
+import { API_URLS } from "./constants";
 import { renderHeatLayer, highlightLayer } from "./map";
 
 window.circles = [];
@@ -33,7 +33,7 @@ function fetchSampleOtus() {
     let idChain = taxonIdChain.id.split(",").join("+");
     ontologyIds.push(idChain);
   }
-  let url = API_URLS_2.sampleOtus;
+  let url = API_URLS.sampleOtus;
   url += "otu=" + ontologyIds.join("&otu=");
 
   // Formatting and adding contextual filters to url
@@ -450,7 +450,7 @@ function findMissingOtuLookups(layer, popup) {
   }
   if (missingIds.length > 0) {
     console.log("missing some otu codes, requesting from server.");
-    let f_url = API_URLS_2.otu_code_by_id + missingIds.join("&id=");
+    let f_url = API_URLS.otu_code_by_id + missingIds.join("&id=");
     fetch(f_url).then(response => {
       response.json().then(jsonResponse => {
         popup.setContent(
@@ -811,7 +811,7 @@ function initializeOtuSelect() {
     ajax: {
       // url: API_URLS.local_filter_options,
       // url: API_URLS.filter_suggestions,
-      url: API_URLS_2.otuSuggestions,
+      url: API_URLS.otuSuggestions,
       delay: 250,
       data: function(params) {
         console.log("requesting more search suggestions");
@@ -1043,7 +1043,7 @@ window.onload = () => {
 
 // NOTE: load contextual options up front. Hardcoding some params.
 // possibly separate into a different API later on if we have time or a need.
-let url = API_URLS_2.otuSuggestions + "q=&page=1&page_size=200";
+let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
 fetch(url).then(response => {
   response.json().then(initializeSelectContextual);
 });
