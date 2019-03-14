@@ -297,8 +297,7 @@ function createContinuousColorRange(siteAggregates) {
   return colourRange;
 }
 
-function assignBiomeColors(siteAggregates) {
-  console.log("creating sequential");
+function assignBiomeColors() {
   const metric = getActivePlotMetric();
 
   // calculate how many tier 1s.
