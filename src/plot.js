@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import * as _ from "lodash";
 import { map, g, tooltip, x, y, GetLayerBySampleContextId } from "./index";
 import { strongLine, strongHeader } from "./utility";
 import { highlightLayer, disableHighlightLayer } from "./map";
@@ -66,9 +67,10 @@ function initPlotChart() {
  */
 function updateGraph(siteAggregates) {
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
-  let metricColour = createColorRange(siteAggregates);
+  let metricColour = createContinuousColorRange(siteAggregates);
+  let categoricalColourMetric = assignBiomeColors(siteAggregates);
   let colourMetric = getActivePlotMetric();
-  console.log(colourMetric);
+  // console.log(colourMetric);
   if (colourMetric == null) {
     colourMetric == "elev";
   }
@@ -149,8 +151,6 @@ function updateGraph(siteAggregates) {
         .attr("r", 7)
         .attr("opacity", 0.3)
         .attr("fill", function(d) {
-          //TODO: Create a function to get the select dropdown values. For here and onchange.
-          //console.log(d.meta[metric]);
           return metricColour(d.meta[colourMetric]);
         })
         .on("mouseover", function(d) {
@@ -159,10 +159,12 @@ function updateGraph(siteAggregates) {
             .transition()
             .attr("r", 14)
             .duration(250);
+
           tooltip
             .transition()
             .style("opacity", 0.9)
             .duration(250);
+
           tooltip
             .html(
               strongLine(d.meta.sample_identifier) +
@@ -170,13 +172,13 @@ function updateGraph(siteAggregates) {
                 strongHeader(
                   getActivePlotMetric(),
                   d.meta[getActivePlotMetric()]
-                  // d.meta["elev"]
                 )
             )
             .style("left", d3.event.pageX + "px")
             .style("top", d3.event.pageY - 10 + "px")
             .style("opacity", 0.9)
             .style("z-index", 1000);
+
           let layer = GetLayerBySampleContextId(d.siteId);
           if (layer != null && layer !== undefined) {
             highlightLayer(layer);
@@ -242,6 +244,7 @@ function updateGraph(siteAggregates) {
  * returns the current value on the plot metric selection.
  */
 const getActivePlotMetric = () => {
+  // console.log(window.sampleContextLookup);
   return document.getElementById("meta-select").value.toLowerCase();
 };
 
@@ -249,7 +252,7 @@ const getActivePlotMetric = () => {
  * returns the current value of the plot coloring select element.
  */
 const getActivePlotColorOption = () => {
-  console.log(document.getElementById("colour-scheme-select").value);
+  // console.log(document.getElementById("colour-scheme-select").value);
   return document.getElementById("colour-scheme-select").value;
 };
 
@@ -259,7 +262,7 @@ const getActivePlotColorOption = () => {
  * @param {*} metric
  * @param {*} siteAggregates
  */
-function createColorRange(siteAggregates) {
+function createContinuousColorRange(siteAggregates) {
   // TODO: not generating color ranges for certain metrics (mean c percent and nitrogen)
   // gets value from drop down and creates colour scale from the select option.
   const metric = getActivePlotMetric();
@@ -294,6 +297,76 @@ function createColorRange(siteAggregates) {
   return colourRange;
 }
 
+function assignBiomeColors(siteAggregates) {
+  console.log("creating sequential");
+  const metric = getActivePlotMetric();
+
+  // calculate how many tier 1s.
+  let colorLookup = {};
+
+  for (let key in window.sampleContextLookup) {
+    let sampleContext = sampleContextLookup[key];
+    let sample_biome_t1 = sampleContext.biome_t1;
+    let sample_biome_t2 = sampleContext.biome_t2;
+    // console.log(sample_biome_t2);
+    // console.log(sample_biome_t1);
+
+    if (_.isUndefined(colorLookup[sample_biome_t2])) {
+      if (sample_biome_t1.toLowerCase() == "terrestrial") {
+        // console.log("aquatic colour scheme");
+        let new_color = getRandomColor("red");
+        if (_.isNull(colorLookup[sample_biome_t2])) {
+          colorLookup[sample_biome_t2] = new_color;
+        } else {
+          sampleContext.biome_t2_color = new_color;
+        }
+      }
+      if (sample_biome_t1.toLowerCase() == "aquatic") {
+        // console.log("aquatic colour scheme");
+        let new_color = getRandomColor("blue");
+        if (_.isNull(colorLookup[sample_biome_t2])) {
+          colorLookup[sample_biome_t2] = new_color;
+        } else {
+          sampleContext.biome_t2_color = new_color;
+        }
+      }
+    }
+  }
+
+  console.log(colorLookup);
+  console.log(window.sampleContextLookup);
+
+  // console.log(idk.length);
+
+  // calculate how many tier 2.
+
+  // hard code for terrestial and aquatic
+
+  // grey for unknown
+
+  console.log(metric);
+}
+
+const getRandomColor = hue => {
+  switch (hue) {
+    case "blue":
+      return d3.rgb(
+        0,
+        Math.floor(Math.random() * 256),
+        Math.floor(Math.random() * 256)
+      );
+    case "red":
+      return d3.rgb(
+        Math.floor(Math.random() * 256),
+        Math.floor(Math.random() * 256),
+        0
+      );
+    default:
+      break;
+  }
+  return color;
+};
+
 /**
  * Returns a random amount between upper and lower. For jittering the plots.
  */
@@ -301,4 +374,9 @@ const randomRange = (upper, lower) => {
   return Math.random() * (upper - lower) + lower;
 };
 
-export { updateGraph, initPlotChart, createColorRange };
+export {
+  updateGraph,
+  initPlotChart,
+  createContinuousColorRange as createColorRange,
+  getActivePlotMetric
+};

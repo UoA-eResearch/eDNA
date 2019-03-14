@@ -6,7 +6,12 @@ import "../js/leaflet.heat";
 import "../js/leaflet-slider";
 import select2 from "../js/select2.min.js";
 import "../js/L.Control.Range";
-import { updateGraph, initPlotChart, createColorRange } from "./plot";
+import {
+  updateGraph,
+  initPlotChart,
+  createColorRange,
+  getActivePlotMetric
+} from "./plot";
 import { strongHeader, strongLine } from "./utility";
 import { API_URLS } from "./constants";
 import { renderHeatLayer, highlightLayer } from "./map";
@@ -774,6 +779,7 @@ leafletGraphControl.onAdd = function() {
       <option selected value="elevation">Elevation</option>
       <option value="latitude">Latitude</option>
       <option value="longitude">Longitude</option>
+      <option value="biome_t2">Biome Tier 2</option>
     </select>
   </label>
   <label> Colour type: 
@@ -795,7 +801,16 @@ function updateGraphColours(metric) {
     .transition()
     .duration(400)
     .attr("fill", function(d) {
-      return metricColour(d.meta[metric]);
+      // console.log(getActivePlotMetric());
+      // console.log(window.sampleContextLookup[d.siteId].biome_t2_color);
+
+      // console.log(Math.floor(Math.random() * 256));
+
+      if (getActivePlotMetric() == "biome_t2") {
+        return d3.color(window.sampleContextLookup[d.siteId].biome_t2_color);
+      } else {
+        return metricColour(d.meta[metric]);
+      }
     });
 }
 
