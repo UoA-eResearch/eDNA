@@ -29,7 +29,7 @@ function fetchSampleOtus() {
   let contextFilters = $("#select-contextual").select2("data");
   let taxonFilters = $("#select-taxonomic").select2("data");
   let ampliconFilters = $("#select-amplicon").select2("data");
-  console.log(ampliconFilters);
+  // console.log(ampliconFilters);
 
   // Formatting and adding otu arguments
   let ontologyIds = [];
@@ -204,7 +204,7 @@ function aggregateBySite(sampleOtus) {
 function aggregateByCell(siteAggs) {
   // setting up grid parameters
   makeGrid(detailLevel);
-  console.log("aggregate by cell");
+  // console.log("aggregate by cell");
   let start = [164.71222, -33.977509];
   let end = [178.858982, -49.66352];
   const hardBounds = L.latLngBounds(start, end);

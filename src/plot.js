@@ -66,6 +66,7 @@ function initPlotChart() {
  * @param {*} siteAggregates
  */
 function updateGraph(siteAggregates) {
+  console.log("updating d3 plot");
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   let metricColour = createContinuousColorRange(siteAggregates);
   let categoricalColourMetric = assignBiomeColors(siteAggregates);
@@ -302,62 +303,40 @@ function assignBiomeColors() {
 
   // calculate how many tier 1s.
   let colorLookup = {};
-
-  for (let key in window.sampleContextLookup) {
-    let sampleContext = sampleContextLookup[key];
-    let sample_biome_t1 = sampleContext.biome_t1;
-    let sample_biome_t2 = sampleContext.biome_t2;
-    // console.log(sample_biome_t2);
-    // console.log(sample_biome_t1);
-
-    if (_.isUndefined(colorLookup[sample_biome_t2])) {
-      if (sample_biome_t1.toLowerCase() == "terrestrial") {
-        // console.log("aquatic colour scheme");
-        let new_color = getRandomColor("red");
-        if (_.isNull(colorLookup[sample_biome_t2])) {
-          colorLookup[sample_biome_t2] = new_color;
-        } else {
-          sampleContext.biome_t2_color = new_color;
-        }
+  for (const [key, value] of Object.entries(window.sampleContextLookup)) {
+    let sample_biome1 = value.biome_t1;
+    let sample_biome2 = value.biome_t2;
+    // console.log(sample_biome2);
+    if (sample_biome2 in colorLookup) {
+      // value already created for that category, assign
+      value.biome_t2_color = colorLookup[sample_biome2];
+    } else {
+      // create color lookup entry
+      if (sample_biome1 == "Terrestrial") {
+        colorLookup[sample_biome2] = getSemiRandomColor("red");
       }
-      if (sample_biome_t1.toLowerCase() == "aquatic") {
-        // console.log("aquatic colour scheme");
-        let new_color = getRandomColor("blue");
-        if (_.isNull(colorLookup[sample_biome_t2])) {
-          colorLookup[sample_biome_t2] = new_color;
-        } else {
-          sampleContext.biome_t2_color = new_color;
-        }
+      if (sample_biome1 == "Aquatic") {
+        colorLookup[sample_biome2] = getSemiRandomColor("blue");
       }
+      value.biome_t2_color = "Default";
     }
   }
-
   console.log(colorLookup);
   console.log(window.sampleContextLookup);
-
-  // console.log(idk.length);
-
-  // calculate how many tier 2.
-
-  // hard code for terrestial and aquatic
-
-  // grey for unknown
-
-  console.log(metric);
 }
 
-const getRandomColor = hue => {
+const getSemiRandomColor = hue => {
   switch (hue) {
     case "blue":
       return d3.rgb(
         0,
-        Math.floor(Math.random() * 256),
+        Math.floor(Math.random() * 64),
         Math.floor(Math.random() * 256)
       );
     case "red":
       return d3.rgb(
         Math.floor(Math.random() * 256),
-        Math.floor(Math.random() * 256),
+        Math.floor(Math.random() * 64),
         0
       );
     default:
