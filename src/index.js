@@ -29,7 +29,6 @@ function fetchSampleOtus() {
   let contextFilters = $("#select-contextual").select2("data");
   let taxonFilters = $("#select-taxonomic").select2("data");
   let ampliconFilters = $("#select-amplicon").select2("data");
-  // console.log(ampliconFilters);
 
   // Formatting and adding otu arguments
   let ontologyIds = [];
