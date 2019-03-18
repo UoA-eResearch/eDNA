@@ -59,8 +59,10 @@ function initPlotChart() {
     .append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
+  // TODO: think of a better solution than making these variables global in index.js
   return { g, y, tooltip, x };
 }
+
 /**
  * Converts siteAggregates to an easier format for d3 use. Updates existing datapoints, enters new additional datapoints
  * @param {*} siteAggregates
@@ -73,7 +75,7 @@ function updateGraph(siteAggregates) {
   let colourMetric = getActivePlotMetric();
   // console.log(colourMetric);
   if (colourMetric == null) {
-    colourMetric == "elev";
+    colourMetric = "elevation";
   }
 
   function makeNestableObject(siteId, site, metricName, value) {
@@ -319,8 +321,6 @@ function assignBiomeColors() {
     // value already created for that category, assign
     value.biome_t2_color = colorLookup[sample_biome2];
   }
-  console.log(colorLookup);
-  console.log(window.sampleContextLookup);
 }
 
 const getSemiRandomColor = hue => {
