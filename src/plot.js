@@ -307,10 +307,7 @@ function assignBiomeColors() {
     let sample_biome1 = value.biome_t1;
     let sample_biome2 = value.biome_t2;
     // console.log(sample_biome2);
-    if (sample_biome2 in colorLookup) {
-      // value already created for that category, assign
-      value.biome_t2_color = colorLookup[sample_biome2];
-    } else {
+    if (!(sample_biome2 in colorLookup)) {
       // create color lookup entry
       if (sample_biome1 == "Terrestrial") {
         colorLookup[sample_biome2] = getSemiRandomColor("red");
@@ -318,8 +315,9 @@ function assignBiomeColors() {
       if (sample_biome1 == "Aquatic") {
         colorLookup[sample_biome2] = getSemiRandomColor("blue");
       }
-      value.biome_t2_color = "Default";
     }
+    // value already created for that category, assign
+    value.biome_t2_color = colorLookup[sample_biome2];
   }
   console.log(colorLookup);
   console.log(window.sampleContextLookup);
@@ -331,12 +329,12 @@ const getSemiRandomColor = hue => {
       return d3.rgb(
         0,
         Math.floor(Math.random() * 64),
-        Math.floor(Math.random() * 256)
+        Math.floor(Math.random() * 216 + 40)
       );
     case "red":
       return d3.rgb(
-        Math.floor(Math.random() * 256),
-        Math.floor(Math.random() * 64),
+        Math.floor(Math.random() * 216 + 40),
+        Math.floor(Math.random() * 64 + 10),
         0
       );
     default:
