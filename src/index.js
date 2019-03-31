@@ -766,6 +766,7 @@ function initializeDisplayControlButton() {
 }
 
 //Adding custom control for Andrew's Visualization Copy.
+// colour by metric dropdown
 const leafletGraphControl = L.control({ position: "bottomright" });
 leafletGraphControl.onAdd = function() {
   this._div = L.DomUtil.create("div", "info"); //creates div with class "info"
@@ -779,6 +780,7 @@ leafletGraphControl.onAdd = function() {
       <option value="latitude">Latitude</option>
       <option value="longitude">Longitude</option>
       <option value="biome_t2">Biome Tier 2</option>
+      <option value="environmental_feature_t1">Environmental Feature 1</option>
     </select>
   </label>
   <label> Colour type: 
@@ -828,6 +830,7 @@ function initializeOtuSelect() {
       url: API_URLS.otuSuggestions,
       delay: 250,
       data: function(params) {
+        // iteratively rebuild the suggestions?
         console.log("requesting more search suggestions");
         let query = {
           q: params.term,
@@ -903,7 +906,7 @@ function initializeOtuSelect() {
       return newTag;
     }
   });
-  $("#select-taxonomic").change(function() {
+  taxonSelect.change(function() {
     fetchSampleOtus();
   });
   return taxonSelect;
