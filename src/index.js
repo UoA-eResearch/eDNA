@@ -440,6 +440,11 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
   }
 }
 
+/**
+ * Finds the otu ids for which there is no name text, requests the text, returns the popup content
+ * @param {grid layer rectangle} layer
+ * @param {popup to be populated} popup
+ */
 function findMissingOtuLookups(layer, popup) {
   let missingIds = [];
   for (const [otuId] of Object.entries(layer.feature.properties.otus)) {
@@ -448,7 +453,9 @@ function findMissingOtuLookups(layer, popup) {
     }
   }
   if (missingIds.length > 0) {
-    console.log("missing some otu codes, requesting from server.");
+    console.log(
+      "missing " + missingIds.length + " otu names. Requesting from server."
+    );
     let f_url = API_URLS.otu_code_by_id + missingIds.join("&id=");
     fetch(f_url).then(response => {
       response.json().then(jsonResponse => {
@@ -485,6 +492,11 @@ function handleMouseOver(e) {
   });
 }
 
+/**
+ * highlights plot circles that are within a grid cell layer.
+ * @param   {layer event}  e  some layer event
+ * @return  {void}
+ */
 function handleMouseOut(e) {
   let layer = e.target;
   layer.feature.properties.sites.forEach(siteId => {
