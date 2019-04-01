@@ -73,6 +73,8 @@ function updateGraph(siteAggregates) {
   let metricColour = createContinuousColorRange(siteAggregates);
   assignBiomeColors(siteAggregates);
   assignRandomCategoricalColor("environmental_feature_t1");
+
+  updatePlotCircleColours();
   let colourMetric = getActivePlotMetric();
   // console.log(colourMetric);
   if (colourMetric == null) {
@@ -146,7 +148,10 @@ function updateGraph(siteAggregates) {
         .enter()
         .append("circle")
         .attr("class", "enter")
-        .attr("id", d => d.meta.site)
+        .attr("id", d => {
+          // console.log(d);
+          return "_" + d.siteId;
+        })
         //.attr('cy', y(d.key))
         .attr("cy", function(circle) {
           // * If no jitter wanted then set jitter 0, 0.
@@ -164,7 +169,7 @@ function updateGraph(siteAggregates) {
         })
         .on("mouseover", function(d) {
           d3.select(this.parentNode.parentNode)
-            .selectAll("#" + d.meta.site)
+            .selectAll("#" + "_" + d.siteId)
             .transition()
             .attr("r", 14)
             .duration(250);
@@ -195,7 +200,7 @@ function updateGraph(siteAggregates) {
         })
         .on("mouseout", function(d) {
           d3.select(this.parentNode.parentNode)
-            .selectAll("#" + d.meta.site)
+            .selectAll("#" + "_" + d.siteId)
             .transition()
             .attr("r", 7)
             .duration(250);
@@ -338,12 +343,26 @@ function assignRandomCategoricalColor(attr) {
     let attributeValue = sampleContext[attr];
     if (!(attributeValue in colorLookup)) {
       // make new
+      let newColour = colourFactory("none");
+
+      for (const [key, existingColour] of Object.entries(colorLookup)) {
+        if (euclideanDistance(newColour, existingColour) < 200) {
+          console.log("colour distance not enough, making new colour");
+          newColour = colourFactory("none");
+        }
+      }
       colorLookup[attributeValue] = colourFactory("none");
     }
     sampleContext[attr + "_colour"] = colorLookup[attributeValue];
   }
-  console.log(window.sampleContextLookup);
 }
+
+const euclideanDistance = (col1, col2) => {
+  let rSq = (col1.r - col2.r) * (col1.r - col2.r);
+  let bSq = (col1.b - col2.b) * (col1.b - col2.b);
+  let gSq = (col1.g - col2.g) * (col1.g - col2.g);
+  return Math.sqrt(rSq + bSq, gSq);
+};
 
 const colourFactory = hue => {
   // generates a random colour in the red or blue hue range depending on the string passed in
@@ -361,11 +380,12 @@ const colourFactory = hue => {
         0
       );
     case "none":
-      return d3.rgb(
+      let colour = d3.rgb(
         Math.floor(Math.random() * 255),
         Math.floor(Math.random() * 255),
         Math.floor(Math.random() * 255)
       );
+      return colour;
     default:
       break;
   }
