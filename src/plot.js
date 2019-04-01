@@ -350,22 +350,27 @@ function assignRandomCategoricalColor(attr) {
       let newColour = colourFactory("none");
 
       for (const [key, existingColour] of Object.entries(colorLookup)) {
-        if (euclideanDistance(newColour, existingColour) < 200) {
-          console.log("colour distance not enough, making new colour");
+        while (euclideanDistance(newColour, existingColour) < 200) {
+          // console.log("colour distance not enough, making new colour");
           newColour = colourFactory("none");
         }
       }
-      colorLookup[attributeValue] = colourFactory("none");
+      colorLookup[attributeValue] = newColour;
     }
     sampleContext[attr + "_colour"] = colorLookup[attributeValue];
   }
 }
 
-const euclideanDistance = (col1, col2) => {
-  let rSq = (col1.r - col2.r) * (col1.r - col2.r);
-  let bSq = (col1.b - col2.b) * (col1.b - col2.b);
-  let gSq = (col1.g - col2.g) * (col1.g - col2.g);
-  return Math.sqrt(rSq + bSq, gSq);
+/**
+ * Compares the distance between two colours, used for see if two colours are distinguishable
+ */
+const euclideanDistance = (c1, c2) => {
+  let rSq = (c1.r - c2.r) * (c1.r - c2.r);
+  let bSq = (c1.b - c2.b) * (c1.b - c2.b);
+  let gSq = (c1.g - c2.g) * (c1.g - c2.g);
+  let dist = Math.sqrt(rSq + bSq, gSq);
+  // console.log(dist);
+  return dist;
 };
 
 const colourFactory = hue => {
@@ -384,6 +389,7 @@ const colourFactory = hue => {
         0
       );
     case "none":
+      // completely random
       let colour = d3.rgb(
         Math.floor(Math.random() * 255),
         Math.floor(Math.random() * 255),
