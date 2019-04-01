@@ -72,6 +72,7 @@ function updateGraph(siteAggregates) {
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   let metricColour = createContinuousColorRange(siteAggregates);
   assignBiomeColors(siteAggregates);
+  assignRandomCategoricalColor("environmental_feature_t1");
   let colourMetric = getActivePlotMetric();
   // console.log(colourMetric);
   if (colourMetric == null) {
@@ -284,9 +285,8 @@ function createContinuousColorRange(siteAggregates) {
   const max = d3.max(sites, function(d) {
     return d[metric];
   });
-  console.log(metric + " visualization plot min, max:", min, max);
+  console.log(metric + " plot min, max:", min, max);
   const colorScheme = getActivePlotColorOption();
-  console.log("colour scheme is" + colorScheme);
   let colorRange = [];
   switch (colorScheme) {
     case "sequential":
@@ -307,29 +307,46 @@ function createContinuousColorRange(siteAggregates) {
 }
 
 function assignBiomeColors() {
-  const metric = getActivePlotMetric();
-
-  // calculate how many tier 1s.
   let colorLookup = {};
-  for (const [key, value] of Object.entries(window.sampleContextLookup)) {
-    let sample_biome1 = value.biome_t1;
-    let sample_biome2 = value.biome_t2;
+  for (const [key, sampleContext] of Object.entries(
+    window.sampleContextLookup
+  )) {
+    let sample_biome1 = sampleContext.biome_t1;
+    let sample_biome2 = sampleContext.biome_t2;
     // console.log(sample_biome2);
     if (!(sample_biome2 in colorLookup)) {
       // create color lookup entry
       if (sample_biome1 == "Terrestrial") {
-        colorLookup[sample_biome2] = getSemiRandomColor("red");
+        colorLookup[sample_biome2] = colourFactory("red");
       }
       if (sample_biome1 == "Aquatic") {
-        colorLookup[sample_biome2] = getSemiRandomColor("blue");
+        colorLookup[sample_biome2] = colourFactory("blue");
       }
     }
     // value already created for that category, assign
-    value.biome_t2_color = colorLookup[sample_biome2];
+    sampleContext.biome_t2_color = colorLookup[sample_biome2];
   }
 }
 
-const getSemiRandomColor = hue => {
+function assignRandomCategoricalColor(attr) {
+  // add property to sample contexts
+  // just making sure no duplicates
+  let colorLookup = {};
+  for (const [key, sampleContext] of Object.entries(
+    window.sampleContextLookup
+  )) {
+    let attributeValue = sampleContext[attr];
+    if (!(attributeValue in colorLookup)) {
+      // make new
+      colorLookup[attributeValue] = colourFactory("none");
+    }
+    sampleContext[attr + "_colour"] = colorLookup[attributeValue];
+  }
+  console.log(window.sampleContextLookup);
+}
+
+const colourFactory = hue => {
+  // generates a random colour in the red or blue hue range depending on the string passed in
   switch (hue) {
     case "blue":
       return d3.rgb(
@@ -343,6 +360,12 @@ const getSemiRandomColor = hue => {
         Math.floor(Math.random() * 64 + 10),
         0
       );
+    case "none":
+      return d3.rgb(
+        Math.floor(Math.random() * 255),
+        Math.floor(Math.random() * 255),
+        Math.floor(Math.random() * 255)
+      );
     default:
       break;
   }
@@ -350,7 +373,7 @@ const getSemiRandomColor = hue => {
 };
 
 /**
- * Selects all .enter elements and changes fill to the current option of the meta-select element.
+ * Colors the circles based on the current value of the active metric and color scheme
  */
 function updatePlotCircleColours() {
   let metric = getActivePlotMetric();
@@ -359,17 +382,18 @@ function updatePlotCircleColours() {
     .transition()
     .duration(400)
     .attr("fill", function(d) {
-      // colourCircle(d, metric, metricColour);
+      // TODO: this is duplicate code to when circles are first assigned colours, could be refactored
       if (metric == "biome_t2") {
         return d3.color(window.sampleContextLookup[d.siteId].biome_t2_color);
+      } else if (metric == "environmental_feature_t1") {
+        return d3.color(
+          window.sampleContextLookup[d.siteId].environmental_feature_t1_colour
+        );
       } else {
         return metricColour(d.meta[metric]);
       }
     });
 }
-
-// function colourCircle(d, metric, metricColour) {
-// }
 
 /**
  * Returns a random amount between upper and lower. For jittering the plots.
