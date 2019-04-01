@@ -71,7 +71,7 @@ function updateGraph(siteAggregates) {
   console.log("updating d3 plot");
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   let metricColour = createContinuousColorRange(siteAggregates);
-  let categoricalColourMetric = assignBiomeColors(siteAggregates);
+  assignBiomeColors(siteAggregates);
   let colourMetric = getActivePlotMetric();
   // console.log(colourMetric);
   if (colourMetric == null) {
@@ -154,7 +154,12 @@ function updateGraph(siteAggregates) {
         .attr("r", 7)
         .attr("opacity", 0.3)
         .attr("fill", function(d) {
-          return metricColour(d.meta[colourMetric]);
+          // TODO: this is duplicate code to the other coloring stuff
+          if (getActivePlotMetric() == "biome_t2") {
+            return d.meta.biome_t2_color;
+          } else {
+            return metricColour(d.meta[colourMetric]);
+          }
         })
         .on("mouseover", function(d) {
           d3.select(this.parentNode.parentNode)
@@ -345,6 +350,28 @@ const getSemiRandomColor = hue => {
 };
 
 /**
+ * Selects all .enter elements and changes fill to the current option of the meta-select element.
+ */
+function updatePlotCircleColours() {
+  let metric = getActivePlotMetric();
+  var metricColour = createContinuousColorRange(window.siteAggregates);
+  d3.selectAll(".enter")
+    .transition()
+    .duration(400)
+    .attr("fill", function(d) {
+      // colourCircle(d, metric, metricColour);
+      if (metric == "biome_t2") {
+        return d3.color(window.sampleContextLookup[d.siteId].biome_t2_color);
+      } else {
+        return metricColour(d.meta[metric]);
+      }
+    });
+}
+
+// function colourCircle(d, metric, metricColour) {
+// }
+
+/**
  * Returns a random amount between upper and lower. For jittering the plots.
  */
 const randomRange = (upper, lower) => {
@@ -354,6 +381,6 @@ const randomRange = (upper, lower) => {
 export {
   updateGraph,
   initPlotChart,
-  createContinuousColorRange as createColorRange,
-  getActivePlotMetric
+  getActivePlotMetric,
+  updatePlotCircleColours
 };

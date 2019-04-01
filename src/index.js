@@ -6,12 +6,7 @@ import "../js/leaflet.heat";
 import "../js/leaflet-slider";
 import select2 from "../js/select2.min.js";
 import "../js/L.Control.Range";
-import {
-  updateGraph,
-  initPlotChart,
-  createColorRange,
-  getActivePlotMetric
-} from "./plot";
+import { updateGraph, initPlotChart, updatePlotCircleColours } from "./plot";
 import { strongHeader, strongLine } from "./utility";
 import { API_URLS } from "./constants";
 import { renderHeatLayer, highlightLayer } from "./map";
@@ -856,29 +851,6 @@ leafletGraphControl.onAdd = function() {
   return plotContainer;
 };
 leafletGraphControl.addTo(map);
-
-/**
- * Selects all .enter elements and changes fill to the current option of the meta-select element.
- */
-function updatePlotCircleColours() {
-  let metric = getActivePlotMetric();
-  var metricColour = createColorRange(window.siteAggregates);
-  d3.selectAll(".enter")
-    .transition()
-    .duration(400)
-    .attr("fill", function(d) {
-      // console.log(getActivePlotMetric());
-      // console.log(window.sampleContextLookup[d.siteId].biome_t2_color);
-
-      // console.log(Math.floor(Math.random() * 256));
-
-      if (metric == "biome_t2") {
-        return d3.color(window.sampleContextLookup[d.siteId].biome_t2_color);
-      } else {
-        return metricColour(d.meta[metric]);
-      }
-    });
-}
 
 function initializeOtuSelect() {
   let taxonSelect = $("#select-taxonomic").select2({
