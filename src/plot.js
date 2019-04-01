@@ -72,7 +72,7 @@ function updateGraph(siteAggregates) {
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
   let metricColour = createContinuousColorRange(siteAggregates);
   assignBiomeColors(siteAggregates);
-  assignRandomCategoricalColor("environmental_feature_t1");
+  assignRandomCategoricalColor("environmental_feature_t2");
 
   updatePlotCircleColours();
 
@@ -165,8 +165,8 @@ function updateGraph(siteAggregates) {
           if (getActivePlotMetric() == "biome_t2") {
             return d.meta.biome_t2_color;
           }
-          if (getActivePlotMetric() == "environmental_feature_t1") {
-            return d.meta.environmental_feature_t1_colour;
+          if (getActivePlotMetric() == "environmental_feature_t2") {
+            return d.meta.environmental_feature_t2_colour;
           } else {
             return metricColour(d.meta[colourMetric]);
           }
@@ -409,9 +409,9 @@ function updatePlotCircleColours() {
       // TODO: this is duplicate code to when circles are first assigned colours, could be refactored
       if (metric == "biome_t2") {
         return d3.color(window.sampleContextLookup[d.siteId].biome_t2_color);
-      } else if (metric == "environmental_feature_t1") {
+      } else if (metric == "environmental_feature_t2") {
         return d3.color(
-          window.sampleContextLookup[d.siteId].environmental_feature_t1_colour
+          window.sampleContextLookup[d.siteId].environmental_feature_t2_colour
         );
       } else {
         return metricColour(d.meta[metric]);

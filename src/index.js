@@ -814,7 +814,7 @@ leafletGraphControl.onAdd = function() {
     { value: "longitude", text: "Longitude" },
     { value: "latitude", text: "Latitude" },
     { value: "biome_t2", text: "Biome Tier 2" },
-    { value: "environmental_feature_t1", text: "Environmental Feature 1" }
+    { value: "environmental_feature_t2", text: "Environmental Feature Tier 2" }
   ];
 
   metaOptions.forEach(option => {
