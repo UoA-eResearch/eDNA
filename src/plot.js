@@ -281,6 +281,7 @@ function createContinuousColorRange(siteAggregates) {
   });
   console.log(metric + " visualization plot min, max:", min, max);
   const colorScheme = getActivePlotColorOption();
+  console.log("colour scheme is" + colorScheme);
   let colorRange = [];
   switch (colorScheme) {
     case "sequential":

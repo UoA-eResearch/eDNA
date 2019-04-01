@@ -769,34 +769,99 @@ function initializeDisplayControlButton() {
 // colour by metric dropdown
 const leafletGraphControl = L.control({ position: "bottomright" });
 leafletGraphControl.onAdd = function() {
-  this._div = L.DomUtil.create("div", "info"); //creates div with class "info"
-  this._div.innerHTML = `<div id="chart" style="display:none;">
-  </div>
-  <br />
-  <button id = "graph-button" >Toggle Graph</button>
-  <label> Colour by: 
-    <select id="meta-select" >
-      <option selected value="elevation">Elevation</option>
-      <option value="latitude">Latitude</option>
-      <option value="longitude">Longitude</option>
-      <option value="biome_t2">Biome Tier 2</option>
-      <option value="environmental_feature_t1">Environmental Feature 1</option>
-    </select>
-  </label>
-  <label> Colour type: 
-    <select id="colour-scheme-select">
-      <option selected value="sequential">Sequential</option>
-      <option value="diverging">Diverging</option>
-    </select>
-  </label>`;
-  return this._div;
+  let plotContainer = L.DomUtil.create("div", "info"); //creates div with class "info"
+
+  // chart node
+  let chartNode = document.createElement("div");
+  chartNode.id = "chart";
+  chartNode.style = "display: none;";
+
+  plotContainer.appendChild(chartNode);
+
+  // button
+  let toggleButton = document.createElement("button");
+  toggleButton.id = "graph-button";
+  toggleButton.innerHTML = "Toggle plot";
+  plotContainer.appendChild(toggleButton);
+
+  // label
+  let colorByLabel = document.createElement("label");
+  colorByLabel.innerHTML = " Colour by: ";
+  plotContainer.appendChild(colorByLabel);
+
+  // select 1
+  let colorBySelect = document.createElement("select");
+  colorBySelect.id = "meta-select";
+
+  let metaOptions = [
+    { value: "elevation", text: "Elevation" },
+    { value: "longitude", text: "Longitude" },
+    { value: "latitude", text: "Latitude" },
+    { value: "biome_t2", text: "Biome Tier 2" },
+    { value: "environmental_feature_t1", text: "Environmental Feature 1" }
+  ];
+
+  metaOptions.forEach(option => {
+    let optionElement = document.createElement("option");
+    optionElement.value = option.value;
+    optionElement.innerHTML = option.text;
+    colorBySelect.appendChild(optionElement);
+  });
+
+  colorByLabel.appendChild(colorBySelect);
+
+  // select 2
+  let colorTypeLabel = document.createElement("label");
+  colorTypeLabel.innerHTML = " Colour scheme: ";
+  plotContainer.appendChild(colorTypeLabel);
+
+  let colourSchemeSelect = document.createElement("select");
+  colourSchemeSelect.id = "colour-scheme-select";
+
+  let colorSchemeOptions = [
+    { value: "sequential", text: "Sequential" },
+    { value: "diverging", text: "Diverging" }
+  ];
+
+  colorSchemeOptions.forEach(option => {
+    let optionElement = document.createElement("option");
+    optionElement.value = option.value;
+    optionElement.innerHTML = option.text;
+    colourSchemeSelect.appendChild(optionElement);
+  });
+
+  colorTypeLabel.appendChild(colourSchemeSelect);
+
+  // plotContainer.appendChild();
+
+  // plotContainer.innerHTML = `<div id="chart" style="display:none;">
+  // </div>
+  // <br />
+  // <button id = "graph-button" >Toggle Graph</button>
+  // <label> Colour by:
+  //   <select id="meta-select" >
+  //     <option selected value="elevation">Elevation</option>
+  //     <option value="latitude">Latitude</option>
+  //     <option value="longitude">Longitude</option>
+  //     <option value="biome_t2">Biome Tier 2</option>
+  //     <option value="environmental_feature_t1">Environmental Feature 1</option>
+  //   </select>
+  // </label>
+  // <label> Colour type:
+  //   <select id="colour-scheme-select">
+  //     <option selected value="sequential">Sequential</option>
+  //     <option value="diverging">Diverging</option>
+  //   </select>
+  // </label>`;
+  return plotContainer;
 };
 leafletGraphControl.addTo(map);
 
 /**
  * Selects all .enter elements and changes fill to the current option of the meta-select element.
  */
-function updateGraphColours(metric) {
+function updatePlotCircleColours() {
+  let metric = getActivePlotMetric();
   var metricColour = createColorRange(window.siteAggregates);
   d3.selectAll(".enter")
     .transition()
@@ -807,7 +872,7 @@ function updateGraphColours(metric) {
 
       // console.log(Math.floor(Math.random() * 256));
 
-      if (getActivePlotMetric() == "biome_t2") {
+      if (metric == "biome_t2") {
         return d3.color(window.sampleContextLookup[d.siteId].biome_t2_color);
       } else {
         return metricColour(d.meta[metric]);
@@ -1029,14 +1094,14 @@ const initializeGraphButton = () => {
 const initializeGraphColourMetricSelect = () => {
   let metaSelect = document.getElementById("meta-select");
   metaSelect.onchange = function() {
-    updateGraphColours(this.value);
+    updatePlotCircleColours();
   };
 };
 
 const initializeGraphColourSchemeSelect = () => {
   let colourSchemeSelect = document.getElementById("colour-scheme-select");
   colourSchemeSelect.onchange = function() {
-    updateGraphColours(this.value);
+    updatePlotCircleColours();
   };
 };
 
