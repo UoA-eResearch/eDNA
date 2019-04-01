@@ -163,10 +163,10 @@ function updateGraph(siteAggregates) {
         .attr("fill", function(d) {
           // TODO: this is duplicate code to the other coloring stuff
           if (getActivePlotMetric() == "biome_t2") {
-            return d.meta.biome_t2_color;
+            return d.meta[getActivePlotMetric() + "_colour"];
           }
           if (getActivePlotMetric() == "environmental_feature_t2") {
-            return d.meta.environmental_feature_t2_colour;
+            return d.meta[getActivePlotMetric() + "_colour"];
           } else {
             return metricColour(d.meta[colourMetric]);
           }
@@ -333,7 +333,7 @@ function assignBiomeColors() {
       }
     }
     // value already created for that category, assign
-    sampleContext.biome_t2_color = colorLookup[sample_biome2];
+    sampleContext.biome_t2_colour = colorLookup[sample_biome2];
   }
 }
 
@@ -407,12 +407,9 @@ function updatePlotCircleColours() {
     .duration(400)
     .attr("fill", function(d) {
       // TODO: this is duplicate code to when circles are first assigned colours, could be refactored
-      if (metric == "biome_t2") {
-        return d3.color(window.sampleContextLookup[d.siteId].biome_t2_color);
-      } else if (metric == "environmental_feature_t2") {
-        return d3.color(
-          window.sampleContextLookup[d.siteId].environmental_feature_t2_colour
-        );
+      let siteMeta = window.sampleContextLookup[d.siteId];
+      if (metric == "biome_t2" || metric == "environmental_feature_t2") {
+        return d3.color(siteMeta[metric + "_colour"]);
       } else {
         return metricColour(d.meta[metric]);
       }

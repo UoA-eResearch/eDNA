@@ -848,27 +848,6 @@ leafletGraphControl.onAdd = function() {
 
   colorTypeLabel.appendChild(colourSchemeSelect);
 
-  // plotContainer.appendChild();
-
-  // plotContainer.innerHTML = `<div id="chart" style="display:none;">
-  // </div>
-  // <br />
-  // <button id = "graph-button" >Toggle Graph</button>
-  // <label> Colour by:
-  //   <select id="meta-select" >
-  //     <option selected value="elevation">Elevation</option>
-  //     <option value="latitude">Latitude</option>
-  //     <option value="longitude">Longitude</option>
-  //     <option value="biome_t2">Biome Tier 2</option>
-  //     <option value="environmental_feature_t1">Environmental Feature 1</option>
-  //   </select>
-  // </label>
-  // <label> Colour type:
-  //   <select id="colour-scheme-select">
-  //     <option selected value="sequential">Sequential</option>
-  //     <option value="diverging">Diverging</option>
-  //   </select>
-  // </label>`;
   return plotContainer;
 };
 leafletGraphControl.addTo(map);
