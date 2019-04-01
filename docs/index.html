@@ -1,0 +1,70 @@
+<html>
+  <head>
+    <title>eDNA Virtual Hub</title>
+
+    <link rel="stylesheet" href="./css/leaflet-slider.css" />
+    <link rel="stylesheet" href="./css/L.Control.Range.css" />
+    <link rel="stylesheet" href="./css/leaflet.css"/>
+    <link rel="stylesheet" href="./css/leaflet.fullscreen.css"/>
+    <link rel="stylesheet" href="./css/select2.min.css" />
+
+    <!-- <script src="../js/jquery.min.js"></script> -->
+    <!-- <script src="../js/papaparse.min.js"></script> -->
+    <!-- <script src="https://d3js.org/d3.v4.min.js"></script> -->
+    <!-- <script src="../js/leaflet.js"></script> -->
+    <!-- <script src="../js/leaflet.heat.js"></script> -->
+    <!-- <script src="../js/L.Control.Range-min.js"></script> -->
+    <!-- <script src="../js/leaflet-slider.js"></script> -->
+    <!-- <script src="../js/select2.min.js"></script> -->
+    <!-- <script src="../js/d3.js"></script> -->
+    <!-- <script src="../js/Leaflet.fullscreen.js"></script> -->
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-77710107-5"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-77710107-5');
+    </script>
+
+    <style>
+      html, body, #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <link rel="stylesheet" href="./css/custom.css">
+  </head>
+  <body>
+    <div id="map" class="map"></div>
+    <div class="search" id="filterWrapper">
+      <select id="select-taxonomic" class="search-filter" multiple="multiple">
+      </select>
+      <br>
+        <select id="select-operator" class="search--right" >
+          <option value="or">OR</option>
+          <option value="and" selected="selected">AND</option>
+        </select>
+      <br>
+      <select id="select-contextual" multiple="multiple">
+      </select>
+      <br>
+      <select id="select-amplicon" multiple="multiple">
+      </select>
+      <br>
+      <div class="search--right">
+        Endemic only <input id="endemic-checkbox" type="checkbox" name="endemic only" value="true">
+        <br>
+        <br>
+        <button id="search-button" class="search__button">Search</button>
+        <br>
+        <span id="numberResults"></span> points
+      </div>
+    </div>
+    <!--<div id="chart"></div> -->
+    <script src="main.js"></script>
+  </body>
+</html>

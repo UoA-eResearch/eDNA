@@ -80,7 +80,7 @@ function fetchSampleOtus() {
   // fetch the url
   fetch(url).then(response => {
     response.json().then(responseData => {
-      recalculateSampleOtuLayers(responseData);
+      calculateSampleOtuData(responseData);
     });
   });
 }
@@ -90,7 +90,7 @@ function fetchSampleOtus() {
  */
 function recalculateGridLayer() {
   if (window.previousResults) {
-    recalculateSampleOtuLayers(window.previousResults);
+    calculateSampleOtuData(window.previousResults);
   } else {
     $("#select-taxonomic").trigger("change");
   }
@@ -99,7 +99,7 @@ function recalculateGridLayer() {
 /**
  * takes combined sampleOtu data and sampleContextual data and calculates their positions and generates layers.
  */
-function recalculateSampleOtuLayers(responseData) {
+function calculateSampleOtuData(responseData) {
   window.previousResults = responseData;
   let sampleOtus = responseData.sample_otu_data;
   let sampleContexts = responseData.sample_contextual_data;
@@ -114,27 +114,32 @@ function recalculateSampleOtuLayers(responseData) {
   let heatLayer = renderHeatLayer(siteAggregatedData, heatLayerGroup, map);
   let cellAggregatedData = aggregateByCell(siteAggregatedData, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggregatedData);
+
   let abundanceLayer = featureCollectionToLayer(
     featureCollection,
     "weightedAbundance",
     gridAbundanceLayerGroup
   );
+  addLayerIdToSampleContext(abundanceLayer);
+
   let richnessLayer = featureCollectionToLayer(
     featureCollection,
     "weightedRichness",
     gridRichnessLayerGroup
   );
+  addLayerIdToSampleContext(richnessLayer);
+
   // NOTE: disabling  site layer for quick comparison: rectangles are distorted.
-  // renderFeatureCollection(
-  //   featureCollection,
-  //   "weightedSites",
-  //   gridSitesLayerGroup
-  // );
+  let siteLayer = featureCollectionToLayer(
+    featureCollection,
+    "weightedSites",
+    gridSitesLayerGroup
+  );
+  addLayerIdToSampleContext(siteLayer);
+
   siteAggregatedData = addSiteMetrics(siteAggregatedData);
   window.siteAggregates = siteAggregatedData;
   // creating site -> leaflet layer references for each layer.
-  addLayerIdToSampleContext(abundanceLayer);
-  addLayerIdToSampleContext(richnessLayer);
   updateGraph(siteAggregatedData);
 }
 
@@ -303,6 +308,7 @@ function makeFeatureCollection(cellAggs) {
         weightedAbundance,
         weightedRichness,
         weightedSites,
+        richness: cell.richness,
         sites: cell.sites,
         otus: cell.otus,
         coordinates: cell.coordinates
@@ -339,6 +345,9 @@ function makeFeatureCollection(cellAggs) {
   }
 }
 
+/**
+ * generates popup content for grid cells
+ */
 function makePopupContent(properties, jsonResponse = null) {
   // TODO: Add pagination to long popup contents. Unable to request over 500 ids at once.
   // filling in missing otu entries here.
@@ -349,8 +358,8 @@ function makePopupContent(properties, jsonResponse = null) {
   }
 
   let popupContent =
-    strongHeader("Cell Richness", properties.weightedRichness) +
-    strongHeader("Cell Abundance", properties.weightedAbundance) +
+    strongHeader("Cell Richness", properties.richness) +
+    // strongHeader("Cell Abundance", properties.weightedAbundance) +
     strongHeader("Cell Site Count", properties.sites.length) +
     strongHeader(
       "Longitude",
