@@ -75,6 +75,7 @@ function updateGraph(siteAggregates) {
   assignRandomCategoricalColor("environmental_feature_t1");
 
   updatePlotCircleColours();
+
   let colourMetric = getActivePlotMetric();
   // console.log(colourMetric);
   if (colourMetric == null) {
@@ -163,6 +164,9 @@ function updateGraph(siteAggregates) {
           // TODO: this is duplicate code to the other coloring stuff
           if (getActivePlotMetric() == "biome_t2") {
             return d.meta.biome_t2_color;
+          }
+          if (getActivePlotMetric() == "environmental_feature_t1") {
+            return d.meta.environmental_feature_t1_colour;
           } else {
             return metricColour(d.meta[colourMetric]);
           }
