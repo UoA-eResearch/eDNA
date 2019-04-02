@@ -644,6 +644,7 @@ bounds._northEast.lng += 10;
 bounds._southWest.lat -= 10;
 bounds._southWest.lng -= 10;
 map.setMaxBounds(bounds);
+
 //Defines how the proj4 function is to convert.
 //in this case proj4 is being set up to convert longlat to cartesian.
 // TODO: coordinate conversion: Change EPSG:2193 to EPSG:4326? To match the bulk convert.
