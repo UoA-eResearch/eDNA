@@ -5,7 +5,7 @@ import { strongLine, strongHeader } from "./utility";
 import { highlightLayer, disableHighlightLayer } from "./map";
 
 function initPlotChart() {
-  var margin = { top: 20, right: 30, bottom: 20, left: 160 },
+  var margin = { top: 20, right: 30, bottom: 20, left: 150 },
     width = window.innerWidth * 0.75 - margin.left - margin.right,
     height = window.innerHeight * 0.35 - margin.top - margin.bottom;
   var chart = d3
@@ -23,7 +23,6 @@ function initPlotChart() {
     .scaleLinear()
     .domain([0, 1]) // the range of the values to plot
     .range([0, width]); // the pixel range of the x-axis
-  var xTicks = [0, 1];
   var xLabels = ["Minimum", "Maximum"];
   var xAxis = d3
     .axisBottom()
@@ -357,6 +356,20 @@ function assignRandomCategoricalColor(attr) {
     }
     sampleContext[attr + "_colour"] = colorLookup[attributeValue];
   }
+
+  // make legend for the colours
+  let legend = d3
+    .select("chart")
+    .data(colorLookup)
+    .enter()
+    .append("g")
+    .attr("x", 20)
+    .attr("y", 20)
+    .attr("width", 20)
+    .attr("height", 20)
+    .style("fill", function(d) {
+      var color = colorLookup.value;
+    });
 }
 
 /**
