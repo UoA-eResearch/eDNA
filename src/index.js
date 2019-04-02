@@ -78,6 +78,7 @@ function fetchSampleOtus() {
   console.log("request url: " + url);
 
   // fetch the url
+  generateLoadingMessaging();
   fetch(url).then(response => {
     response.json().then(responseData => {
       calculateSampleOtuData(responseData);
@@ -447,6 +448,13 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
     });
     // console.log(layer.feature);
   }
+}
+
+function generateLoadingMessaging() {
+  let loadingBanner = document.createElement("h2");
+  loadingBanner.style = "z-index: 5000";
+  loadingBanner.innerHTML = "Loading...";
+  $("#map").append(loadingBanner);
 }
 
 /**

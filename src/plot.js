@@ -70,7 +70,7 @@ function initPlotChart() {
 function updateGraph(siteAggregates) {
   console.log("updating d3 plot");
   // todo: see if I can make this into one class. Called in colorrange, select onchange function as well.
-  let metricColour = createContinuousColorRange(siteAggregates);
+  let colourRange = createContinuousColorRange(siteAggregates);
   assignBiomeColors(siteAggregates);
   assignRandomCategoricalColor("environmental_feature_t2");
 
@@ -162,14 +162,13 @@ function updateGraph(siteAggregates) {
         .attr("opacity", 0.3)
         .attr("fill", function(d) {
           // TODO: this is duplicate code to the other coloring stuff
-          if (getActivePlotMetric() == "biome_t2") {
-            return d.meta[getActivePlotMetric() + "_colour"];
-          }
-          if (getActivePlotMetric() == "environmental_feature_t2") {
-            return d.meta[getActivePlotMetric() + "_colour"];
+          let fillColour;
+          if (getActivePlotMetric() + "_colour" in d.meta) {
+            fillColour = d.meta[getActivePlotMetric() + "_colour"];
           } else {
-            return metricColour(d.meta[colourMetric]);
+            fillColour = colourRange(d.meta[colourMetric]);
           }
+          return fillColour;
         })
         .on("mouseover", function(d) {
           d3.select(this.parentNode.parentNode)
@@ -177,7 +176,6 @@ function updateGraph(siteAggregates) {
             .transition()
             .attr("r", 14)
             .duration(250);
-
           tooltip
             .transition()
             .style("opacity", 0.9)
@@ -350,8 +348,8 @@ function assignRandomCategoricalColor(attr) {
       let newColour = colourFactory("none");
 
       for (const [key, existingColour] of Object.entries(colorLookup)) {
-        while (euclideanDistance(newColour, existingColour) < 200) {
-          // console.log("colour distance not enough, making new colour");
+        if (euclideanDistance(newColour, existingColour) < 120) {
+          console.log("colour distance not enough, making new colour");
           newColour = colourFactory("none");
         }
       }
@@ -414,7 +412,7 @@ function updatePlotCircleColours() {
     .attr("fill", function(d) {
       // TODO: this is duplicate code to when circles are first assigned colours, could be refactored
       let siteMeta = window.sampleContextLookup[d.siteId];
-      if (metric == "biome_t2" || metric == "environmental_feature_t2") {
+      if (metric + "_colour" in siteMeta) {
         return d3.color(siteMeta[metric + "_colour"]);
       } else {
         return metricColour(d.meta[metric]);
