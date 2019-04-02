@@ -95,3 +95,20 @@ div.tooltip {
     text-align: right;
     float: right;
 }
+
+.map-popup--visible {
+    position: fixed;
+    visibility: visible;
+    left: 50%;
+    top: 50%;
+    z-index: 1000;
+}
+
+
+.map-popup--hidden {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: -5;
+    visibility: hidden;
+}

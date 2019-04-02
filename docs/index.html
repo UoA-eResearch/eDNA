@@ -1,7 +1,7 @@
 <html>
   <head>
     <title>eDNA Virtual Hub</title>
-
+    <meta name="description" content="An interactive map of eDNA recorded in New Zealand"/>
     <link rel="stylesheet" href="./css/leaflet-slider.css" />
     <link rel="stylesheet" href="./css/L.Control.Range.css" />
     <link rel="stylesheet" href="./css/leaflet.css"/>
@@ -40,6 +40,7 @@
   </head>
   <body>
     <div id="map" class="map"></div>
+    <h2 id="loading-popup" class="map-popup--hidden">Loading...</h2>
     <div class="search" id="filterWrapper">
       <select id="select-taxonomic" class="search-filter" multiple="multiple">
       </select>

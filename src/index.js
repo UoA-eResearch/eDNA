@@ -78,9 +78,10 @@ function fetchSampleOtus() {
   console.log("request url: " + url);
 
   // fetch the url
-  generateLoadingMessaging();
+  showLoadingMessage();
   fetch(url).then(response => {
     response.json().then(responseData => {
+      hideLoadingMessage();
       calculateSampleOtuData(responseData);
     });
   });
@@ -450,11 +451,14 @@ function featureCollectionToLayer(featureCollection, property, layerGroup) {
   }
 }
 
-function generateLoadingMessaging() {
-  let loadingBanner = document.createElement("h2");
-  loadingBanner.style = "z-index: 5000";
-  loadingBanner.innerHTML = "Loading...";
-  $("#map").append(loadingBanner);
+function showLoadingMessage() {
+  let loadingBanner = document.getElementById("loading-popup");
+  loadingBanner.classList = "map-popup--visible";
+}
+
+function hideLoadingMessage() {
+  let loadingBanner = document.getElementById("loading-popup");
+  loadingBanner.classList = "map-popup--hidden";
 }
 
 /**
