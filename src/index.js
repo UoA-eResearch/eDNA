@@ -869,7 +869,7 @@ leafletGraphControl.onAdd = function() {
 };
 leafletGraphControl.addTo(map);
 
-function initializeOtuSelect() {
+function initOtuSelect() {
   let taxonSelect = $("#select-taxonomic").select2({
     placeholder: "Type to filter by classification and metadata",
     multiple: true,
@@ -966,7 +966,7 @@ function initializeOtuSelect() {
   return taxonSelect;
 }
 
-function initializeSelectContextual(json) {
+function initContextSelect(json) {
   let data = json.data.context_options.map(field => {
     return {
       id: field,
@@ -1008,6 +1008,9 @@ function initializeSelectContextual(json) {
   });
 }
 
+/**
+ * Sets up the amplicon filter
+ */
 const initAmpliconSearch = () => {
   $("#select-amplicon").select2({
     placeholder: "Select amplicon",
@@ -1048,23 +1051,21 @@ const initAmpliconSearch = () => {
   });
 };
 
-initAmpliconSearch();
-
-function initializeEndemicRadio() {
+function initEndemicCheckbox() {
   let radio = document.getElementById("endemic-checkbox");
   radio.onchange = function() {
     fetchSampleOtus();
   };
 }
 
-function initializeOperatorSelect() {
+function initOperatorSelect() {
   let selectOperator = document.getElementById("select-operator");
   selectOperator.onchange = function() {
     fetchSampleOtus();
   };
 }
 
-function initializeSearchButton() {
+function initSearchButton() {
   let submitButton = document.getElementById("search-button");
   submitButton.onclick = function() {
     fetchSampleOtus();
@@ -1074,20 +1075,20 @@ function initializeSearchButton() {
 /**
  * Toggles the datapoint visualization visibility.
  */
-const initializeGraphButton = () => {
+const initTogglePlotButton = () => {
   document.getElementById("graph-button").onclick = function() {
     $("#chart").toggle("slow");
   };
 };
 
-const initializeGraphColourMetricSelect = () => {
+const initPlotColourMetricSelect = () => {
   let metaSelect = document.getElementById("meta-select");
   metaSelect.onchange = function() {
     updatePlotCircleColours();
   };
 };
 
-const initializeGraphColourSchemeSelect = () => {
+const initPlotColourSchemeSelect = () => {
   let colourSchemeSelect = document.getElementById("colour-scheme-select");
   colourSchemeSelect.onchange = function() {
     updatePlotCircleColours();
@@ -1099,14 +1100,15 @@ export const { g, y, tooltip, x } = initPlotChart();
 
 // Adding functions to elements -----------------------------------------
 window.onload = () => {
-  initializeOperatorSelect();
-  initializeOtuSelect();
-  initializeEndemicRadio();
-  initializeSearchButton();
+  initOperatorSelect();
+  initOtuSelect();
+  initAmpliconSearch();
+  initEndemicCheckbox();
+  initSearchButton();
 
-  initializeGraphButton();
-  initializeGraphColourMetricSelect();
-  initializeGraphColourSchemeSelect();
+  initTogglePlotButton();
+  initPlotColourMetricSelect();
+  initPlotColourSchemeSelect();
 
   initializeDisplayOptionsControls();
   initializeDisplayControlButton();
@@ -1116,7 +1118,7 @@ window.onload = () => {
 // possibly separate into a different API later on if we have time or a need.
 let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
 fetch(url).then(response => {
-  response.json().then(initializeSelectContextual);
+  response.json().then(initContextSelect);
 });
 
 // TODO: fix layer rendering only workng when contextual filter has conditions. Something to do with the backend not returning results when no contextual present.
