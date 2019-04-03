@@ -506,9 +506,7 @@ function handleCellClick(e) {
 function handleMouseOver(e) {
   let layer = e.target;
   layer.feature.properties.sites.forEach(siteId => {
-    // needs to use sitecode as you cannot select in css using a number "#123"
-    let siteCode = window.sampleContextLookup[siteId].sample_identifier;
-    let circle = d3.selectAll("#" + siteCode);
+    let circle = d3.selectAll("#_" + siteId);
     circle
       .transition()
       .duration(250)
@@ -524,9 +522,7 @@ function handleMouseOver(e) {
 function handleMouseOut(e) {
   let layer = e.target;
   layer.feature.properties.sites.forEach(siteId => {
-    // needs to use sitecode as you cannot select in css using a number "#123"
-    let siteCode = window.sampleContextLookup[siteId].site;
-    let circle = d3.selectAll("#" + siteCode);
+    let circle = d3.selectAll("#_" + siteId);
     circle
       .transition()
       .duration(250)
