@@ -33,7 +33,7 @@ export function highlightLayer(layer) {
 /**
  * centralised place to store value
  */
-function getOutlineOpacity() {
+export function getOutlineOpacity() {
   return 0.15;
 }
 
