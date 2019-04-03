@@ -632,18 +632,23 @@ const tileLayer = L.tileLayer(
     minZoom: 5.75
   }
 );
-export const map = L.map("map", {
-  zoomSnap: 0.25,
-  zoomDelta: 0.25,
-  layers: tileLayer,
-  fullscreenControl: true
-}).setView([-41.235726, 172.5118422], 5.75);
-var bounds = map.getBounds();
-bounds._northEast.lat += 10;
-bounds._northEast.lng += 10;
-bounds._southWest.lat -= 10;
-bounds._southWest.lng -= 10;
-map.setMaxBounds(bounds);
+
+export const map = initMap();
+function initMap() {
+  let map = L.map("map", {
+    zoomSnap: 0.25,
+    zoomDelta: 0.25,
+    layers: tileLayer,
+    fullscreenControl: true
+  }).setView([-41.235726, 172.5118422], 5.75);
+  var bounds = map.getBounds();
+  bounds._northEast.lat += 10;
+  bounds._northEast.lng += 10;
+  bounds._southWest.lat -= 10;
+  bounds._southWest.lng -= 10;
+  map.setMaxBounds(bounds);
+  return map;
+}
 
 //Defines how the proj4 function is to convert.
 //in this case proj4 is being set up to convert longlat to cartesian.

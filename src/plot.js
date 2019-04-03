@@ -384,6 +384,9 @@ const euclideanDistance = (c1, c2) => {
   return dist;
 };
 
+/**
+ * Generates a semi-random colour.
+ */
 const colourFactory = hue => {
   // generates a random colour in the red or blue hue range depending on the string passed in
   switch (hue) {

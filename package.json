@@ -33,7 +33,7 @@
     "build": "webpack",
     "start": "webpack-dev-server --open",
     "watch": "webpack --watch",
-    "test": "jest"
+    "test": "jest --watch"
   },
   "repository": {
     "type": "git",
