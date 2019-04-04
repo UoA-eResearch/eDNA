@@ -24,6 +24,7 @@
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^24.6.0",
     "babel-loader": "^8.0.4",
+    "cypress": "^3.2.0",
     "jest": "^24.6.0",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0",
@@ -33,7 +34,8 @@
     "build": "webpack",
     "start": "webpack-dev-server --open",
     "watch": "webpack --watch",
-    "test": "jest --watch"
+    "test": "jest --watch",
+    "cypress:open": "cypress open"
   },
   "repository": {
     "type": "git",
