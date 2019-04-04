@@ -16,7 +16,9 @@ export function renderHeatLayer(siteAggs, heatLayerGroup, map) {
   heatLayerGroup.addLayer(heatLayer);
   heatLayer.setOptions({ max: maxWeight * 1.5, maxZoom: 6 });
   heatLayer.setLatLngs(heatData);
-  map.addLayer(heatLayerGroup);
+
+  // stop re-applying heatmap on every dataset received, only appears on initial page load.
+  // map.addLayer(heatLayerGroup);
   return heatLayer;
 }
 

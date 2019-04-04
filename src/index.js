@@ -94,7 +94,8 @@ function recalculateGridLayer() {
   if (window.previousResults) {
     calculateSampleOtuData(window.previousResults);
   } else {
-    $("#select-taxonomic").trigger("change");
+    // $("#select-taxonomic").trigger("change");
+    fetchSampleOtus();
   }
 }
 
@@ -113,7 +114,7 @@ function calculateSampleOtuData(responseData) {
     window.sampleContextLookup[sampleContext.id] = sampleContext;
   }
   let siteAggregatedData = aggregateBySite(sampleOtus);
-  let heatLayer = renderHeatLayer(siteAggregatedData, heatLayerGroup, map);
+  renderHeatLayer(siteAggregatedData, heatLayerGroup, map);
   let cellAggregatedData = aggregateByCell(siteAggregatedData, sampleContexts);
   let featureCollection = makeFeatureCollection(cellAggregatedData);
 
@@ -131,7 +132,6 @@ function calculateSampleOtuData(responseData) {
   );
   addLayerIdToSampleContext(richnessLayer);
 
-  // NOTE: disabling  site layer for quick comparison: rectangles are distorted.
   let siteLayer = featureCollectionToLayer(
     featureCollection,
     "weightedSites",
@@ -669,6 +669,8 @@ var gridRichnessLayerGroup = L.layerGroup();
 var gridAbundanceLayerGroup = L.layerGroup();
 var gridSitesLayerGroup = L.layerGroup();
 var heatLayerGroup = L.layerGroup();
+map.addLayer(heatLayerGroup);
+
 var baseMaps = {
   Base: tileLayer
 };
