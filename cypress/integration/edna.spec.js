@@ -39,3 +39,12 @@ describe("Color metric select", function() {
     cy.get("#_919:first").should("have.not.attr", "fill", "rgb(0, 0, 255)");
   });
 });
+
+describe("Grid layer cell/rectangel", function() {
+  it("should generate popup content when clicked on", function() {
+    cy.get(".leaflet-control-layers-overlays input:first").click();
+    cy.get(".leaflet-interactive:first").click({ force: true });
+    cy.wait(200);
+    cy.get(".leaflet-popup-content").contains("Cell Richness");
+  });
+});
