@@ -1,4 +1,6 @@
 import * as L from "leaflet";
+import { API_URLS } from "./constants";
+import { strongHeader, strongLine } from "./utility";
 
 export function renderHeatLayer(siteAggs, heatLayerGroup, map) {
   let heatData = [];
@@ -30,6 +32,180 @@ export function highlightLayer(layer) {
   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
     layer.bringToFront();
   }
+}
+
+export function featureCollectionToLayer(
+  featureCollection,
+  property,
+  layerGroup
+) {
+  const outlineOpacity = 0.15;
+  const outlineColor = "#000000";
+  const fillOpacity = d => (d > 0.0 ? 0.8 : 0.2);
+  const fillColor = d =>
+    d > 0.9
+      ? "#800026"
+      : d > 0.8
+      ? "#BD0026"
+      : d > 0.7
+      ? "#E31A1C"
+      : d > 0.6
+      ? "#FC4E2A"
+      : d > 0.5
+      ? "#FD8D3C"
+      : d > 0.4
+      ? "#FEB24C"
+      : d > 0.3
+      ? "#FED976"
+      : d > 0.2
+      ? "#FFEDA0"
+      : d > 0.0
+      ? "#FFFFCC"
+      : "#9ECAE1";
+  const geoJSONLayer = L.geoJSON(featureCollection, {
+    style: layerStyle,
+    onEachFeature: onEachFeature
+  });
+  layerGroup.clearLayers();
+  layerGroup.addLayer(geoJSONLayer);
+
+  return geoJSONLayer;
+
+  function layerStyle(feature) {
+    return {
+      fillColor: fillColor(feature.properties[property]),
+      weight: 1,
+      opacity: outlineOpacity,
+      color: outlineColor,
+      fillOpacity: fillOpacity(feature.properties[property])
+    };
+  }
+
+  function onEachFeature(feature, layer) {
+    // setting popup size constraint.
+    layer.bindPopup("Loading...", {
+      // layer.bindPopup(feature.properties.popupContent, {
+      maxWidth: 4000,
+      maxHeight: 150
+    });
+    layer.on({
+      mouseover: handleMouseOver,
+      mouseout: handleMouseOut,
+      click: handleCellClick,
+      select: highlightLayer
+    });
+    // console.log(layer.feature);
+  }
+}
+
+/**
+ * Function called when layer is selected.
+ * @param {*} e
+ */
+function handleCellClick(e) {
+  var layer = e.target;
+  let popup = layer.getPopup();
+  popup.bindPopup(findMissingOtuLookups(layer, popup));
+}
+
+function handleMouseOver(e) {
+  let layer = e.target;
+  layer.feature.properties.sites.forEach(siteId => {
+    let circle = d3.selectAll("#_" + siteId);
+    circle
+      .transition()
+      .duration(250)
+      .attr("r", 14);
+  });
+}
+
+/**
+ * highlights plot circles that are within a grid cell layer.
+ * @param   {layer event}  e  some layer event
+ * @return  {void}
+ */
+function handleMouseOut(e) {
+  let layer = e.target;
+  layer.feature.properties.sites.forEach(siteId => {
+    let circle = d3.selectAll("#_" + siteId);
+    circle
+      .transition()
+      .duration(250)
+      .attr("r", 7);
+  });
+}
+
+/**
+ * Finds the otu ids for which there is no name text, requests the text, returns the popup content
+ * @param {grid layer rectangle} layer
+ * @param {popup to be populated} popup
+ */
+function findMissingOtuLookups(layer, popup) {
+  let missingIds = [];
+  for (const [otuId] of Object.entries(layer.feature.properties.otus)) {
+    if (!(otuId in window.otuLookup)) {
+      missingIds.push(otuId);
+    }
+  }
+  if (missingIds.length > 0) {
+    console.log(
+      "missing " + missingIds.length + " otu names. Requesting from server."
+    );
+    let f_url = API_URLS.otu_code_by_id + missingIds.join("&id=");
+    fetch(f_url).then(response => {
+      response.json().then(jsonResponse => {
+        popup.setContent(
+          makePopupContent(layer.feature.properties, jsonResponse)
+        );
+      });
+    });
+  } else {
+    popup.setContent(makePopupContent(layer.feature.properties));
+  }
+}
+
+/**
+ * generates popup content for grid cells
+ */
+function makePopupContent(properties, jsonResponse = null) {
+  // TODO: Add pagination to long popup contents. Unable to request over 500 ids at once.
+  // filling in missing otu entries here.
+  if (jsonResponse != null && jsonResponse !== undefined) {
+    jsonResponse.otu_names.forEach(otu => {
+      window.otuLookup[otu.id] = otu.code;
+    });
+  }
+
+  let popupContent =
+    strongHeader("Cell Richness", properties.richness) +
+    // strongHeader("Cell Abundance", properties.weightedAbundance) +
+    strongHeader("Cell Site Count", properties.sites.length) +
+    strongHeader(
+      "Longitude",
+      properties.coordinates[0][0] + " to " + properties.coordinates[2][0]
+    ) +
+    strongHeader(
+      "Latitude",
+      properties.coordinates[0][1] + " to " + properties.coordinates[2][1]
+    ) +
+    "<br />";
+  //list all sites within the cell.
+  popupContent += strongLine("Sites in cell: ") + "<ul>";
+  for (let i in properties.sites) {
+    let siteId = properties.sites[i];
+    popupContent +=
+      "<li>" + window.sampleContextLookup[siteId].sample_identifier + "</li>";
+  }
+  popupContent += "</ul><br />";
+
+  for (let otuId in properties.otus) {
+    popupContent +=
+      strongLine(window.otuLookup[otuId]) +
+      strongHeader("Abundance in cell", properties.otus[otuId].abundance) +
+      strongHeader("Frequency in cell", properties.otus[otuId].count) +
+      "<br />";
+  }
+  return popupContent;
 }
 
 /**
