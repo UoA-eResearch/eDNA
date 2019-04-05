@@ -89,9 +89,9 @@ export function featureCollectionToLayer(
       maxHeight: 150
     });
     layer.on({
-      mouseover: handleMouseOver,
-      mouseout: handleMouseOut,
-      click: handleCellClick,
+      mouseover: handleGridLayerMouseOver,
+      mouseout: handleGridLayerMouseOut,
+      click: handleGridLayerClick,
       select: highlightLayer
     });
     // console.log(layer.feature);
@@ -102,13 +102,13 @@ export function featureCollectionToLayer(
  * Function called when layer is selected.
  * @param {*} e
  */
-function handleCellClick(e) {
+function handleGridLayerClick(e) {
   var layer = e.target;
   let popup = layer.getPopup();
   popup.bindPopup(findMissingOtuLookups(layer, popup));
 }
 
-function handleMouseOver(e) {
+function handleGridLayerMouseOver(e) {
   let layer = e.target;
   layer.feature.properties.sites.forEach(siteId => {
     let circle = d3.selectAll("#_" + siteId);
@@ -124,7 +124,7 @@ function handleMouseOver(e) {
  * @param   {layer event}  e  some layer event
  * @return  {void}
  */
-function handleMouseOut(e) {
+function handleGridLayerMouseOut(e) {
   let layer = e.target;
   layer.feature.properties.sites.forEach(siteId => {
     let circle = d3.selectAll("#_" + siteId);
@@ -136,7 +136,7 @@ function handleMouseOut(e) {
 }
 
 /**
- * Finds the otu ids for which there is no name text, requests the text, returns the popup content
+ * Finds the otu ids for which there is no name text from a layer, requests the text, returns the popup content
  * @param {grid layer rectangle} layer
  * @param {popup to be populated} popup
  */

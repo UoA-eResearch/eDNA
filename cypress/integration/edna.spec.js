@@ -31,12 +31,33 @@ describe("The heat layer", function() {
   });
 });
 
-describe("Color metric select", function() {
+describe("Colour metric select", function() {
   it("should change circle colour on selection change", function() {
     cy.get("#graph-button").click();
     cy.get("#_919:first").should("have.attr", "fill", "rgb(0, 0, 255)");
     cy.get("#meta-select").select("biome_t2");
     cy.get("#_919:first").should("have.not.attr", "fill", "rgb(0, 0, 255)");
+  });
+});
+
+describe("Colour scheme select", function() {
+  it("should change colour for certain metrics", function() {
+    cy.get("#graph-button").click();
+    cy.get("#meta-select").select("elevation");
+    cy.get("#_919:first").should("have.attr", "fill", "rgb(0, 0, 255)");
+    cy.get("#colour-scheme-select").select("diverging");
+    cy.get("#_919:first").should("have.not.attr", "fill", "rgb(0, 0, 255)");
+  });
+
+  it("should not alter colour for specified metrics", function() {
+    cy.get("#meta-select").select("biome_t2");
+    cy.wait(400);
+    cy.get("#_919:first").then(circleElem => {
+      const firstFill = Cypress.$(circleElem).attr("fill");
+      cy.get("#colour-scheme-select").select("diverging");
+      cy.wait(400);
+      cy.get("#_919:first").should("have.attr", "fill", firstFill);
+    });
   });
 });
 
