@@ -1,5 +1,6 @@
 import * as L from "leaflet";
 import { API_URLS } from "./constants";
+import * as d3 from "d3";
 import { strongHeader, strongLine } from "./utility";
 
 export function renderHeatLayer(siteAggs, heatLayerGroup, map) {
