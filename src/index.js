@@ -20,6 +20,7 @@ window.sampleContextLookup = {};
  * generates the request URL and calls recalculating data functions when data is received.
  */
 function fetchSampleOtus() {
+  console.log(API_URLS);
   let contextFilters = $("#select-contextual").select2("data");
   let taxonFilters = $("#select-taxonomic").select2("data");
   let ampliconFilters = $("#select-amplicon").select2("data");
