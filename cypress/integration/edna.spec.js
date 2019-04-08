@@ -14,6 +14,7 @@ describe("The plot circles", function() {
   it("should enlarge when hovered", function() {
     cy.get("#graph-button").click();
     cy.get(".leaflet-control-layers-overlays input:first").click();
+    cy.wait(3000);
     cy.get("#_279:first")
       .should("have.attr", "r", "7")
       .trigger("mouseover", { force: true })
@@ -28,6 +29,18 @@ describe("The heat layer", function() {
     cy.get(".leaflet-control-layers-overlays input:last").click();
     cy.get("#endemic-checkbox").check();
     cy.get(".leaflet-heatmap-layer").should("not.exist");
+  });
+
+  it("should enlarge relevant plot circles when hovered over", function() {
+    cy.get(".leaflet-control-layers-overlays input:first").click();
+    // cy.get("#graph-button").click();
+    cy.get(".leaflet-interactive:first").trigger("mouseover", { force: true });
+    cy.wait(300);
+    cy.get('.enter [r="14"]');
+    // TODO: not finding the enlarged circle
+    // hover it
+    // get the tool tip site id.
+    // check that the original layer contains that site id
   });
 });
 
@@ -50,6 +63,7 @@ describe("Colour scheme select", function() {
   });
 
   it("should not alter colour for specified metrics", function() {
+    cy.get(".leaflet-control-layers-overlays input:first").click();
     cy.get("#meta-select").select("biome_t2");
     cy.wait(400);
     cy.get("#_919:first").then(circleElem => {
