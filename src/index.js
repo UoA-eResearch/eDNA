@@ -743,8 +743,12 @@ function initOtuSelect() {
             group: "taxon"
           };
           index++;
-          window.otuLookup[taxon[2]] = taxon[0];
-          // window.otuLookup[taxon[2]] = taxon[1];
+          // window.otuLookup[taxon[2]] = taxon[0];
+          window.otuLookup[taxon[2]] = {
+            code: taxon[0],
+            pathogenic: false
+          };
+          console.log(window.otuLookup);
           return option;
         });
 

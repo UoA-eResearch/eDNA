@@ -174,6 +174,10 @@ function makePopupContent(properties, jsonResponse = null) {
   if (jsonResponse != null && jsonResponse !== undefined) {
     jsonResponse.otu_names.forEach(otu => {
       window.otuLookup[otu.id] = otu.code;
+      window.otuLookup[otu.id] = {
+        code: otu.code,
+        pathogenic: false
+      };
     });
   }
 
@@ -201,7 +205,7 @@ function makePopupContent(properties, jsonResponse = null) {
 
   for (let otuId in properties.otus) {
     popupContent +=
-      strongLine(window.otuLookup[otuId]) +
+      strongLine(window.otuLookup[otuId].code) +
       strongHeader("Abundance in cell", properties.otus[otuId].abundance) +
       strongHeader("Frequency in cell", properties.otus[otuId].count) +
       "<br />";
