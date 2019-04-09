@@ -25,7 +25,7 @@ const API_URLS = {
   sampleOtus: activeUrl + "abundance?",
   metaData: activeUrl + "metadata?term=",
   otuSuggestions: activeUrl + "filter-options?",
-  otu_code_by_id: activeUrl + "otu/?id="
+  otu_data_by_id: activeUrl + "otu/?id="
 };
 
 export { DEV_BASE_URL, PRD_BASE_URL, activeUrl, API_URLS };
