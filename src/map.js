@@ -152,7 +152,7 @@ function findMissingOtuLookups(layer, popup) {
     console.log(
       "missing " + missingIds.length + " otu names. Requesting from server."
     );
-    let f_url = API_URLS.otu_code_by_id + missingIds.join("&id=");
+    let f_url = API_URLS.otu_data_by_id + missingIds.join("&id=");
     fetch(f_url).then(response => {
       response.json().then(jsonResponse => {
         popup.setContent(
