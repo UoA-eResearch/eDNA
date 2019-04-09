@@ -173,11 +173,14 @@ function makePopupContent(properties, jsonResponse = null) {
   // filling in missing otu entries here.
   if (jsonResponse != null && jsonResponse !== undefined) {
     jsonResponse.otu_names.forEach(otu => {
-      window.otuLookup[otu.id] = otu.code;
-      window.otuLookup[otu.id] = {
-        code: otu.code,
-        pathogenic: false
-      };
+      // window.otuLookup[otu.id] = otu.code;
+      if (!window.otuLookup[otu.id]) {
+        window.otuLookup[otu.id] = {
+          code: otu.code
+        };
+      } else {
+        window.otuLookup[otu.id]["code"] = otu.code;
+      }
     });
   }
 

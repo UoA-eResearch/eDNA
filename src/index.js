@@ -744,11 +744,11 @@ function initOtuSelect() {
           };
           index++;
           // window.otuLookup[taxon[2]] = taxon[0];
-          window.otuLookup[taxon[2]] = {
-            code: taxon[0],
-            pathogenic: false
-          };
-          console.log(window.otuLookup);
+          if (!window.otuLookup[taxon[2]]) {
+            window.otuLookup[taxon[2]] = {
+              code: taxon[0]
+            };
+          }
           return option;
         });
 
