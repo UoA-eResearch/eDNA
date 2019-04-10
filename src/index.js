@@ -20,6 +20,7 @@ window.sampleContextLookup = {};
  * generates the request URL and calls recalculating data functions when data is received.
  */
 function fetchSampleOtus() {
+  console.log("constructing query from filters");
   let contextFilters = $("#select-contextual").select2("data");
   let taxonFilters = $("#select-taxonomic").select2("data");
   let ampliconFilters = $("#select-amplicon").select2("data");
@@ -103,9 +104,11 @@ function recalculateGridLayer() {
  * @param {array} otus
  */
 function updateOtuLookupPathogenicStatus(otus) {
+  console.log("updating pathogenic status");
+  console.log(otus);
   // console.log(otus);
   otus.forEach(otuId => {
-    if (!window.otuLookup[otuId]) {
+    if (!(otuId in window.otuLookup)) {
       window.otuLookup[otuId] = {
         pathogenic: true
       };
@@ -113,6 +116,7 @@ function updateOtuLookupPathogenicStatus(otus) {
       window.otuLookup[otuId].pathogenic = true;
     }
   });
+  // console.log(window.otuLookup);
 }
 
 /**
@@ -460,11 +464,15 @@ function calculateSiteMetrics(siteAggregates) {
         (otuAbundance / site.abundance) *
         Math.log(otuAbundance / site.abundance);
 
-      if (otuId in window.otuLookup) {
-        if (window.otuLookup[otuId].pathogenic) {
-          site.pathogenicRichness++;
-          site.pathogenicAbundance += otuAbundance;
-        }
+      if (!(otuId in window.otuLookup)) {
+        window.otuLookup[otuId] = {
+          pathogenic: false
+        };
+      }
+
+      if (window.otuLookup[otuId].pathogenic) {
+        site.pathogenicRichness++;
+        site.pathogenicAbundance += otuAbundance;
       }
     }
     // final calculations for effective alpha and shannon diversity
@@ -475,7 +483,6 @@ function calculateSiteMetrics(siteAggregates) {
     site.pathogenicRichness /= site.richness;
     site.pathogenicAbundance /= site.abundance;
   }
-  console.log(siteAggregates);
   return siteAggregates;
 }
 
@@ -985,7 +992,6 @@ window.onload = () => {
 // NOTE: load contextual options up front. Hardcoding some params.
 // possibly separate into a different API later on if we have time or a need.
 let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
-console.log(API_URLS);
 fetch(url).then(response => {
   response.json().then(initContextSelect);
 });
