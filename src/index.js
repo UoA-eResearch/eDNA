@@ -99,12 +99,30 @@ function recalculateGridLayer() {
 }
 
 /**
+ * Updates the lookup containing all the data of otus accquired so far.
+ * @param {array} otus
+ */
+function updateOtuLookupPathogenicStatus(otus) {
+  // console.log(otus);
+  otus.forEach(otuId => {
+    if (!window.otuLookup[otuId]) {
+      window.otuLookup[otuId] = {
+        pathogenic: true
+      };
+    } else {
+      window.otuLookup[otuId].pathogenic = true;
+    }
+  });
+}
+
+/**
  * takes combined sampleOtu data and sampleContextual data and calculates their positions and generates layers.
  */
 function calculateSampleOtuData(responseData) {
   window.previousResults = responseData;
   let sampleOtus = responseData.sample_otu_data;
   let sampleContexts = responseData.sample_contextual_data;
+  updateOtuLookupPathogenicStatus(responseData.pathogenic_otus);
   // display amount of abundances from a search below the filter
   $("#numberResults").text(sampleOtus.length);
   // restructure the sample contexts by pk
