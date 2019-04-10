@@ -156,7 +156,7 @@ function calculateSampleOtuData(responseData) {
   );
   addLayerIdToSampleContext(siteLayer);
 
-  siteAggregatedData = addSiteMetrics(siteAggregatedData);
+  siteAggregatedData = calculateSiteMetrics(siteAggregatedData);
   window.siteAggregates = siteAggregatedData;
   // creating site -> leaflet layer references for each layer.
   updateGraph(siteAggregatedData);
@@ -448,19 +448,34 @@ function makeGrid(detailLevel) {
 /**
  * Adds additional metrics to site aggregated data.
  */
-function addSiteMetrics(siteAggregates) {
+function calculateSiteMetrics(siteAggregates) {
   // entries released in es6.
   for (const [siteId, site] of Object.entries(siteAggregates)) {
     site.shannonDiversity = 0;
+    site.pathogenicRichness = 0;
+    site.pathogenicAbundance = 0;
     for (const [otuId, otu] of Object.entries(site.otus)) {
       let otuAbundance = otu.abundance;
       site.shannonDiversity +=
         (otuAbundance / site.abundance) *
         Math.log(otuAbundance / site.abundance);
+
+      if (otuId in window.otuLookup) {
+        if (window.otuLookup[otuId].pathogenic) {
+          site.pathogenicRichness++;
+          site.pathogenicAbundance += otuAbundance;
+        }
+      }
     }
+    // final calculations for effective alpha and shannon diversity
     site.shannonDiversity *= -1;
     site.effectiveAlpha = Math.exp(site.shannonDiversity);
+
+    // final calculations for proportioning site potential pathogen proportion
+    site.pathogenicRichness /= site.richness;
+    site.pathogenicAbundance /= site.abundance;
   }
+  console.log(siteAggregates);
   return siteAggregates;
 }
 
