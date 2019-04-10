@@ -144,7 +144,7 @@ function handleGridLayerMouseOut(e) {
 function findMissingOtuLookups(layer, popup) {
   let missingIds = [];
   for (const [otuId] of Object.entries(layer.feature.properties.otus)) {
-    if (!(otuId in window.otuLookup)) {
+    if (!(otuId in window.otuLookup) || !window.otuLookup[otuId].code) {
       missingIds.push(otuId);
     }
   }
