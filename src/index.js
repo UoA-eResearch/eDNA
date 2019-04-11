@@ -105,7 +105,6 @@ function recalculateGridLayer() {
  */
 function updateOtuLookupPathogenicStatus(otus) {
   console.log("updating pathogenic status");
-  console.log(otus);
   // console.log(otus);
   otus.forEach(otuId => {
     if (!(otuId in window.otuLookup)) {
