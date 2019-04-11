@@ -75,53 +75,11 @@ describe("Colour scheme select", function() {
   });
 });
 
-describe("Grid layer cell/rectangel", function() {
+describe("Grid layer cell/rectangle", function() {
   it("should generate popup content when clicked on", function() {
     cy.get(".leaflet-control-layers-overlays input:first").click();
     cy.get(".leaflet-interactive:first").click({ force: true });
     cy.wait(200);
     cy.get(".leaflet-popup-content").contains("Cell Richness");
   });
-});
-
-context("API behaviour", function() {
-  beforeEach(() => {
-    cy.visit("/");
-  });
-
-  it("Default settings should return results on initial page load.", function() {
-    // cy.visit("/"); // change URL to match your dev URL
-    cy.get("#numberResults").contains(/^[0-9]*$/);
-  });
-
-  it("Should return results with no filters + endemism included.", function() {
-    // TODO: clear filters before each of these tests
-    cy.wait(1000);
-    cy.get("#numberResults").contains(/^[0-9]*$/);
-    cy.get("#numberResults").then(numResults => {
-      let value = numResults.text();
-
-      cy.get("#endemic-checkbox").click();
-      cy.get("#numberResults")
-        .invoke("text")
-        .should(text2 => {
-          expect(value).not.to.eq(text2);
-        });
-    });
-
-    // probably assert or make sure it's set to intersection/AND?
-
-    // resetting state
-    cy.get("#endemic-checkbox").click();
-  });
-
-  it("More otu select parameters should return more.", function() {
-    cy.get("#select-taxonomic").type("k__fungi{enter}k__bac{enter}", {
-      force: true
-    });
-  });
-
-  it("Intersectional filtering should return more results with less filter params.", function() {});
-
-  it("Union filtering should return more results with more filter params.", function() {});
 });
