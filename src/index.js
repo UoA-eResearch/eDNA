@@ -4,6 +4,7 @@ import * as d3 from "d3";
 import * as $ from "jquery";
 import "../js/leaflet.heat";
 import "../js/leaflet-slider";
+import "leaflet-sidebar-v2";
 import select2 from "../js/select2.min.js";
 import "../js/L.Control.Range";
 import { updateGraph, initPlotChart, updatePlotCircleColours } from "./plot";
@@ -531,6 +532,11 @@ var detailLevel = 60;
 
 //shows the scale of the map
 var scaleIndicator = L.control.scale().addTo(map);
+
+var sidevar = L.control
+  .sidebar({ container: "sidebar" })
+  .addTo(map)
+  .open("home");
 
 //instantiating empty layer control layers to be filled later
 var gridRichnessLayerGroup = L.layerGroup();
