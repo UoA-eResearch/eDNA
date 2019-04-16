@@ -533,8 +533,8 @@ var detailLevel = 60;
 //shows the scale of the map
 var scaleIndicator = L.control.scale().addTo(map);
 
-var sidevar = L.control
-  .sidebar({ container: "sidebar" })
+var sidebar = L.control
+  .sidebar({ container: "sidebar", autopan: true })
   .addTo(map)
   .open("home");
 

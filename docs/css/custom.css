@@ -83,7 +83,7 @@ div.tooltip {
     left: 0;
 }
 
-.search {
+/* .search {
     width: 50%;        
     position: absolute;
     right: 10px;
@@ -94,7 +94,7 @@ div.tooltip {
 .search--right {
     text-align: right;
     float: right;
-}
+} */
 
 .map-popup--visible {
     position: fixed;
@@ -118,4 +118,9 @@ div.tooltip {
     color: hsla(210, 100%, 100%, 0.9) !important;
     background: hsla(210, 100%, 50%, 0.9) !important;
     outline: solid 0.25rem hsla(210, 100%, 50%, 0.9) !important;
+}
+
+
+.select2-dropdown {
+    z-index: 9001;
 }
