@@ -517,11 +517,6 @@ function initMap() {
 
 //Defines how the proj4 function is to convert.
 //in this case proj4 is being set up to convert longlat to cartesian.
-// TODO: coordinate conversion: Change EPSG:2193 to EPSG:4326? To match the bulk convert.
-// proj4.defs(
-//   "EPSG:2193",
-//   "+proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 +x_0=1600000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-// );
 
 //gets the params from the search bar
 var taxonParams = new URLSearchParams(window.location.search);
@@ -601,7 +596,6 @@ function initializeDisplayOptionsControls() {
   let gridResSlider = L.control.slider(
     function(value) {
       detailLevel = value;
-      // TODO: directly call fetchSampleOTU data instead of triggering a change.
       recalculateGridLayer();
     },
     {
@@ -1000,6 +994,4 @@ let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
 fetch(url).then(response => {
   response.json().then(initContextSelect);
 });
-
 // TODO: fix layer rendering only workng when contextual filter has conditions. Something to do with the backend not returning results when no contextual present.
-// TODO: standardise abundance values from 0-1 or something like that.

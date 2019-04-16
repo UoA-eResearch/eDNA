@@ -109,10 +109,12 @@ div.tooltip {
 }
 
 .feather {
-    margin: 0.1rem;
-    color: hsla(210, 100%, 100%, 0.9) !important;
+    display: block;
+    margin:auto;
+    text-align: center;
+    /* color: hsla(210, 100%, 100%, 0.9) !important;
     background: hsla(210, 100%, 50%, 0.9) !important;
-    outline: solid 0.25rem hsla(210, 100%, 50%, 0.9) !important;
+    outline: solid 0.25rem hsla(210, 100%, 50%, 0.9) !important; */
 }
 
 
