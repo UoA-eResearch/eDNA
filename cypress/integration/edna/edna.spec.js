@@ -111,7 +111,7 @@ describe("Grid layer + Circle Plot Interaction", function() {
     cy.get("#graph-button").click();
     cy.get(".leaflet-interactive:first").trigger("mouseover", { force: true });
     cy.wait(300);
-    cy.get("circle");
+    cy.get('circle[r="14"]');
     // TODO: not finding the enlarged circle
     // hover it
     // get the tool tip site id.
