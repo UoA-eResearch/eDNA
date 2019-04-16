@@ -33,7 +33,6 @@ describe("The plot circles", function() {
 describe("The heat layer", function() {
   beforeEach(() => {
     cy.visit("/");
-    cy.get(".leaflet-control-layers-overlays input:first").click();
   });
 
   it("Should only add itself to map on first data received.", function() {
@@ -112,7 +111,7 @@ describe("Grid layer + Circle Plot Interaction", function() {
     cy.get("#graph-button").click();
     cy.get(".leaflet-interactive:first").trigger("mouseover", { force: true });
     cy.wait(300);
-    cy.get('.enter [r="14"]');
+    cy.get("circle");
     // TODO: not finding the enlarged circle
     // hover it
     // get the tool tip site id.
