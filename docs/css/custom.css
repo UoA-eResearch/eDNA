@@ -83,18 +83,13 @@ div.tooltip {
     left: 0;
 }
 
-/* .search {
-    width: 50%;        
-    position: absolute;
+ .search {
+    margin-top: 0.3rem;
+    margin-bottom: 0.3rem;
     right: 10px;
     top: 10px;
     z-index: 1000;
 }
-
-.search--right {
-    text-align: right;
-    float: right;
-} */
 
 .map-popup--visible {
     position: fixed;
@@ -114,7 +109,7 @@ div.tooltip {
 }
 
 .feather {
-    padding: 1rem;
+    margin: 0.1rem;
     color: hsla(210, 100%, 100%, 0.9) !important;
     background: hsla(210, 100%, 50%, 0.9) !important;
     outline: solid 0.25rem hsla(210, 100%, 50%, 0.9) !important;
