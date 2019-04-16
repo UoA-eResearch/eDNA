@@ -86,8 +86,8 @@ export function featureCollectionToLayer(
     // setting popup size constraint.
     layer.bindPopup("Loading...", {
       // layer.bindPopup(feature.properties.popupContent, {
-      maxWidth: 4000,
-      maxHeight: 150
+      maxWidth: 400,
+      maxHeight: 200
     });
     layer.on({
       mouseover: handleGridLayerMouseOver,

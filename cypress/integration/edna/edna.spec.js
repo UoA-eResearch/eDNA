@@ -1,4 +1,5 @@
 import { exportAllDeclaration } from "@babel/types";
+import { isContext } from "vm";
 
 describe("The toggle button", function() {
   it("successfully toggles chart", function() {
@@ -11,6 +12,13 @@ describe("The toggle button", function() {
 });
 
 describe("The plot circles", function() {
+  before(() => {
+    cy.visit("/");
+    cy.get(".leaflet-sidebar-tabs").within(() => {
+      cy.get(".active").click();
+    });
+  });
+
   it("should enlarge when hovered", function() {
     cy.get("#graph-button").click();
     cy.get(".leaflet-control-layers-overlays input:first").click();
@@ -23,30 +31,31 @@ describe("The plot circles", function() {
 });
 
 describe("The heat layer", function() {
-  it("should only auto-add on first data received", function() {
-    cy.get(".leaflet-heatmap-layer");
+  beforeEach(() => {
+    cy.visit("/");
     cy.get(".leaflet-control-layers-overlays input:first").click();
-    cy.get(".leaflet-control-layers-overlays input:last").click();
-    cy.get("#endemic-checkbox").check();
-    cy.get(".leaflet-heatmap-layer").should("not.exist");
   });
 
-  it("should enlarge relevant plot circles when hovered over", function() {
-    cy.get(".leaflet-control-layers-overlays input:first").click();
-    // cy.get("#graph-button").click();
-    cy.get(".leaflet-interactive:first").trigger("mouseover", { force: true });
-    cy.wait(300);
-    cy.get('.enter [r="14"]');
-    // TODO: not finding the enlarged circle
-    // hover it
-    // get the tool tip site id.
-    // check that the original layer contains that site id
+  it("Should only add itself to map on first data received.", function() {
+    cy.get(".leaflet-heatmap-layer");
+    cy.get(".leaflet-control-layers-overlays input:last").click({
+      force: true
+    });
+    cy.get("#endemic-checkbox").check();
+    cy.get(".leaflet-heatmap-layer").should("not.exist");
   });
 });
 
 describe("Colour metric select", function() {
-  it("should change circle colour on selection change", function() {
+  before(() => {
+    cy.visit("/");
+    cy.get(".leaflet-sidebar-tabs").within(() => {
+      cy.get(".active").click();
+    });
     cy.get("#graph-button").click();
+  });
+
+  it("should change circle colour on selection change", function() {
     cy.get("#_919:first").should("have.attr", "fill", "rgb(0, 0, 255)");
     cy.get("#meta-select").select("biome_t2");
     cy.get("#_919:first").should("have.not.attr", "fill", "rgb(0, 0, 255)");
@@ -54,8 +63,15 @@ describe("Colour metric select", function() {
 });
 
 describe("Colour scheme select", function() {
-  it("should change colour for certain metrics", function() {
+  before(() => {
+    cy.visit("/");
+    cy.get(".leaflet-sidebar-tabs").within(() => {
+      cy.get(".active").click();
+    });
     cy.get("#graph-button").click();
+  });
+
+  it("should change colour for certain metrics", function() {
     cy.get("#meta-select").select("elevation");
     cy.get("#_919:first").should("have.attr", "fill", "rgb(0, 0, 255)");
     cy.get("#colour-scheme-select").select("diverging");
@@ -75,11 +91,43 @@ describe("Colour scheme select", function() {
   });
 });
 
-describe("Grid layer cell/rectangle", function() {
-  it("should generate popup content when clicked on", function() {
+describe("Grid layer + Circle Plot Interaction", function() {
+  before(() => {
+    cy.visit("/");
     cy.get(".leaflet-control-layers-overlays input:first").click();
-    cy.get(".leaflet-interactive:first").click({ force: true });
-    cy.wait(200);
+    cy.get("#graph-button").click();
+  });
+
+  it("should generate popup content when clicked on", function() {
+    cy.get(".leaflet-interactive:first").click();
+    // cy.wait(200);
     cy.get(".leaflet-popup-content").contains("Cell Richness");
+  });
+
+  it("Grid cell hover should expand related plot circles", function() {
+    // cy.get(".leaflet-control-layers-overlays input:first").click();
+    cy.get("#graph-button").click();
+    cy.get(".leaflet-interactive:first").trigger("mouseover", { force: true });
+    cy.wait(300);
+    cy.get('.enter [r="14"]');
+    // TODO: not finding the enlarged circle
+    // hover it
+    // get the tool tip site id.
+    // check that the original layer contains that site id
+  });
+});
+
+context("Side bar", () => {
+  before(() => {
+    cy.visit("/");
+  });
+
+  it("Should be initially expanded", () => {
+    cy.get("#sidebar").should("not.have.class", "collapsed");
+  });
+
+  it("Should should collapse when clicked from expanded view.", () => {
+    cy.get("li .active:first").click();
+    cy.get("#sidebar").should("have.class", "collapsed");
   });
 });
