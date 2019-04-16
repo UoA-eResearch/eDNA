@@ -59,15 +59,17 @@ context("Request behaviour", function() {
     cy.get(".select2-search__field:first").type("{enter}", { force: true });
 
     cy.get("#numberResults").then(numResults => {
-      let oneParamCount = numResults.text();
+      let oneParamCount = parseInt(numResults.text());
       cy.get("#contextual-wrapper .select2-search__field:first").type(
         "elevation=100 {enter}"
       );
       cy.get("#loading-popup").should("have.class", "map-popup--hidden");
       //   cy.get(".select2-search__field:first").type("{enter}");
+      cy.get("#numberResults").contains(/^[0-9]+$/);
       cy.get("#numberResults")
         .invoke("text")
-        .should(twoParamCount => {
+        .should(numResultsText => {
+          let twoParamCount = parseInt(numResultsText);
           expect(twoParamCount).to.be.lessThan(oneParamCount);
         });
     });
@@ -83,15 +85,17 @@ context("Request behaviour", function() {
 
     cy.get("#numberResults").then(numResults => {
       cy.get("#select-operator").select("or");
-      let oneParamCount = numResults.text();
+      let oneParamCount = parseInt(numResults.text());
       cy.get("#contextual-wrapper .select2-search__field:first").type(
-        "elevation=0 {enter}"
+        "elevation=0 {enter}",
+        { force: true }
       );
       cy.get("#loading-popup").should("have.class", "map-popup--hidden");
       //   cy.get(".select2-search__field:first").type("{enter}");
       cy.get("#numberResults")
         .invoke("text")
-        .should(twoParamCount => {
+        .should(numResultsText => {
+          let twoParamCount = parseInt(numResultsText);
           expect(twoParamCount).to.be.greaterThan(oneParamCount);
         });
     });
@@ -99,7 +103,7 @@ context("Request behaviour", function() {
 
   it("Adding amplicon filter should reduce number of results from unfiltered set", () => {
     cy.get("#numberResults").then(numResults => {
-      let unfilteredCount = numResults.text();
+      let unfilteredCount = parseInt(numResults.text());
 
       cy.get("#amplicon-wrapper .select2-container:first").click();
       cy.get("#amplicon-wrapper .select2-search__field:first").type("its");
@@ -110,7 +114,8 @@ context("Request behaviour", function() {
       //   cy.get(".select2-search__field:first").type("{enter}");
       cy.get("#numberResults")
         .invoke("text")
-        .should(ampliconFilteredCount => {
+        .should(numResultsText => {
+          let ampliconFilteredCount = parseInt(numResultsText);
           expect(ampliconFilteredCount).to.be.lessThan(unfilteredCount);
         });
     });
