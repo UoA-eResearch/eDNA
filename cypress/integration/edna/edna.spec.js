@@ -96,6 +96,9 @@ describe("Grid layer + Circle Plot Interaction", function() {
     cy.visit("/");
     cy.get(".leaflet-control-layers-overlays input:first").click();
     cy.get("#graph-button").click();
+    cy.get(".leaflet-sidebar-tabs").within(() => {
+      cy.get(".active").click();
+    });
   });
 
   it("should generate popup content when clicked on", function() {
@@ -127,7 +130,9 @@ context("Side bar", () => {
   });
 
   it("Should should collapse when clicked from expanded view.", () => {
-    cy.get("li .active:first").click();
+    cy.get(".leaflet-sidebar-tabs").within(() => {
+      cy.get(".active").click();
+    });
     cy.get("#sidebar").should("have.class", "collapsed");
   });
 });
