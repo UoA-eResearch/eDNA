@@ -969,6 +969,16 @@ const initPlotColourSchemeSelect = () => {
   };
 };
 
+const test = () => {
+  let segmentSelectors = document.getElementsByClassName("taxonomic-select");
+  console.log(segmentSelectors);
+  for (let item of segmentSelectors) {
+    $("#" + item.id).select2({
+      placeholder: item.id
+    });
+  }
+};
+
 //Adding d3 visualization
 export const { g, y, tooltip, x } = initPlotChart();
 
@@ -986,6 +996,8 @@ window.onload = () => {
 
   initializeDisplayOptionsControls();
   initializeDisplayControlButton();
+
+  test();
 };
 
 // NOTE: load contextual options up front. Hardcoding some params.
