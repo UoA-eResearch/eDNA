@@ -749,8 +749,6 @@ function initOtuSelect() {
     // cache: true,
     tags: true,
     ajax: {
-      // url: API_URLS.local_filter_options,
-      // url: API_URLS.filter_suggestions,
       url: API_URLS.otuSuggestions,
       delay: 250,
       data: function(params) {
@@ -969,12 +967,33 @@ const initPlotColourSchemeSelect = () => {
   };
 };
 
-const test = () => {
+const initAllTaxonomicSelects = () => {
   let segmentSelectors = document.getElementsByClassName("taxonomic-select");
+
   console.log(segmentSelectors);
   for (let item of segmentSelectors) {
+    // TODO: create wrapper with cy-data attribute for testing as select2 creates element as sibling not child.
     $("#" + item.id).select2({
-      placeholder: item.id
+      placeholder: item.id,
+      ajax: {
+        url: API_URLS.otuSegmentedSuggestions,
+        delay: 250,
+        data: function(params) {
+          let args = [];
+          for (let item of segmentSelectors) {
+            // console.log(item.value);
+            args.push(item.id.replace("Select", "=") + item.value);
+          }
+          console.log(args);
+          // return "&".join(args);
+          return args.join("&");
+        },
+        processResults: function(response, params) {
+          return {
+            results: response.suggestions
+          };
+        }
+      }
     });
   }
 };
@@ -997,7 +1016,7 @@ window.onload = () => {
   initializeDisplayOptionsControls();
   initializeDisplayControlButton();
 
-  test();
+  initAllTaxonomicSelects();
 };
 
 // NOTE: load contextual options up front. Hardcoding some params.

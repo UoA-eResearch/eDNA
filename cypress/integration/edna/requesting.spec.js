@@ -4,6 +4,18 @@ context("Request behaviour", function() {
     cy.get("#numberResults").contains(/^[0-9]+$/);
   });
 
+  describe("taxonomic kingdom select", () => {
+    it("Should suggest fungi when typing in fungi", () => {
+      cy.get(".select2-container:first").click();
+      cy.get(".select2-search__field:first").type("k__fungi");
+      // cy
+      // cy.get('.select2-results__option[data-select2-id="63"]').contains(
+      cy.get('.select2-results__option[data-select2-id="63"]').contains(
+        "k__Fungi"
+      );
+    });
+  });
+
   it("Default settings should return results on initial page load.", function() {
     // cy.visit("/"); // change URL to match your dev URL
     cy.get("#numberResults").contains(/^[0-9]*$/);

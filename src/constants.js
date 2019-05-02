@@ -9,6 +9,7 @@ const API_URLS = {
   sampleOtus: activeUrl + "abundance?",
   metaData: activeUrl + "metadata?term=",
   otuSuggestions: activeUrl + "filter-options?",
+  otuSegmentedSuggestions: activeUrl + "suggestions/",
   otu_data_by_id: activeUrl + "otu/?id=",
 
   // test

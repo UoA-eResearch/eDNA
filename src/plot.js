@@ -6,7 +6,7 @@ import { highlightLayer, disableHighlightLayer } from "./map";
 
 function initPlotChart() {
   var margin = { top: 20, right: 30, bottom: 20, left: 150 },
-    width = window.innerWidth * 0.75 - margin.left - margin.right,
+    width = window.innerWidth * 0.55 - margin.left - margin.right,
     height = window.innerHeight * 0.35 - margin.top - margin.bottom;
   var chart = d3
     .select("#chart")
