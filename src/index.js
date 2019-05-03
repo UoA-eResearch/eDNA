@@ -967,10 +967,12 @@ const initPlotColourSchemeSelect = () => {
   };
 };
 
+/**
+ * Iterates through the elements that are used as bases for select2 construction
+ */
 const initAllTaxonomicSelects = () => {
   let segmentSelectors = document.getElementsByClassName("taxonomic-select");
 
-  console.log(segmentSelectors);
   for (let item of segmentSelectors) {
     // TODO: create wrapper with cy-data attribute for testing as select2 creates element as sibling not child.
     $("#" + item.id).select2({
@@ -1007,6 +1009,25 @@ const initAllTaxonomicSelects = () => {
   }
 };
 
+const initClearOtusButton = () => {
+  let clearBtn = document.getElementById("selectClearAll");
+  console.log(clearBtn);
+  clearBtn.onclick = () => {
+    console.log("clear all clicked");
+    let taxonSelects = document
+      .getElementById("search2")
+      .getElementsByClassName("taxonomic-select");
+
+    for (let item of taxonSelects) {
+      $("#" + item.id)
+        .val(null)
+        .trigger("change");
+    }
+  };
+};
+
+const initSubmitOtuButton = () => {};
+
 //Adding d3 visualization
 export const { g, y, tooltip, x } = initPlotChart();
 
@@ -1026,6 +1047,8 @@ window.onload = () => {
   initializeDisplayControlButton();
 
   initAllTaxonomicSelects();
+  initClearOtusButton();
+  initSubmitOtuButton();
 };
 
 // NOTE: load contextual options up front. Hardcoding some params.
