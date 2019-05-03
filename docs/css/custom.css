@@ -99,7 +99,6 @@ div.tooltip {
     z-index: 1000;
 }
 
-
 .map-popup--hidden {
     position: fixed;
     left: 50%;
@@ -124,5 +123,6 @@ div.tooltip {
 .select-container {
     display: flex;
     flex-direction: column;
+
     justify-content: space-around;
 }

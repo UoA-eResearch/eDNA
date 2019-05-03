@@ -989,8 +989,17 @@ const initAllTaxonomicSelects = () => {
           return args.join("&");
         },
         processResults: function(response, params) {
+          let suggestions = response.suggestions;
+          let sumText = "";
+          for (let index in suggestions) {
+            // checks if any of the results contain text values.
+            sumText += suggestions[index].text;
+          }
+          if (!sumText) {
+            suggestions = [];
+          }
           return {
-            results: response.suggestions
+            results: suggestions
           };
         }
       }
