@@ -1009,6 +1009,15 @@ const initAllTaxonomicSelects = () => {
   }
 };
 
+const initCombinationSelct = () => {
+  $("#combinationSelect").select2({
+    // placeholder: "combination select",
+    placeholder: "Current query filters.",
+    multiple: true,
+    tags: true
+  });
+};
+
 const initClearOtusButton = () => {
   let clearBtn = document.getElementById("selectClearAll");
   console.log(clearBtn);
@@ -1026,7 +1035,26 @@ const initClearOtusButton = () => {
   };
 };
 
-const initSubmitOtuButton = () => {};
+/**
+ * Get the states of the taxonomic selects, concatenate into one term. Add the new entry to the combination select2, select that new entry.
+ */
+const initSubmitOtuButton = () => {
+  let addBtn = document.getElementById("addOtuBtn");
+  addBtn.onclick = () => {
+    console.log("add clicked");
+    let segmentSelectors = document.getElementsByClassName("taxonomic-select");
+
+    for (let item of segmentSelectors) {
+      // TODO: create wrapper with cy-data attribute for testing as select2 creates element as sibling not child.
+      // $("#" + item.id).select2(val);
+      // console.log(item);
+      // console.log(item.id);
+      let select = $("#" + item.id);
+      // console.log(select);
+      console.log(select.val());
+    }
+  };
+};
 
 //Adding d3 visualization
 export const { g, y, tooltip, x } = initPlotChart();
@@ -1047,6 +1075,7 @@ window.onload = () => {
   initializeDisplayControlButton();
 
   initAllTaxonomicSelects();
+  initCombinationSelct();
   initClearOtusButton();
   initSubmitOtuButton();
 };

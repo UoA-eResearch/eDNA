@@ -131,3 +131,70 @@ context("Sidebar", () => {
     cy.get("#sidebar").should("have.class", "collapsed");
   });
 });
+
+context("Segmented OTU selects", () => {
+  before(() => {
+    cy.visit("/");
+  });
+
+  beforeEach(() => {
+    cy.get('a[data-cy="search-tab"]').click();
+    // cy.get('.leaflet-sidebar-tabs a[data-cy="search-tab]"').click();
+  });
+
+  it.only("otu segmented selects working", () => {
+    // making selections
+    cy.get("#select2-kingdomSelect-container").click();
+    cy.get(".select2-results__options").contains("Animalia");
+    cy.get(
+      "#select2-kingdomSelect-results .select2-results__option:first"
+    ).click();
+
+    cy.get("#select2-phylumSelect-container").click();
+    cy.get(".select2-results__options").contains("Bryozoa");
+    cy.get(
+      "#select2-phylumSelect-results .select2-results__option:first"
+    ).click({ force: true });
+
+    cy.get("#select2-classSelect-container").click();
+    cy.get(".select2-results__options").contains("Palae");
+    cy.get("#select2-classSelect-results .select2-results__option:first").click(
+      { force: true }
+    );
+
+    // confirming the selections are there before clearing
+    cy.get('span #select2-kingdomSelect-container[role="textbox"]').should(
+      "have.attr",
+      "title"
+    );
+    cy.get('span #select2-phylumSelect-container[role="textbox"]').should(
+      "have.attr",
+      "title"
+    );
+    cy.get('span #select2-classSelect-container[role="textbox"]').should(
+      "have.attr",
+      "title"
+    );
+
+    // clearing
+    cy.get('button[data-cy="clear-btn"').click();
+
+    // checking the selections are no longer there
+    cy.get('span #select2-kingdomSelect-container[role="textbox"]').should(
+      "not.have.attr",
+      "title"
+    );
+    cy.get('span #select2-phylumSelect-container[role="textbox"]').should(
+      "not.have.attr",
+      "title"
+    );
+    cy.get('span #select2-classSelect-container[role="textbox"]').should(
+      "not.have.attr",
+      "title"
+    );
+
+    it("Should add to combination select when add button pressed.", () => {
+      // cy.get()
+    });
+  });
+});

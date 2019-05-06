@@ -43,7 +43,7 @@
               class="feather feather-menu">
               <path d="M3 12h18M3 6h18M3 18h18" /></svg></a></li>
         <li><a href="#autopan" role="tab"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></a></li>
-        <li><a href="#search2" role="tab">S2</a></li>
+        <li><a href="#search2" data-cy="search-tab" role="tab">S2</a></li>
       </ul>
 
       <!-- bottom aligned tabs -->
@@ -98,8 +98,11 @@
       <div class="leaflet-sidebar-pane" id="search2">
         <h1>Taxonomic 2</h1>
         <div class="select-container">
+          <div id="combinationSelectWrapper">
+            <select name="combinationSelect" id="combinationSelect"></select>
+          </div>
           <div id="kingdomSelectWrapper">
-            <select name="kingdomSelect" id="kingdomSelect" class="taxonomic-select"></select>
+            <select name="kingdomSelect" id="kingdomSelect" class="taxonomic-select" data-cy="kingdomSelect"></select>
           </div>
           <div id="phylumSelectWrapper">
             <select name="phylumSelect" id="phylumSelect" class="taxonomic-select"></select>
@@ -120,8 +123,8 @@
             <select name="speciesSelect" id="speciesSelect" class="taxonomic-select"></select>
           </div>
         </div>
-        <button id="selectClearAll" data-cy="clear-btn">Clear</button>
-        <button id="addSelects" data-cy="add-btn">Add</button>
+        <button id="selectClearAll" title="Clear current taxonomic selection" data-cy="clear-btn">Clear</button>
+        <button id="addOtuBtn" title="Add current OTU to your query set." data-cy="add-btn">Add to query</button>
       </div>
 
       <div class="leaflet-sidebar-pane" id="messages">
