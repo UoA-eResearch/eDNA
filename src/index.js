@@ -702,7 +702,7 @@ leafletGraphControl.addTo(map);
 
 function initOtuSelect() {
   let taxonSelect = $("#select-taxonomic").select2({
-    placeholder: "Type to filter by classification and metadata",
+    placeholder: "Type to filter by organism classification",
     multiple: true,
     allowClear: true,
     width: "100%",
@@ -797,13 +797,34 @@ function initOtuSelect() {
   return taxonSelect;
 }
 
-function initContextSelect(json) {
-  let data = json.data.context_options.map(field => {
-    return {
-      id: field,
-      text: field
-    };
-  });
+function initContextSelect(responseData) {
+  let excludedFields = [
+    "regional_council",
+    "primer_sequence_r",
+    "primer_sequence_f",
+    "vineyard",
+    "amplicon",
+    "host_plant",
+    "iwi_area"
+  ];
+  let data = responseData.data.context_options
+    .filter(contextOption => {
+      if (!excludedFields.includes(contextOption)) {
+        return true;
+      } else {
+        return false;
+      }
+    })
+    .map(field => {
+      if (!excludedFields.includes(field)) {
+        return {
+          id: field,
+          text: field
+        };
+      } else {
+        console.log("excluding the field" + field);
+      }
+    });
   $("#select-contextual").select2({
     placeholder: "Search by sample contextual metadata",
     multiple: true,
