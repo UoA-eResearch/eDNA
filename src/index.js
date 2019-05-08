@@ -986,8 +986,6 @@ const initAllTaxonomicSelects = () => {
             // console.log(item.value);
             args.push(item.id.replace("Select", "=") + item.value);
           }
-          console.log(args);
-          // return "&".join(args);
           return args.join("&");
         },
         processResults: function(response, params) {
@@ -1040,19 +1038,38 @@ const initClearOtusButton = () => {
  */
 const initSubmitOtuButton = () => {
   let addBtn = document.getElementById("addOtuBtn");
+  console.log(addBtn);
   addBtn.onclick = () => {
     console.log("add clicked");
     let segmentSelectors = document.getElementsByClassName("taxonomic-select");
 
+    let taxonSegments = [];
+    let taxonIds = [];
     for (let item of segmentSelectors) {
-      // TODO: create wrapper with cy-data attribute for testing as select2 creates element as sibling not child.
-      // $("#" + item.id).select2(val);
-      // console.log(item);
-      // console.log(item.id);
       let select = $("#" + item.id);
-      // console.log(select);
-      console.log(select.val());
+      if (!select.val()) {
+        continue;
+      }
+      // console.log(select.val());
+      // console.log(select.text());
+      taxonSegments.push(select.text());
+      taxonIds.push(parseInt(select.val()));
     }
+
+    let otuName = taxonSegments.join(";");
+    let fkCombination = taxonIds.join(",");
+    console.log(otuName);
+    console.log(fkCombination);
+
+    //   let option = new Option(otuName.join(";"), otuCombinationKey.join(","));
+    //   console.log(option);
+    //   $("#combinationSelect")
+    //     .append(option)
+    //     .trigger("change");
+
+    //   console.log(otuName);
+    //   console.log(otuCombinationKey);
+    // };
   };
 };
 

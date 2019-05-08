@@ -142,7 +142,7 @@ context("Segmented OTU selects", () => {
     // cy.get('.leaflet-sidebar-tabs a[data-cy="search-tab]"').click();
   });
 
-  it.only("otu segmented selects working", () => {
+  it("otu segmented selects working", () => {
     // making selections
     cy.get("#select2-kingdomSelect-container").click();
     cy.get(".select2-results__options").contains("Animalia");
@@ -154,13 +154,13 @@ context("Segmented OTU selects", () => {
     cy.get(".select2-results__options").contains("Bryozoa");
     cy.get(
       "#select2-phylumSelect-results .select2-results__option:first"
-    ).click({ force: true });
+    ).click();
 
     cy.get("#select2-classSelect-container").click();
     cy.get(".select2-results__options").contains("Palae");
-    cy.get("#select2-classSelect-results .select2-results__option:first").click(
-      { force: true }
-    );
+    cy.get(
+      "#select2-classSelect-results .select2-results__option:first"
+    ).click();
 
     // confirming the selections are there before clearing
     cy.get('span #select2-kingdomSelect-container[role="textbox"]').should(
@@ -192,9 +192,40 @@ context("Segmented OTU selects", () => {
       "not.have.attr",
       "title"
     );
+  });
 
-    it("Should add to combination select when add button pressed.", () => {
-      // cy.get()
-    });
+  it.only("Should add current taxon selections to combination select when add button pressed.", () => {
+    // cy.get("#_919:first").then(circleElem => {
+    //   const firstFill = Cypress.$(circleElem).attr("fill");
+    //   cy.get("#colour-scheme-select").select("diverging");
+    //   cy.wait(400);
+    //   cy.get("#_919:first").should("have.attr", "fill", firstFill);
+    // });
+
+    cy.get("#select2-kingdomSelect-container").click();
+    cy.get(".select2-results__options").contains("Animalia");
+    cy.get(
+      "#select2-kingdomSelect-results .select2-results__option:first"
+    ).click();
+
+    cy.get("#select2-phylumSelect-container").click();
+    cy.get(".select2-results__options").contains("Bryozoa");
+    cy.get(
+      "#select2-phylumSelect-results .select2-results__option:first"
+    ).click();
+
+    cy.get("#select2-classSelect-container").click();
+    cy.get(".select2-results__options").contains("Palae");
+    cy.get(
+      "#select2-classSelect-results .select2-results__option:first"
+    ).click();
+
+    cy.get('button[data-cy="add-otu-btn"').click();
+
+    // store the filled selects text and values then compare to the multi-box
+
+    cy.get("#combinationSelectWrapper").contains("Animalia");
+    cy.get("#combinationSelectWrapper").contains("Bryozoa");
+    cy.get("#combinationSelectWrapper").contains("Palae");
   });
 });
