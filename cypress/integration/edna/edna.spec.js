@@ -220,12 +220,18 @@ context("Segmented OTU selects", () => {
       "#select2-classSelect-results .select2-results__option:first"
     ).click();
 
-    cy.get('button[data-cy="add-otu-btn"').click();
+    cy.get('button[data-cy="add-otu-btn"]').click();
 
     // store the filled selects text and values then compare to the multi-box
 
-    cy.get("#combinationSelectWrapper").contains("Animalia");
-    cy.get("#combinationSelectWrapper").contains("Bryozoa");
-    cy.get("#combinationSelectWrapper").contains("Palae");
+    // should contain what is selected
+
+    // cy.get("#select2-kingdomSelect-container").get(kingomSelect => {
+    //   console.log(kingdomSelect);
+    // });
+
+    cy.get("#combinationSelectWrapper").contains("k__");
+    cy.get("#combinationSelectWrapper").contains("p__");
+    cy.get("#combinationSelectWrapper").contains("c__");
   });
 });
