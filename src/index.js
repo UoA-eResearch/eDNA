@@ -66,7 +66,7 @@ function fetchSampleOtus() {
     }
   }
 
-  if (document.getElementById("endemic-checkbox").checked) {
+  if (document.getElementById("rarity-checkbox").checked) {
     url += "&endemic=true";
   } else {
   }
@@ -944,8 +944,8 @@ const initAmpliconSearch = () => {
   });
 };
 
-function initEndemicCheckbox() {
-  let radio = document.getElementById("endemic-checkbox");
+function initRarityCheckbox() {
+  let radio = document.getElementById("rarity-checkbox");
   radio.onchange = function() {
     fetchSampleOtus();
   };
@@ -1128,7 +1128,7 @@ window.onload = () => {
   initOperatorSelect();
   initOtuSelect();
   initAmpliconSearch();
-  initEndemicCheckbox();
+  initRarityCheckbox();
   initSearchButton();
 
   initTogglePlotButton();

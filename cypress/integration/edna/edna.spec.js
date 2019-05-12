@@ -40,7 +40,7 @@ describe("The heat layer", function() {
     cy.get(".leaflet-control-layers-overlays input:last").click({
       force: true
     });
-    cy.get("#endemic-checkbox").check();
+    cy.get("#rarity-checkbox").check();
     cy.get(".leaflet-heatmap-layer").should("not.exist");
   });
 });

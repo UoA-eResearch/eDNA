@@ -25,23 +25,23 @@ context("Request behaviour", function() {
     // TODO: clear filters before each of these tests
     cy.get("#numberResults").contains(/^[0-9]+$/);
     cy.get("#numberResults").then(numResults => {
-      let unendemicCount = numResults.text();
+      let commonOtuCount = numResults.text();
 
-      cy.get("#endemic-checkbox").click();
+      cy.get("#rarity-checkbox").click();
 
       cy.get("#loading-popup").should("have.class", "map-popup--hidden");
 
       cy.get("#numberResults")
         .invoke("text")
-        .should(endemicCount => {
-          expect(endemicCount).to.be.lessThan(unendemicCount);
+        .should(rareOtuCount => {
+          expect(rareOtuCount).to.be.lessThan(commonOtuCount);
         });
     });
 
     // probably assert or make sure it's set to intersection/AND?
 
     // resetting state
-    cy.get("#endemic-checkbox").click();
+    cy.get("#rarity-checkbox").click();
   });
 
   it("More otu parameters should contain more results", function() {
