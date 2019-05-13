@@ -22,6 +22,13 @@ window.sampleContextLookup = {};
  */
 function fetchSampleOtus() {
   console.log("constructing query from filters");
+
+  if ($("#combinationSelect").data("select2")) {
+    if ($("#combinationSelect").select2("data")) {
+      console.log($("#combinationSelect").select2("data"));
+    }
+  }
+
   let contextFilters = $("#select-contextual").select2("data");
   let taxonFilters = $("#select-taxonomic").select2("data");
   let ampliconFilters = $("#select-amplicon").select2("data");
@@ -96,6 +103,7 @@ function recalculateGridLayer() {
     calculateSampleOtuData(window.previousResults);
   } else {
     // $("#select-taxonomic").trigger("change");
+    console.log("fetching sample otussssssss");
     fetchSampleOtus();
   }
 }
@@ -1028,12 +1036,18 @@ const initAllTaxonomicSelects = () => {
   }
 };
 
-const initCombinationSelct = () => {
-  $("#combinationSelect").select2({
+const initCombinationSelect = () => {
+  let comboSelect = $("#combinationSelect").select2({
     // placeholder: "combination select",
     placeholder: "Current query filters.",
     multiple: true,
     tags: true
+  });
+
+  comboSelect.change(() => {
+    // if ($("#combinationSelect").select2("data")) {
+    fetchSampleOtus();
+    // }
   });
 };
 
@@ -1139,7 +1153,7 @@ window.onload = () => {
   initializeDisplayControlButton();
 
   initAllTaxonomicSelects();
-  initCombinationSelct();
+  initCombinationSelect();
   initClearOtusButton();
   initSubmitOtuButton();
 };

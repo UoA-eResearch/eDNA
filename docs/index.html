@@ -96,8 +96,9 @@
       </div>
 
       <div class="leaflet-sidebar-pane" id="search2">
-        <h1>Taxonomic 2</h1>
-        <div class="select-container">
+        <h1>Segmented Search</h1>
+        <h2 id="taxononmic-selected-title">Taxonomic Selects</h2>
+        <div id="taxonomic-selects-container" class="select-container">
           <div id="combinationSelectWrapper">
             <select name="combinationSelect" id="combinationSelect"></select>
           </div>
@@ -125,7 +126,12 @@
         </div>
         <button id="selectClearAll" title="Clear current taxonomic selection" data-cy="clear-btn">Clear</button>
         <button id="addOtuBtn" title="Add current OTU to your query set." data-cy="add-otu-btn">Add to query</button>
+
+        <h2 id="contextual-selects">Contextual Selects</h2>
+        <button id="submit-search" title="Request data with all search parameters" data-cy="submit-search-btn">Search for
+          OTUs</button>
       </div>
+
 
       <div class="leaflet-sidebar-pane" id="messages">
         <h1 class="leaflet-sidebar-header">Messages<span class="leaflet-sidebar-close"><i

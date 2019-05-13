@@ -197,7 +197,7 @@ context("Segmented OTU selects", () => {
     );
   });
 
-  it("Should add current taxon selections to combination select when add button pressed.", () => {
+  it.only("Should add current taxon selections to combination select when add button pressed.", () => {
     cy.get("#select2-kingdomSelect-container").click();
     cy.get(".select2-results__options").contains("Animalia");
     cy.get(
@@ -230,4 +230,10 @@ context("Segmented OTU selects", () => {
     cy.get("#combinationSelectWrapper").contains("p__");
     cy.get("#combinationSelectWrapper").contains("c__");
   });
+});
+
+context("grid resolution slider", () => {
+  it("should update grid resolution input field when slider changes.", () => {});
+
+  it("should move slider when grid resolution input field is updated", () => {});
 });
