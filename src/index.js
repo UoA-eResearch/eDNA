@@ -1006,6 +1006,7 @@ const initAllTaxonomicSelects = () => {
     // TODO: create wrapper with cy-data attribute for testing as select2 creates element as sibling not child.
     $("#" + item.id).select2({
       placeholder: item.id,
+      width: "100%",
       ajax: {
         url: API_URLS.otuSegmentedSuggestions,
         delay: 250,
@@ -1081,32 +1082,28 @@ const initSubmitOtuButton = () => {
     let taxonSegments = [];
     let taxonIds = [];
     for (let item of segmentSelectors) {
+      console.log(item);
       let select = $("#" + item.id);
       if (!select.val()) {
         continue;
       }
       // console.log(select.val());
       // console.log(select.text());
+      console.log(select.text());
+      console.log(select.val());
+
       taxonSegments.push(select.text());
       taxonIds.push(parseInt(select.val()));
     }
+
+    console.log(taxonSegments);
+    console.log(taxonIds);
 
     // join fk combination array using commas
     let otuName = taxonSegments.join(";");
     let fkCombination = taxonIds.join(",");
     console.log(otuName);
     console.log(fkCombination);
-
-    // select combination-select2
-
-    // if (
-    //   $("#combinationSelect").find("option[value='" + fkCombination + "']")
-    //     .length
-    // ) {
-    //   console.log("not found");
-    // } else {
-    //   console.log("found");
-    // }
 
     // Set the value, creating a new option if necessary
     if (

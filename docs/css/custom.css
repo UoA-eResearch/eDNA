@@ -123,6 +123,11 @@ div.tooltip {
 .select-container {
     display: flex;
     flex-direction: column;
-
     justify-content: space-around;
+}
+
+.taxonomic-select {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
 }
