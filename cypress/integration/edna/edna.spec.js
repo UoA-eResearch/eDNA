@@ -197,7 +197,7 @@ context("Segmented OTU selects", () => {
     );
   });
 
-  it.only("Should add current taxon selections to combination select when add button pressed.", () => {
+  it("Should add current taxon selections to combination select when add button pressed.", () => {
     cy.get("#select2-kingdomSelect-container").click();
     cy.get(".select2-results__options").contains("Animalia");
     cy.get(
@@ -229,6 +229,20 @@ context("Segmented OTU selects", () => {
     cy.get("#combinationSelectWrapper").contains("k__");
     cy.get("#combinationSelectWrapper").contains("p__");
     cy.get("#combinationSelectWrapper").contains("c__");
+  });
+});
+
+describe("Contextual query builder", () => {
+  before(() => {
+    cy.visit("/");
+    cy.get('a[data-cy="search-tab"]').click();
+  });
+
+  it.only("Should create new contextual filter and add it to the filter list.", () => {
+    cy.get('select[data-cy="context-field-select"').select("elevation");
+    cy.get('input[data-cy="context-input"').type("100");
+    cy.get('button[data-cy="add-context-btn"]').click();
+    cy.get("#combinationSelectWrapper").contains("elevationgt100");
   });
 });
 

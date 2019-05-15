@@ -2,6 +2,7 @@
 import * as $ from "jquery";
 import { API_URLS } from "./constants";
 import { fetchSampleOtus } from "./index";
+import { request } from "http";
 
 function initContextSelect(responseData) {
   let excludedFields = [
@@ -215,7 +216,8 @@ const initCombinationSelect = () => {
     // placeholder: "combination select",
     placeholder: "Current query filters.",
     multiple: true,
-    tags: true
+    tags: true,
+    allowClear: true
   });
 
   comboSelect.change(() => {
@@ -225,9 +227,35 @@ const initCombinationSelect = () => {
   });
 };
 
+const initContextFieldSelect = () => {
+  // select element and clear
+  let contextFieldSelect = document.getElementById("context-field-select");
+  contextFieldSelect.length = 0;
+
+  //   let defaultOption = document.createElement("option");
+  //   defaultOption.text = "Select a contextual field";
+
+  //   contextFieldSelect.add(defaultOption);
+  //   contextFieldSelect.selectedIndex = 0;
+
+  // populate options with request data
+  let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
+  fetch(url).then(response => {
+    response.json().then(json => {
+      json.data.context_options.map(field => {
+        let option = document.createElement("option");
+        option.text = field;
+        option.value = field;
+        contextFieldSelect.add(option);
+      });
+    });
+  });
+};
+
 export {
   initAllTaxonomicSelects,
   initOtuSelect,
   initCombinationSelect,
-  initContextSelect
+  initContextSelect,
+  initContextFieldSelect
 };

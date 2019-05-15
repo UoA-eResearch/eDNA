@@ -14,7 +14,8 @@ import {
   initAllTaxonomicSelects,
   initOtuSelect,
   initCombinationSelect,
-  initContextSelect
+  initContextSelect,
+  initContextFieldSelect
 } from "./selects";
 
 window.circles = [];
@@ -109,7 +110,6 @@ function recalculateGridLayer() {
     calculateSampleOtuData(window.previousResults);
   } else {
     // $("#select-taxonomic").trigger("change");
-    console.log("fetching sample otussssssss");
     fetchSampleOtus();
   }
 }
@@ -919,6 +919,56 @@ const initSubmitOtuButton = () => {
   };
 };
 
+const initSubmitContextButton = () => {
+  let submitContextBtn = document.getElementById("add-context-btn");
+
+  submitContextBtn.onclick = () => {
+    let contextInput = document.getElementById("context-input");
+    if (contextInput.value) {
+      let contextFieldSelect = document.getElementById("context-field-select");
+      let contextOperatorSelect = document.getElementById(
+        "context-operator-select"
+      );
+
+      let contextFilterText =
+        contextFieldSelect.value +
+        contextOperatorSelect.value +
+        contextInput.value;
+
+      let contextFilterId =
+        "&q=" +
+        contextFieldSelect.value +
+        "$" +
+        contextOperatorSelect.value +
+        contextInput.value;
+
+      // Set the value, creating a new option if necessary
+      if (
+        $("#combinationSelect").find("option[value='" + contextFilterId + "']")
+          .length
+      ) {
+        alert("Filter is already in the filter list");
+      } else {
+        console.log("creating new option");
+        var newOption = new Option(
+          contextFilterText,
+          contextFilterId,
+          true,
+          true
+        );
+        // Append it to the select
+        $("#combinationSelect")
+          .append(newOption)
+          .trigger("change");
+      }
+      // WIP: get the values and concatenate then add them to the main query constructor. Could either group them or do something like that
+    } else {
+      console.log("empty input field");
+      alert("Nothing entered in the input field");
+    }
+  };
+};
+
 //Adding d3 visualization
 export const { g, y, tooltip, x } = initPlotChart();
 
@@ -941,12 +991,18 @@ window.onload = () => {
   initCombinationSelect();
   initClearOtusButton();
   initSubmitOtuButton();
+
+  initSubmitContextButton();
 };
 
 // NOTE: load contextual options up front. Hardcoding some params.
 // possibly separate into a different API later on if we have time or a need.
 let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
 fetch(url).then(response => {
-  response.json().then(initContextSelect);
+  // response.json().then(initContextSelect);
+  response.json().then(jsonData => {
+    initContextSelect(jsonData);
+    initContextFieldSelect(jsonData);
+  });
 });
 // TODO: fix layer rendering only workng when contextual filter has conditions. Something to do with the backend not returning results when no contextual present.

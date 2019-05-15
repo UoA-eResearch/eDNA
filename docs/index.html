@@ -125,9 +125,23 @@
           </div>
         </div>
         <button id="selectClearAll" title="Clear current taxonomic selection" data-cy="clear-btn">Clear</button>
-        <button id="addOtuBtn" title="Add current OTU to your query set." data-cy="add-otu-btn">Add to query</button>
+        <button id="addOtuBtn" title="Add current OTU to your query set." data-cy="add-otu-btn">Add OTU to query</button>
 
         <h2 id="contextual-selects">Contextual Selects</h2>
+        <div class="contextual-select-container">
+          <select name="contextual field select" id="context-field-select" class="context-query-item" data-cy="context-field-select">
+            <option value="" disabled selected>Select a contextual field...</option>
+          </select>
+          <select name="context operator select" id="context-operator-select" class="context-query-item">
+            <option value="gt">greater than</option>
+            <option value="eq">equal to</option>
+            <option value="lt">less than</option>
+          </select>
+          <input type="value" id="context-input" class="context-query-item" data-cy="context-input">
+        </div>
+
+        <button id="add-context-btn" class="context-query-item" data-cy="add-context-btn">Add context to query</button>
+
         <button id="submit-search" title="Request data with all search parameters" data-cy="submit-search-btn">Search for
           OTUs</button>
       </div>
