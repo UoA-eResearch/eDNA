@@ -238,7 +238,7 @@ describe("Contextual query builder", () => {
     cy.get('a[data-cy="search-tab"]').click();
   });
 
-  it.only("Should create new contextual filter and add it to the filter list.", () => {
+  it("Should create new contextual filter and add it to the filter list.", () => {
     cy.get('select[data-cy="context-field-select"').select("elevation");
     cy.get('input[data-cy="context-input"').type("100");
     cy.get('button[data-cy="add-context-btn"]').click();
