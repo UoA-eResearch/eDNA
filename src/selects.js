@@ -221,9 +221,7 @@ const initCombinationSelect = () => {
   });
 
   comboSelect.change(() => {
-    // if ($("#combinationSelect").select2("data")) {
     fetchSampleOtus();
-    // }
   });
 };
 
@@ -231,12 +229,6 @@ const initContextFieldSelect = () => {
   // select element and clear
   let contextFieldSelect = document.getElementById("context-field-select");
   contextFieldSelect.length = 0;
-
-  //   let defaultOption = document.createElement("option");
-  //   defaultOption.text = "Select a contextual field";
-
-  //   contextFieldSelect.add(defaultOption);
-  //   contextFieldSelect.selectedIndex = 0;
 
   // populate options with request data
   let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
