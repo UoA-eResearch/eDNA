@@ -80,6 +80,7 @@ export function fetchSampleOtus() {
     }
   }
 
+  // test
   if (document.getElementById("rarity-checkbox").checked) {
     url += "&endemic=true";
   } else {
