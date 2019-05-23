@@ -969,6 +969,31 @@ const initSubmitContextButton = () => {
   };
 };
 
+const initSubmitSearch2Button = () => {
+  let submitSearchButton = document.getElementById("submit-search");
+  submitSearchButton.onclick = () => {
+    console.log("konichiwa, world");
+
+    let combinedFilters = $("#combinationSelect").select2("data");
+    console.log(combinedFilters);
+
+    // let contextFilters = $("#select-contextual").select2("data");
+    // let taxonFilters = $("#select-taxonomic").select2("data");
+    // let ampliconFilters = $("#select-amplicon").select2("data");
+
+    // Formatting and adding otu arguments
+
+    // let ontologyIds = [];
+    // for (let i in taxonFilters) {
+    //   let taxonIdChain = taxonFilters[i];
+    //   let idChain = taxonIdChain.id.split(",").join("+");
+    //   ontologyIds.push(idChain);
+    // }
+    // let url = API_URLS.sampleOtus;
+    // url += "otu=" + ontologyIds.join("&otu=");
+  };
+};
+
 //Adding d3 visualization
 export const { g, y, tooltip, x } = initPlotChart();
 
@@ -993,6 +1018,8 @@ window.onload = () => {
   initSubmitOtuButton();
 
   initSubmitContextButton();
+
+  initSubmitSearch2Button();
 };
 
 // NOTE: load contextual options up front. Hardcoding some params.
