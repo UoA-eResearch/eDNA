@@ -44,20 +44,26 @@
       <h2 >Loading...</h2>
     </div>
     <div class="search" id="filterWrapper">
-      <select id="select-taxonomic" class="search-filter" multiple="multiple">
-      </select>
-      <br>
+      <div id="taxon-wrapper">
+        <select id="select-taxonomic" class="search-filter" multiple="multiple">
+        </select>
+        <br>
+      </div>
         <select id="select-operator" class="search--right" >
           <option value="or">OR</option>
           <option value="and" selected="selected">AND</option>
         </select>
       <br>
-      <select id="select-contextual" multiple="multiple">
-      </select>
-      <br>
-      <select id="select-amplicon" multiple="multiple">
-      </select>
-      <br>
+      <div id="contextual-wrapper">
+        <select id="select-contextual" multiple="multiple">
+        </select>
+        <br>
+      </div>
+      <div id="amplicon-wrapper">
+        <select id="select-amplicon" multiple="multiple">
+        </select>
+        <br>
+      </div>
       <div class="search--right">
         Rare organisms only <input id="endemic-checkbox" type="checkbox" name="endemic only" value="true">
         <br>

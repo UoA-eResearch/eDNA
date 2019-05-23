@@ -20,6 +20,7 @@ window.sampleContextLookup = {};
  * generates the request URL and calls recalculating data functions when data is received.
  */
 function fetchSampleOtus() {
+  console.log("constructing query from filters");
   let contextFilters = $("#select-contextual").select2("data");
   let taxonFilters = $("#select-taxonomic").select2("data");
   let ampliconFilters = $("#select-amplicon").select2("data");
@@ -99,12 +100,32 @@ function recalculateGridLayer() {
 }
 
 /**
+ * Updates the lookup containing all the data of otus accquired so far.
+ * @param {array} otus
+ */
+function updateOtuLookupPathogenicStatus(otus) {
+  console.log("updating pathogenic status");
+  // console.log(otus);
+  otus.forEach(otuId => {
+    if (!(otuId in window.otuLookup)) {
+      window.otuLookup[otuId] = {
+        pathogenic: true
+      };
+    } else {
+      window.otuLookup[otuId].pathogenic = true;
+    }
+  });
+  // console.log(window.otuLookup);
+}
+
+/**
  * takes combined sampleOtu data and sampleContextual data and calculates their positions and generates layers.
  */
 function calculateSampleOtuData(responseData) {
   window.previousResults = responseData;
   let sampleOtus = responseData.sample_otu_data;
   let sampleContexts = responseData.sample_contextual_data;
+  updateOtuLookupPathogenicStatus(responseData.pathogenic_otus);
   // display amount of abundances from a search below the filter
   $("#numberResults").text(sampleOtus.length);
   // restructure the sample contexts by pk
@@ -138,7 +159,7 @@ function calculateSampleOtuData(responseData) {
   );
   addLayerIdToSampleContext(siteLayer);
 
-  siteAggregatedData = addSiteMetrics(siteAggregatedData);
+  siteAggregatedData = calculateSiteMetrics(siteAggregatedData);
   window.siteAggregates = siteAggregatedData;
   // creating site -> leaflet layer references for each layer.
   updateGraph(siteAggregatedData);
@@ -430,18 +451,36 @@ function makeGrid(detailLevel) {
 /**
  * Adds additional metrics to site aggregated data.
  */
-function addSiteMetrics(siteAggregates) {
+function calculateSiteMetrics(siteAggregates) {
   // entries released in es6.
   for (const [siteId, site] of Object.entries(siteAggregates)) {
     site.shannonDiversity = 0;
+    site.pathogenicRichness = 0;
+    site.pathogenicAbundance = 0;
     for (const [otuId, otu] of Object.entries(site.otus)) {
       let otuAbundance = otu.abundance;
       site.shannonDiversity +=
         (otuAbundance / site.abundance) *
         Math.log(otuAbundance / site.abundance);
+
+      if (!(otuId in window.otuLookup)) {
+        window.otuLookup[otuId] = {
+          pathogenic: false
+        };
+      }
+
+      if (window.otuLookup[otuId].pathogenic) {
+        site.pathogenicRichness++;
+        site.pathogenicAbundance += otuAbundance;
+      }
     }
+    // final calculations for effective alpha and shannon diversity
     site.shannonDiversity *= -1;
     site.effectiveAlpha = Math.exp(site.shannonDiversity);
+
+    // final calculations for proportioning site potential pathogen proportion
+    site.pathogenicRichness /= site.richness;
+    site.pathogenicAbundance /= site.abundance;
   }
   return siteAggregates;
 }
@@ -743,8 +782,12 @@ function initOtuSelect() {
             group: "taxon"
           };
           index++;
-          window.otuLookup[taxon[2]] = taxon[0];
-          // window.otuLookup[taxon[2]] = taxon[1];
+          // window.otuLookup[taxon[2]] = taxon[0];
+          if (!window.otuLookup[taxon[2]]) {
+            window.otuLookup[taxon[2]] = {
+              code: taxon[0]
+            };
+          }
           return option;
         });
 
@@ -969,7 +1012,6 @@ window.onload = () => {
 // NOTE: load contextual options up front. Hardcoding some params.
 // possibly separate into a different API later on if we have time or a need.
 let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
-console.log(API_URLS);
 fetch(url).then(response => {
   response.json().then(initContextSelect);
 });

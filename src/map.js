@@ -144,7 +144,7 @@ function handleGridLayerMouseOut(e) {
 function findMissingOtuLookups(layer, popup) {
   let missingIds = [];
   for (const [otuId] of Object.entries(layer.feature.properties.otus)) {
-    if (!(otuId in window.otuLookup)) {
+    if (!(otuId in window.otuLookup) || !window.otuLookup[otuId].code) {
       missingIds.push(otuId);
     }
   }
@@ -152,7 +152,7 @@ function findMissingOtuLookups(layer, popup) {
     console.log(
       "missing " + missingIds.length + " otu names. Requesting from server."
     );
-    let f_url = API_URLS.otu_code_by_id + missingIds.join("&id=");
+    let f_url = API_URLS.otu_data_by_id + missingIds.join("&id=");
     fetch(f_url).then(response => {
       response.json().then(jsonResponse => {
         popup.setContent(
@@ -173,7 +173,14 @@ function makePopupContent(properties, jsonResponse = null) {
   // filling in missing otu entries here.
   if (jsonResponse != null && jsonResponse !== undefined) {
     jsonResponse.otu_names.forEach(otu => {
-      window.otuLookup[otu.id] = otu.code;
+      // window.otuLookup[otu.id] = otu.code;
+      if (!window.otuLookup[otu.id]) {
+        window.otuLookup[otu.id] = {
+          code: otu.code
+        };
+      } else {
+        window.otuLookup[otu.id]["code"] = otu.code;
+      }
     });
   }
 
@@ -201,7 +208,7 @@ function makePopupContent(properties, jsonResponse = null) {
 
   for (let otuId in properties.otus) {
     popupContent +=
-      strongLine(window.otuLookup[otuId]) +
+      strongLine(window.otuLookup[otuId].code) +
       strongHeader("Abundance in cell", properties.otus[otuId].abundance) +
       strongHeader("Frequency in cell", properties.otus[otuId].count) +
       "<br />";

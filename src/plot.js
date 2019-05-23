@@ -34,7 +34,12 @@ function initPlotChart() {
   var y = d3
     .scalePoint()
     //.domain(nested.map( function(d) { return d.key }) )
-    .domain(["OTU richness", "Sequence abundance", "Effective alpha diversity"])
+    .domain([
+      "OTU richness",
+      "Sequence abundance",
+      "Effective alpha diversity",
+      "Proportion pathogens"
+    ])
     .range([0, height - 20])
     .padding(0.1);
   var yAxis = d3.axisLeft().scale(y);
@@ -104,6 +109,14 @@ function updateGraph(siteAggregates) {
         site,
         "Effective alpha diversity",
         site.effectiveAlpha
+      )
+    );
+    plotData.push(
+      makeNestableObject(
+        siteId,
+        site,
+        "Proportion pathogens",
+        site.pathogenicRichness
       )
     );
   }

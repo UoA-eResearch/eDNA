@@ -75,7 +75,7 @@ describe("Colour scheme select", function() {
   });
 });
 
-describe("Grid layer cell/rectangel", function() {
+describe("Grid layer cell/rectangle", function() {
   it("should generate popup content when clicked on", function() {
     cy.get(".leaflet-control-layers-overlays input:first").click();
     cy.get(".leaflet-interactive:first").click({ force: true });
