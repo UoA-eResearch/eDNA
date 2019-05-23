@@ -38,6 +38,9 @@
     "test": "jest --watch",
     "cypress:open": "cypress open"
   },
+  "jest": {
+    "testRegex": "/__test__/"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/UoA-eResearch/eDNA.git"
