@@ -27,71 +27,71 @@ window.sampleContextLookup = {};
 /**
  * generates the request URL and calls recalculating data functions when data is received.
  */
-export function fetchSampleOtus() {
+export function fetchSampleOtus(url = null) {
   console.log("constructing query from filters");
-
-  if ($("#combinationSelect").data("select2")) {
-    if ($("#combinationSelect").select2("data")) {
-      console.log($("#combinationSelect").select2("data"));
+  if (!url) {
+    if ($("#combinationSelect").data("select2")) {
+      if ($("#combinationSelect").select2("data")) {
+        console.log($("#combinationSelect").select2("data"));
+      }
     }
-  }
 
-  let contextFilters = $("#select-contextual").select2("data");
-  let taxonFilters = $("#select-taxonomic").select2("data");
-  let ampliconFilters = $("#select-amplicon").select2("data");
+    let contextFilters = $("#select-contextual").select2("data");
+    let taxonFilters = $("#select-taxonomic").select2("data");
+    let ampliconFilters = $("#select-amplicon").select2("data");
 
-  // Formatting and adding otu arguments
-  let ontologyIds = [];
-  for (let i in taxonFilters) {
-    let taxonIdChain = taxonFilters[i];
-    let idChain = taxonIdChain.id.split(",").join("+");
-    ontologyIds.push(idChain);
-  }
-  let url = API_URLS.sampleOtus;
-  url += "otu=" + ontologyIds.join("&otu=");
-
-  // Formatting and adding contextual filters to url
-  if (contextFilters.length > 0) {
-    let s = contextFilters
-      .map(param => {
-        let paramEncoded = param.text;
-        paramEncoded = paramEncoded.replace("<", "$lt");
-        paramEncoded = paramEncoded.replace(">", "$gt");
-        paramEncoded = paramEncoded.replace("=", "$eq");
-        return "&q=" + paramEncoded;
-      })
-      .join("");
-    url += s;
-  }
-
-  // amplicon filtering
-  if (ampliconFilters.length > 0) {
-    let useAny = false;
-    let ampliconUrlSegment = ampliconFilters
-      .map(filter => {
-        if (filter.text == "Any") {
-          useAny = true;
-        }
-        return "&q=amplicon$eq" + filter.text;
-      })
-      .join("");
-    if (!useAny) {
-      url += ampliconUrlSegment;
+    // Formatting and adding otu arguments
+    let ontologyIds = [];
+    for (let i in taxonFilters) {
+      let taxonIdChain = taxonFilters[i];
+      let idChain = taxonIdChain.id.split(",").join("+");
+      ontologyIds.push(idChain);
     }
-  }
+    let url = API_URLS.sampleOtus;
+    url += "otu=" + ontologyIds.join("&otu=");
 
-  // test
-  if (document.getElementById("rarity-checkbox").checked) {
-    url += "&endemic=true";
-  } else {
-  }
-  if (document.getElementById("select-operator").value == "or") {
-    url += "&operator=union";
-  } else {
-    url += "&operator=intersection";
-  }
+    // Formatting and adding contextual filters to url
+    if (contextFilters.length > 0) {
+      let s = contextFilters
+        .map(param => {
+          let paramEncoded = param.text;
+          paramEncoded = paramEncoded.replace("<", "$lt");
+          paramEncoded = paramEncoded.replace(">", "$gt");
+          paramEncoded = paramEncoded.replace("=", "$eq");
+          return "&q=" + paramEncoded;
+        })
+        .join("");
+      url += s;
+    }
 
-  console.log("request url: " + url);
+    // amplicon filtering
+    if (ampliconFilters.length > 0) {
+      let useAny = false;
+      let ampliconUrlSegment = ampliconFilters
+        .map(filter => {
+          if (filter.text == "Any") {
+            useAny = true;
+          }
+          return "&q=amplicon$eq" + filter.text;
+        })
+        .join("");
+      if (!useAny) {
+        url += ampliconUrlSegment;
+      }
+    }
+
+    // test
+    if (document.getElementById("rarity-checkbox").checked) {
+      url += "&endemic=true";
+    } else {
+    }
+    if (document.getElementById("select-operator").value == "or") {
+      url += "&operator=union";
+    } else {
+      url += "&operator=intersection";
+    }
+    console.log("request url: " + url);
+  }
 
   // fetch the url
   showLoadingMessage();
@@ -890,9 +890,7 @@ const initSubmitOtuButton = () => {
 
     // join fk combination array using commas
     let otuName = taxonSegments.join(";");
-    let fkCombination = taxonIds.join(",");
-    console.log(otuName);
-    console.log(fkCombination);
+    let fkCombination = "otu=" + taxonIds.join("+");
 
     // Set the value, creating a new option if necessary
     if (
@@ -937,7 +935,7 @@ const initSubmitContextButton = () => {
         contextInput.value;
 
       let contextFilterId =
-        "&q=" +
+        "q=" +
         contextFieldSelect.value +
         "$" +
         contextOperatorSelect.value +
@@ -973,26 +971,33 @@ const initSubmitContextButton = () => {
 const initSubmitSearch2Button = () => {
   let submitSearchButton = document.getElementById("submit-search");
   submitSearchButton.onclick = () => {
-    console.log("konichiwa, world");
-
     let combinedFilters = $("#combinationSelect").select2("data");
-    console.log(combinedFilters);
-
-    // let contextFilters = $("#select-contextual").select2("data");
-    // let taxonFilters = $("#select-taxonomic").select2("data");
-    // let ampliconFilters = $("#select-amplicon").select2("data");
-
-    // Formatting and adding otu arguments
-
-    // let ontologyIds = [];
-    // for (let i in taxonFilters) {
-    //   let taxonIdChain = taxonFilters[i];
-    //   let idChain = taxonIdChain.id.split(",").join("+");
-    //   ontologyIds.push(idChain);
-    // }
-    // let url = API_URLS.sampleOtus;
-    // url += "otu=" + ontologyIds.join("&otu=");
+    let params = combinedFilters.map(filter => {
+      return filter.id;
+    });
+    console.log(params);
+    console.log(params.join("&"));
+    let slug = params.join("&");
+    let url = API_URLS.sampleOtus + slug;
+    console.log(url);
+    fetchSampleOtus(url);
   };
+};
+
+/**
+ *  Generates the query tail
+ */
+const generateRequestQuery = () => {
+  let combinedFilters = $("#combinationSelect").select2("data");
+  let params = combinedFilters.map(filter => {
+    return filter.id;
+  });
+  console.log(params);
+  console.log(params.join("&"));
+  let slug = params.join("&");
+  let url = API_URLS.sampleOtus + slug;
+  console.log(url);
+  return url;
 };
 
 //Adding d3 visualization
