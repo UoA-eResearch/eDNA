@@ -1,7 +1,7 @@
 // import s
 import * as $ from "jquery";
 import { API_URLS } from "./constants";
-import { fetchSampleOtus } from "./index";
+import { createAggregateUrl } from "./index";
 import { request } from "http";
 
 function initContextSelect(responseData) {
@@ -63,7 +63,7 @@ function initContextSelect(responseData) {
     // }
   });
   $("#select-contextual").change(function() {
-    fetchSampleOtus();
+    createAggregateUrl();
   });
 }
 
@@ -160,7 +160,7 @@ function initOtuSelect() {
     }
   });
   taxonSelect.change(function() {
-    fetchSampleOtus();
+    createAggregateUrl();
   });
   return taxonSelect;
 }
@@ -221,7 +221,7 @@ const initCombinationSelect = () => {
   });
 
   comboSelect.change(() => {
-    fetchSampleOtus();
+    createAggregateUrl();
   });
 };
 

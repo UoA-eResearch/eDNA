@@ -27,72 +27,69 @@ window.sampleContextLookup = {};
 /**
  * generates the request URL and calls recalculating data functions when data is received.
  */
-export function fetchSampleOtus(url = null) {
-  console.log("constructing query from filters");
-  if (!url) {
-    if ($("#combinationSelect").data("select2")) {
-      if ($("#combinationSelect").select2("data")) {
-        console.log($("#combinationSelect").select2("data"));
-      }
-    }
+export function createAggregateUrl() {
+  let contextFilters = $("#select-contextual").select2("data");
+  let taxonFilters = $("#select-taxonomic").select2("data");
+  let ampliconFilters = $("#select-amplicon").select2("data");
 
-    let contextFilters = $("#select-contextual").select2("data");
-    let taxonFilters = $("#select-taxonomic").select2("data");
-    let ampliconFilters = $("#select-amplicon").select2("data");
+  // Formatting and adding otu arguments
+  let ontologyIds = [];
+  for (let i in taxonFilters) {
+    let taxonIdChain = taxonFilters[i];
+    let idChain = taxonIdChain.id.split(",").join("+");
+    ontologyIds.push(idChain);
+  }
+  let url = API_URLS.sampleOtus;
+  url += "otu=" + ontologyIds.join("&otu=");
 
-    // Formatting and adding otu arguments
-    let ontologyIds = [];
-    for (let i in taxonFilters) {
-      let taxonIdChain = taxonFilters[i];
-      let idChain = taxonIdChain.id.split(",").join("+");
-      ontologyIds.push(idChain);
-    }
-    let url = API_URLS.sampleOtus;
-    url += "otu=" + ontologyIds.join("&otu=");
-
-    // Formatting and adding contextual filters to url
-    if (contextFilters.length > 0) {
-      let s = contextFilters
-        .map(param => {
-          let paramEncoded = param.text;
-          paramEncoded = paramEncoded.replace("<", "$lt");
-          paramEncoded = paramEncoded.replace(">", "$gt");
-          paramEncoded = paramEncoded.replace("=", "$eq");
-          return "&q=" + paramEncoded;
-        })
-        .join("");
-      url += s;
-    }
-
-    // amplicon filtering
-    if (ampliconFilters.length > 0) {
-      let useAny = false;
-      let ampliconUrlSegment = ampliconFilters
-        .map(filter => {
-          if (filter.text == "Any") {
-            useAny = true;
-          }
-          return "&q=amplicon$eq" + filter.text;
-        })
-        .join("");
-      if (!useAny) {
-        url += ampliconUrlSegment;
-      }
-    }
-
-    // test
-    if (document.getElementById("rarity-checkbox").checked) {
-      url += "&endemic=true";
-    } else {
-    }
-    if (document.getElementById("select-operator").value == "or") {
-      url += "&operator=union";
-    } else {
-      url += "&operator=intersection";
-    }
-    console.log("request url: " + url);
+  // Formatting and adding contextual filters to url
+  if (contextFilters.length > 0) {
+    let s = contextFilters
+      .map(param => {
+        let paramEncoded = param.text;
+        paramEncoded = paramEncoded.replace("<", "$lt");
+        paramEncoded = paramEncoded.replace(">", "$gt");
+        paramEncoded = paramEncoded.replace("=", "$eq");
+        return "&q=" + paramEncoded;
+      })
+      .join("");
+    url += s;
   }
 
+  // amplicon filtering
+  if (ampliconFilters.length > 0) {
+    let useAny = false;
+    let ampliconUrlSegment = ampliconFilters
+      .map(filter => {
+        if (filter.text == "Any") {
+          useAny = true;
+        }
+        return "&q=amplicon$eq" + filter.text;
+      })
+      .join("");
+    if (!useAny) {
+      url += ampliconUrlSegment;
+    }
+  }
+
+  // test
+  if (document.getElementById("rarity-checkbox").checked) {
+    url += "&endemic=true";
+  } else {
+  }
+  if (document.getElementById("select-operator").value == "or") {
+    url += "&operator=union";
+  } else {
+    url += "&operator=intersection";
+  }
+  console.log("request url: " + url);
+  fetchSampleOtus(url);
+}
+
+/**
+ * Gets sampleOtu data and triggers for recalculations on response
+ */
+const fetchSampleOtus = url => {
   // fetch the url
   showLoadingMessage();
   fetch(url).then(response => {
@@ -101,7 +98,7 @@ export function fetchSampleOtus(url = null) {
       calculateSampleOtuData(responseData);
     });
   });
-}
+};
 
 /**
  * recalculates where data fits on the grid structure without fetching new data from the server.
@@ -111,7 +108,7 @@ function recalculateGridLayer() {
     calculateSampleOtuData(window.previousResults);
   } else {
     // $("#select-taxonomic").trigger("change");
-    fetchSampleOtus();
+    createAggregateUrl();
   }
 }
 
@@ -149,9 +146,12 @@ function calculateSampleOtuData(responseData) {
     let sampleContext = sampleContexts[i];
     window.sampleContextLookup[sampleContext.id] = sampleContext;
   }
-  let siteAggregatedData = aggregateBySite(sampleOtus);
+  let siteAggregatedData = aggregateSampleOtusBySite(sampleOtus);
   renderHeatLayer(siteAggregatedData, heatLayerGroup, map);
-  let cellAggregatedData = aggregateByCell(siteAggregatedData, sampleContexts);
+  let cellAggregatedData = aggregateSamplesByCell(
+    siteAggregatedData,
+    sampleContexts
+  );
   let featureCollection = makeFeatureCollection(cellAggregatedData);
 
   let abundanceLayer = featureCollectionToLayer(
@@ -201,7 +201,7 @@ function addLayerIdToSampleContext(layerGroup) {
  * Iterates the sample otu json response and sums the values by site
  * @param {*} sampleOtus
  */
-function aggregateBySite(sampleOtus) {
+function aggregateSampleOtusBySite(sampleOtus) {
   let siteAggs = {};
   let missingOtus = [];
   for (let i in sampleOtus) {
@@ -238,7 +238,7 @@ function aggregateBySite(sampleOtus) {
  * @param {*} siteAggs
  * @param {*} sampleContexts
  */
-function aggregateByCell(siteAggs) {
+function aggregateSamplesByCell(siteAggs) {
   // setting up grid parameters
   makeGrid(detailLevel);
   // console.log("aggregate by cell");
@@ -793,28 +793,28 @@ const initAmpliconSearch = () => {
     ]
   });
   $("#select-amplicon").change(function() {
-    fetchSampleOtus();
+    createAggregateUrl();
   });
 };
 
 function initRarityCheckbox() {
   let radio = document.getElementById("rarity-checkbox");
   radio.onchange = function() {
-    fetchSampleOtus();
+    createAggregateUrl();
   };
 }
 
 function initOperatorSelect() {
   let selectOperator = document.getElementById("select-operator");
   selectOperator.onchange = function() {
-    fetchSampleOtus();
+    createAggregateUrl();
   };
 }
 
 function initSearchButton() {
   let submitButton = document.getElementById("search-button");
   submitButton.onclick = function() {
-    fetchSampleOtus();
+    createAggregateUrl();
   };
 }
 
@@ -979,25 +979,9 @@ const initSubmitSearch2Button = () => {
     console.log(params.join("&"));
     let slug = params.join("&");
     let url = API_URLS.sampleOtus + slug;
-    console.log(url);
+    // console.log(url);
     fetchSampleOtus(url);
   };
-};
-
-/**
- *  Generates the query tail
- */
-const generateRequestQuery = () => {
-  let combinedFilters = $("#combinationSelect").select2("data");
-  let params = combinedFilters.map(filter => {
-    return filter.id;
-  });
-  console.log(params);
-  console.log(params.join("&"));
-  let slug = params.join("&");
-  let url = API_URLS.sampleOtus + slug;
-  console.log(url);
-  return url;
 };
 
 //Adding d3 visualization
