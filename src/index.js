@@ -335,9 +335,6 @@ function initMap() {
   return map;
 }
 
-//Defines how the proj4 function is to convert.
-//in this case proj4 is being set up to convert longlat to cartesian.
-
 //gets the params from the search bar
 var taxonParams = new URLSearchParams(window.location.search);
 var mode = taxonParams.get("mode");
@@ -382,7 +379,7 @@ var layerMenuControl = L.control
  * Takes in a sample contextual index, iterates through all active and stamped map layers, then returns the last matching layer with leaflet id. Assumes sample contextual contains a leafletId value.
  * @param {integer} id
  */
-export function GetLayerBySampleContextId(id) {
+function GetLayerBySampleContextId(id) {
   let targetLeafletIds = window.sampleContextLookup[id].leafletIds;
   // for now just iterate through all layers. Final layer that matches is returned.
   let targetLayer;
@@ -829,4 +826,4 @@ fetch(url).then(response => {
 });
 // TODO: fix layer rendering only workng when contextual filter has conditions. Something to do with the backend not returning results when no contextual present.
 
-export { detailLevel, map };
+export { detailLevel, map, GetLayerBySampleContextId };
