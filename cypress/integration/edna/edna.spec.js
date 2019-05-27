@@ -247,7 +247,15 @@ describe("Contextual query builder", () => {
 });
 
 context("grid resolution slider", () => {
-  it("should update grid resolution input field when slider changes.", () => {});
+  before(() => {
+    cy.visit("/");
+  });
+
+  it.only("should update grid resolution input field when slider changes.", () => {
+    // cy.get('a .leaflet-control-slider-toggle[title="Leaflet Slider"]').trigger(
+    cy.get(".leaflet-control-slider-toggle").trigger("mouseover");
+    cy.get(".leaflet-control-slider-plus").click();
+  });
 
   it("should move slider when grid resolution input field is updated", () => {});
 });
