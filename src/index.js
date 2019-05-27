@@ -724,7 +724,7 @@ const initSubmitContextButton = () => {
   let submitContextBtn = document.getElementById("add-context-btn");
 
   submitContextBtn.onclick = () => {
-    let contextInput = document.getElementById("context-input");
+    let contextInput = document.getElementById("context-values-select");
     if (contextInput.value) {
       let contextFieldSelect = document.getElementById("context-field-select");
       let contextOperatorSelect = document.getElementById(
@@ -770,6 +770,14 @@ const initSubmitContextButton = () => {
   };
 };
 
+const initContextValuesSelect = () => {
+  let contextValueSelect = $("#context-values-select").select2({
+    placeholder: "testing 1234",
+    allowClear: true,
+    width: "100%"
+  });
+};
+
 const initSubmitSearch2Button = () => {
   let submitSearchButton = document.getElementById("submit-search");
   submitSearchButton.onclick = () => {
@@ -810,6 +818,7 @@ window.onload = () => {
   initSubmitOtuButton();
 
   initSubmitContextButton();
+  initContextValuesSelect();
 
   initSubmitSearch2Button();
 };

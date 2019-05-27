@@ -242,6 +242,28 @@ const initContextFieldSelect = () => {
       });
     });
   });
+
+  contextFieldSelect.onchange = () => {
+    console.log("context field changed.");
+    console.log(contextFieldSelect.value);
+    let url = API_URLS.contextualFieldValues + contextFieldSelect.value;
+    fetch(url).then(response => {
+      response.json().then(json => {
+        console.log(json.data);
+        let selectOptions = json.data.map(option => {
+          return {
+            id: option,
+            text: option
+          };
+        });
+        $("#context-values-select")
+          .empty()
+          .select2({
+            data: selectOptions
+          });
+      });
+    });
+  };
 };
 
 export {

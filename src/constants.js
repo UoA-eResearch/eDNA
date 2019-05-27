@@ -10,7 +10,10 @@ const API_URLS = {
   metaData: activeUrl + "metadata?term=",
   otuSuggestions: activeUrl + "filter-options?",
   otuSegmentedSuggestions: activeUrl + "suggestions/",
-  otu_data_by_id: activeUrl + "otu/?id=",
+  otuDataById: activeUrl + "otu/?id=",
+
+  // test
+  contextualFieldValues: activeUrl + "context-suggestions/",
 
   // test
   kingdoms: activeUrl + "kingdom/",
