@@ -4,7 +4,7 @@ import { detailLevel } from "./index";
  * Iterates the sample otu json response and sums the values by site
  * @param {*} sampleOtus
  */
-export function aggregateSampleOtusBySite(sampleOtus) {
+function aggregateSampleOtusBySite(sampleOtus) {
   let siteAggs = {};
   let missingOtus = [];
   for (let i in sampleOtus) {
@@ -41,7 +41,7 @@ export function aggregateSampleOtusBySite(sampleOtus) {
  * @param {*} siteAggs
  * @param {*} sampleContexts
  */
-export function aggregateSamplesByCell(siteAggs) {
+function aggregateSamplesByCell(siteAggs) {
   // setting up grid parameters
   makeGrid(detailLevel);
   // console.log("aggregate by cell");
@@ -198,3 +198,5 @@ function makeGrid(detailLevel) {
     return cell;
   }
 }
+
+export { aggregateSampleOtusBySite, aggregateSamplesByCell };
