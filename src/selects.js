@@ -37,6 +37,7 @@ function initContextSelect(responseData) {
     multiple: true,
     allowClear: true,
     width: "100%",
+    closeOnSelect: true,
     // cache: true,
     tags: true,
     data: data,
@@ -177,6 +178,7 @@ const initAllTaxonomicSelects = () => {
       placeholder: item.id,
       allowClear: true,
       width: "100%",
+      closeOnSelect: true,
       ajax: {
         url: API_URLS.otuSegmentedSuggestions,
         delay: 250,
@@ -217,11 +219,16 @@ const initCombinationSelect = () => {
     placeholder: "Current query filters.",
     multiple: true,
     tags: true,
-    allowClear: true
+    allowClear: true,
+    closeOnSelect: true,
+    width: "%100"
   });
-  comboSelect.change(() => {
-    createAggregateUrl();
-  });
+
+  // don't need to do anything when select changes.
+
+  // comboSelect.change(() => {
+  //   createAggregateUrl();
+  // });
 };
 
 const initContextFieldSelect = () => {
@@ -247,7 +254,6 @@ const initContextFieldSelect = () => {
     let url = API_URLS.contextualFieldValues + contextFieldSelect.value;
     fetch(url).then(response => {
       response.json().then(json => {
-        console.log(json.data);
         let selectOptions = json.data.map(option => {
           return {
             id: option,

@@ -126,13 +126,7 @@ div.tooltip {
     justify-content: space-around;
 }
 
-.taxonomic-select {
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-}
-
-.context-query-item {
+.taxonomic-select .context-query-item .search-item {
     display: flex;
     justify-content: space-between;
     align-items: stretch;

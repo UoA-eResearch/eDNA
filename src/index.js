@@ -645,17 +645,19 @@ const initPlotColourSchemeSelect = () => {
 
 const initClearOtusButton = () => {
   let clearBtn = document.getElementById("selectClearAll");
-  console.log(clearBtn);
   clearBtn.onclick = () => {
     console.log("clear all clicked");
     let taxonSelects = document
       .getElementById("search2")
       .getElementsByClassName("taxonomic-select");
 
+    // iterate through the selects, make their selection null, clear the stored suggestions
     for (let item of taxonSelects) {
       $("#" + item.id)
         .val(null)
         .trigger("change");
+      let taxonSelect = document.getElementById(item.id);
+      taxonSelect.length = 0;
     }
   };
 };
@@ -749,6 +751,8 @@ const initSubmitContextButton = () => {
           .length
       ) {
         alert("Filter is already in the filter list");
+        console.log("selecting existing option");
+        $("#combinationSelect").val(contextFilterId);
       } else {
         console.log("creating new option");
         var newOption = new Option(
