@@ -219,7 +219,6 @@ const initCombinationSelect = () => {
     tags: true,
     allowClear: true
   });
-
   comboSelect.change(() => {
     createAggregateUrl();
   });
@@ -244,8 +243,7 @@ const initContextFieldSelect = () => {
   });
 
   contextFieldSelect.onchange = () => {
-    console.log("context field changed.");
-    console.log(contextFieldSelect.value);
+    // updating the value suggestions for a given context field
     let url = API_URLS.contextualFieldValues + contextFieldSelect.value;
     fetch(url).then(response => {
       response.json().then(json => {

@@ -774,7 +774,8 @@ const initContextValuesSelect = () => {
   let contextValueSelect = $("#context-values-select").select2({
     placeholder: "testing 1234",
     allowClear: true,
-    width: "100%"
+    width: "100%",
+    tags: true
   });
 };
 

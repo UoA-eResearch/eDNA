@@ -131,3 +131,9 @@ div.tooltip {
     justify-content: space-between;
     align-items: stretch;
 }
+
+.context-query-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+}
