@@ -215,7 +215,6 @@ const initAllTaxonomicSelects = () => {
  */
 const initCombinationSelect = () => {
   let comboSelect = $("#combinationSelect").select2({
-    // placeholder: "combination select",
     placeholder: "Current query filters.",
     multiple: true,
     tags: true,
@@ -223,18 +222,42 @@ const initCombinationSelect = () => {
     closeOnSelect: true,
     width: "%100"
   });
-
-  // don't need to do anything when select changes.
-
-  // comboSelect.change(() => {
-  //   createAggregateUrl();
-  // });
 };
 
+/**
+ * Queries the database for distinct values of the currently selected contextual field then uses them to populate the options list
+ */
+const updateContextValuesSelect = () => {
+  // updating the value suggestions for a given context field
+  let contextFieldSelect = document.getElementById("context-field-select");
+  let url = API_URLS.contextualFieldValues + contextFieldSelect.value;
+  console.log("fetching context field distinct values for: " + url);
+  fetch(url).then(response => {
+    response.json().then(json => {
+      let selectOptions = json.data.map(option => {
+        return {
+          id: option,
+          text: option
+        };
+      });
+      $("#context-values-select")
+        .empty()
+        .select2({
+          data: selectOptions
+        });
+    });
+  });
+};
+
+/**
+ * Loads the contextual fields from the database, assigns the handler function for changes
+ */
 const initContextFieldSelect = () => {
   // select element and clear
   let contextFieldSelect = document.getElementById("context-field-select");
   contextFieldSelect.length = 0;
+
+  contextFieldSelect.onchange = updateContextValuesSelect;
 
   // populate options with request data
   let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
@@ -246,28 +269,11 @@ const initContextFieldSelect = () => {
         option.value = field;
         contextFieldSelect.add(option);
       });
+      contextFieldSelect.selectedIndex = 0;
+      // console.log(contextFieldSelect.value);
+      updateContextValuesSelect();
     });
   });
-
-  contextFieldSelect.onchange = () => {
-    // updating the value suggestions for a given context field
-    let url = API_URLS.contextualFieldValues + contextFieldSelect.value;
-    fetch(url).then(response => {
-      response.json().then(json => {
-        let selectOptions = json.data.map(option => {
-          return {
-            id: option,
-            text: option
-          };
-        });
-        $("#context-values-select")
-          .empty()
-          .select2({
-            data: selectOptions
-          });
-      });
-    });
-  };
 };
 
 export {
