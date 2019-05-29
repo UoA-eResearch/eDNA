@@ -1,3 +1,6 @@
+
+/* BEM Block__element--modifier. --modifiers occur on blocks */
+
 /* Test flexbox css */
 #flex-container-state {
     -moz-box-align: center;
@@ -120,14 +123,16 @@ div.tooltip {
     z-index: 9001;
 }
 
-.select-container {
+.taxon-search {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
 }
 
-.taxonomic-select .context-query-item .search-item {
+/* .taxonomic-select .context-query-item .search-item {
     display: flex;
     justify-content: space-between;
     align-items: stretch;
-}
+} */
+
+
