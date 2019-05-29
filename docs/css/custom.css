@@ -86,13 +86,13 @@ div.tooltip {
     left: 0;
 }
 
- .search {
+ /* .search {
     margin-top: 0.3rem;
     margin-bottom: 0.3rem;
     right: 10px;
     top: 10px;
     z-index: 1000;
-}
+} */
 
 .map-popup--visible {
     position: fixed;
@@ -123,7 +123,7 @@ div.tooltip {
     z-index: 9001;
 }
 
-.taxon-search {
+.select-container {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
@@ -136,3 +136,9 @@ div.tooltip {
 } */
 
 
+.search {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+}

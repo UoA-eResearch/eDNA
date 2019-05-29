@@ -99,28 +99,28 @@
         <h2 id="taxonomic-search-title">Taxonomic Selects</h2>
         <div id="taxonomic-search" class="taxon-search">
           <div id="combinationSelectWrapper">
-            <select name="combinationSelect" id="combinationSelect" class="search-item"></select>
+            <select name="combinationSelect" id="combinationSelect" class="search search__select"></select>
           </div>
           <div id="kingdomSelectWrapper">
-            <select name="kingdomSelect" id="kingdomSelect" class="taxonomic-select" data-cy="kingdomSelect"></select>
+            <select name="kingdomSelect" id="kingdomSelect" class="search taxonomic-select" data-cy="kingdomSelect"></select>
           </div>
           <div id="phylumSelectWrapper">
-            <select name="phylumSelect" id="phylumSelect" class="taxonomic-select"></select>
+            <select name="phylumSelect" id="phylumSelect" class="search taxonomic-select"></select>
           </div>
           <div id="classSelectWrapper">
-            <select name="classSelect" id="classSelect" class="taxonomic-select"></select>
+            <select name="classSelect" id="classSelect" class="search taxonomic-select"></select>
           </div>
           <div id="orderSelectWrapper">
-            <select name="orderSelect" id="orderSelect" class="taxonomic-select"></select>
+            <select name="orderSelect" id="orderSelect" class="search taxonomic-select"></select>
           </div>
           <div id="familySelectWrapper">
-            <select name="familySelect" id="familySelect" class="taxonomic-select"></select>
+            <select name="familySelect" id="familySelect" class="search taxonomic-select"></select>
           </div>
           <div id="genusSelectWrapper">
-            <select name="genusSelect" id="genusSelect" class="taxonomic-select"></select>
+            <select name="genusSelect" id="genusSelect" class="search taxonomic-select"></select>
           </div>
           <div id="speciesSelectWrapper">
-            <select name="speciesSelect" id="speciesSelect" class="taxonomic-select"></select>
+            <select name="speciesSelect" id="speciesSelect" class="search taxonomic-select"></select>
           </div>
         </div>
         <button id="selectClearAll" title="Clear current taxonomic selection" data-cy="clear-btn">Clear</button>
@@ -128,25 +128,25 @@
 
         <h2 id="contextual-selects">Contextual Selects</h2>
         <div class="contextual-select-container">
-          <select name="contextual field select" id="context-field-select" class="context-query-item" data-cy="context-field-select">
+          <select name="contextual field select" id="context-field-select" class="search search__select" data-cy="context-field-select">
             <option value="" disabled selected>Select a contextual field...</option>
           </select>
-          <select name="context operator select" id="context-operator-select" class="context-query-item">
+          <select name="context operator select" id="context-operator-select" class="search search__select">
             <option value="gt">greater than</option>
             <option value="eq">equal to</option>
             <option value="lt">less than</option>
           </select>
           <!-- <input type="value" id="context-input" class="context-query-item" data-cy="context-input"> -->
-          <select name="context values select" id="context-values-select" class="context-query-item">
+          <select name="context values select" id="context-values-select" class="search search__select">
           </select>
         </div>
 
-        <button id="add-context-btn" class="context-query-item" data-cy="add-context-btn">Add context to query</button>
+        <button id="add-context-btn" class="search search__button" data-cy="add-context-btn">Add context to query</button>
 
         <button id="submit-search" title="Request data with all search parameters" data-cy="submit-search-btn">Search for
           OTUs
         </button>
-        <span id="numberResults" class="search-item"></span> points
+        <span id="numberResults" class="search search__span"></span> points
       </div>
 
 
