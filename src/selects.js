@@ -249,9 +249,34 @@ const updateContextValuesSelect = () => {
   });
 };
 
+<<<<<<< HEAD
 /**
  * Loads the contextual fields from the database, assigns the handler function for changes
  */
+=======
+const updateContextValuesSelect = () => {
+  // updating the value suggestions for a given context field
+  let contextFieldSelect = document.getElementById("context-field-select");
+  let url = API_URLS.contextualFieldValues + contextFieldSelect.value;
+  console.log("fetching context field distinct values for: " + url);
+  fetch(url).then(response => {
+    response.json().then(json => {
+      let selectOptions = json.data.map(option => {
+        return {
+          id: option,
+          text: option
+        };
+      });
+      $("#context-values-select")
+        .empty()
+        .select2({
+          data: selectOptions
+        });
+    });
+  });
+};
+
+>>>>>>> 75cf15a6fe785f16140a4ed9c9baca60cc122140
 const initContextFieldSelect = () => {
   // select element and clear
   let contextFieldSelect = document.getElementById("context-field-select");
