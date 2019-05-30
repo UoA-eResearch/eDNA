@@ -258,7 +258,6 @@ function makeFeatureCollection(cellAggs) {
 
 function showLoadingMessage() {
   let loadingBanner = document.getElementById("loading-popup");
-  // loadingBanner.classList = "map-popup--visible";
   loadingBanner.classList.remove("map-popup--hidden");
   loadingBanner.classList.add("map-popup--visible");
 }
