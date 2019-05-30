@@ -675,23 +675,16 @@ const initSubmitOtuButton = () => {
     let taxonSegments = [];
     let taxonIds = [];
     for (let item of segmentSelectors) {
-      console.log(item);
       let select = $("#" + item.id);
       if (!select.val()) {
+        // taxonSegments.push("");
+        taxonIds.push("any");
         continue;
+      } else {
+        taxonSegments.push(select.text());
+        taxonIds.push(parseInt(select.val()));
       }
-      // console.log(select.val());
-      // console.log(select.text());
-      console.log(select.text());
-      console.log(select.val());
-
-      taxonSegments.push(select.text());
-      taxonIds.push(parseInt(select.val()));
     }
-
-    console.log(taxonSegments);
-    console.log(taxonIds);
-
     // join fk combination array using commas
     let otuName = taxonSegments.join(";");
     let fkCombination = "otu=" + taxonIds.join("+");

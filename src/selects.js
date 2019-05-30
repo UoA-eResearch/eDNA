@@ -172,10 +172,6 @@ function initOtuSelect() {
 const initAllTaxonomicSelects = () => {
   let taxonSelects = document.getElementsByClassName("taxonomic-select");
 
-  const createSuggestionUrl = params => {
-    console.log("stub");
-  };
-
   for (let taxonSelect of taxonSelects) {
     // TODO: create wrapper with cy-data attribute for testing as select2 creates element as sibling not child.
     $("#" + taxonSelect.id).select2({
