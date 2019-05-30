@@ -170,21 +170,29 @@ function initOtuSelect() {
  * Iterates through the elements that are used as bases for select2 construction
  */
 const initAllTaxonomicSelects = () => {
-  let segmentSelectors = document.getElementsByClassName("taxonomic-select");
+  let taxonSelects = document.getElementsByClassName("taxonomic-select");
 
-  for (let item of segmentSelectors) {
+  const createSuggestionUrl = params => {
+    console.log("stub");
+  };
+
+  for (let taxonSelect of taxonSelects) {
     // TODO: create wrapper with cy-data attribute for testing as select2 creates element as sibling not child.
-    $("#" + item.id).select2({
-      placeholder: item.id,
+    $("#" + taxonSelect.id).select2({
+      placeholder: taxonSelect.id,
       allowClear: true,
       width: "100%",
       closeOnSelect: true,
       ajax: {
-        url: API_URLS.otuSegmentedSuggestions,
+        // TODO: replace with new taxon specific url
+        url:
+          API_URLS.otuSegmentedSuggestions +
+          taxonSelect.id.replace("Select", "") +
+          "/",
         delay: 250,
         data: function(params) {
           let args = [];
-          for (let item of segmentSelectors) {
+          for (let item of taxonSelects) {
             // console.log(item.value);
             args.push(item.id.replace("Select", "=") + item.value);
           }
