@@ -232,6 +232,10 @@ function makeFeatureCollection(cellAggs) {
   }
   return featureCollection;
 
+  /**
+   * Calculates the maximum values within a cell
+   * @param {*} cellAggs
+   */
   function calculateMaxes(cellAggs) {
     let abundance = 0;
     let richness = 0;
