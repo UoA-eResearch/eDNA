@@ -265,13 +265,30 @@ const updateContextValuesSelect = () => {
   });
 };
 
+class ContextValueSelect {
+  constructor() {
+    this.id = "#context-values-select";
+    this.element = document.getElementById("#context-values-select");
+    this.select2 = $("#context-values-select").select2({
+      placeholder: "testing 1234",
+      allowClear: true,
+      width: "100%",
+      tags: true
+    });
+    console.log(this.select2);
+    console.log(this.element);
+  }
+
+  updateOptions() {}
+}
+
 class ContextFieldSelect {
   constructor() {
     this.domElement = document.getElementById("context-field-select");
     this.selectedValue = this.domElement.value;
     this.url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
     this.clearOptions();
-    this.populateOptions();
+    this.updateOptions();
     this.domElement.onchange = updateContextValuesSelect;
   }
 
@@ -299,7 +316,7 @@ class ContextFieldSelect {
   /**
    * Loads the contextual fields from the database,
    */
-  populateOptions() {
+  updateOptions() {
     console.log("populating context field options");
     fetch(this.url).then(response => {
       response.json().then(json => {
@@ -323,5 +340,6 @@ export {
   initOtuSelect,
   initCombinationSelect,
   initContextSelect,
+  ContextValueSelect,
   ContextFieldSelect
 };

@@ -1,7 +1,6 @@
-import * as _ from "lodash";
 import * as L from "leaflet";
 import * as d3 from "d3";
-import * as $ from "jquery";
+import $ from "jquery";
 import "../js/leaflet.heat";
 import "../js/leaflet-slider";
 import "leaflet-sidebar-v2";
@@ -15,7 +14,8 @@ import {
   initOtuSelect,
   initCombinationSelect,
   initContextSelect,
-  ContextFieldSelect
+  ContextFieldSelect,
+  ContextValueSelect
 } from "./selects";
 import {
   aggregateSampleOtusBySite,
@@ -771,15 +771,6 @@ const initSubmitContextButton = () => {
   };
 };
 
-const initContextValuesSelect = () => {
-  let contextValueSelect = $("#context-values-select").select2({
-    placeholder: "testing 1234",
-    allowClear: true,
-    width: "100%",
-    tags: true
-  });
-};
-
 const initSubmitSearch2Button = () => {
   let submitSearchButton = document.getElementById("submit-search");
   submitSearchButton.onclick = () => {
@@ -820,7 +811,9 @@ window.onload = () => {
   initSubmitOtuButton();
 
   initSubmitContextButton();
-  initContextValuesSelect();
+
+  // initContextValuesSelect();
+  let contextValueSelect = new ContextValueSelect();
 
   initSubmitSearch2Button();
 };
