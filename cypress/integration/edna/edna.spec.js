@@ -240,7 +240,7 @@ describe("Contextual query builder", () => {
 
   it("Should create new contextual filter and add it to the filter list.", () => {
     cy.get('select[data-cy="context-field-select"').select("elevation");
-    cy.get('input[data-cy="context-input"').type("100");
+    cy.get('input[data-cy="context-input"]').type("100");
     cy.get('button[data-cy="add-context-btn"]').click();
     cy.get("#combinationSelectWrapper").contains("elevationgt100");
   });
@@ -251,7 +251,7 @@ context("grid resolution slider", () => {
     cy.visit("/");
   });
 
-  it.only("should update grid resolution input field when slider changes.", () => {
+  it("should update grid resolution input field when slider changes.", () => {
     // cy.get('a .leaflet-control-slider-toggle[title="Leaflet Slider"]').trigger(
     cy.get(".leaflet-control-slider-toggle").trigger("mouseover");
     cy.get(".leaflet-control-slider-plus").click();
