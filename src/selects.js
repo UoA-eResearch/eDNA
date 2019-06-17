@@ -228,6 +228,24 @@ const initCombinationSelect = () => {
   });
 };
 
+const replaceContextValuesOptions = newOptions => {
+  $("#context-values-select")
+    .empty()
+    .select2({
+      data: newOptions
+    });
+};
+
+const createSelectOptions = optionData => {
+  let newOptions = optionData.map(option => {
+    return {
+      id: option,
+      text: option
+    };
+  });
+  return newOptions;
+};
+
 /**
  * Queries the database for distinct values of the currently selected contextual field then uses them to populate the options list
  */
@@ -241,17 +259,8 @@ const updateContextValuesSelect = () => {
   console.log("fetching context field distinct values for: " + url);
   fetch(url).then(response => {
     response.json().then(json => {
-      let selectOptions = json.data.map(option => {
-        return {
-          id: option,
-          text: option
-        };
-      });
-      $("#context-values-select")
-        .empty()
-        .select2({
-          data: selectOptions
-        });
+      let newOptions = createSelectOptions(json.data);
+      replaceContextValuesOptions(newOptions);
     });
   });
 };
@@ -314,6 +323,5 @@ export {
   initOtuSelect,
   initCombinationSelect,
   initContextSelect,
-  initContextFieldSelect,
   ContextFieldSelect
 };

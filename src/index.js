@@ -323,6 +323,7 @@ const tileLayer = L.tileLayer(
 
 const map = initMap();
 function initMap() {
+  // document.body.innerHTML = `<div id="map"></div>`;
   let map = L.map("map", {
     zoomSnap: 0.25,
     zoomDelta: 0.25,
