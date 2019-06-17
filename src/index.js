@@ -15,7 +15,7 @@ import {
   initOtuSelect,
   initCombinationSelect,
   initContextSelect,
-  initContextFieldSelect
+  ContextFieldSelect
 } from "./selects";
 import {
   aggregateSampleOtusBySite,
@@ -831,7 +831,9 @@ fetch(url).then(response => {
   // response.json().then(initContextSelect);
   response.json().then(jsonData => {
     initContextSelect(jsonData);
-    initContextFieldSelect(jsonData);
+    // initContextFieldSelect();
+
+    let contextSelect = new ContextFieldSelect();
   });
 });
 // TODO: fix layer rendering only workng when contextual filter has conditions. Something to do with the backend not returning results when no contextual present.

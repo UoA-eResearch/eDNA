@@ -234,6 +234,9 @@ const initCombinationSelect = () => {
 const updateContextValuesSelect = () => {
   // updating the value suggestions for a given context field
   let contextFieldSelect = document.getElementById("context-field-select");
+  // console.log(contextFieldSelect.value);
+  if (contextFieldSelect.value == "password") {
+  }
   let url = API_URLS.contextualFieldValues + contextFieldSelect.value;
   console.log("fetching context field distinct values for: " + url);
   fetch(url).then(response => {
@@ -254,36 +257,66 @@ const updateContextValuesSelect = () => {
 };
 
 /**
- * Loads the contextual fields from the database, assigns the handler function for changes
+ * assigns the handler function for changes
  */
-const initContextFieldSelect = () => {
-  // select element and clear
-  let contextFieldSelect = document.getElementById("context-field-select");
-  contextFieldSelect.length = 0;
+class ContextFieldSelect {
+  constructor() {
+    this.domElement = document.getElementById("context-field-select");
+    this.selectedValue = this.domElement.value;
+    this.url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
+    this.clearOptions();
+    this.populateOptions();
+    this.domElement.onchange = updateContextValuesSelect;
+  }
 
-  contextFieldSelect.onchange = updateContextValuesSelect;
+  clearOptions() {
+    this.domElement.length = 0;
+  }
 
-  // populate options with request data
-  let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
-  fetch(url).then(response => {
-    response.json().then(json => {
-      json.data.context_options.map(field => {
-        let option = document.createElement("option");
-        option.text = field;
-        option.value = field;
-        contextFieldSelect.add(option);
+  /**
+   * Loads the contextual fields from the database,
+   * @param   {[function]}  func  [Desired onchange function]
+   */
+  set onchange(func) {
+    this.domElement.onchange = func;
+  }
+
+  /**
+   * Returns the onchange function of the related DOM element
+   *
+   * @return  {[function]}  [DOM element's onchange function]
+   */
+  get onchange() {
+    return this.domElement.onchange;
+  }
+
+  /**
+   * Loads the contextual fields from the database,
+   */
+  populateOptions() {
+    console.log("populating context field options");
+    fetch(this.url).then(response => {
+      response.json().then(json => {
+        json.data.context_options.map(field => {
+          let option = document.createElement("option");
+          option.text = field;
+          option.value = field;
+          this.domElement.add(option);
+        });
+        this.selectedValue = 0;
+        // console.log(contextFieldSelect.value);
+        // updateContextValuesSelect();
+        this.onchange();
       });
-      contextFieldSelect.selectedIndex = 0;
-      // console.log(contextFieldSelect.value);
-      updateContextValuesSelect();
     });
-  });
-};
+  }
+}
 
 export {
   initAllTaxonomicSelects,
   initOtuSelect,
   initCombinationSelect,
   initContextSelect,
-  initContextFieldSelect
+  initContextFieldSelect,
+  ContextFieldSelect
 };
