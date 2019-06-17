@@ -256,9 +256,6 @@ const updateContextValuesSelect = () => {
   });
 };
 
-/**
- * assigns the handler function for changes
- */
 class ContextFieldSelect {
   constructor() {
     this.domElement = document.getElementById("context-field-select");
