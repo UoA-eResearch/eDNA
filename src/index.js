@@ -32,33 +32,12 @@ window.sampleContextLookup = {};
  * generates the request URL and calls recalculating data functions when data is received.
  */
 export function createAggregateUrl() {
-  let contextFilters = $("#select-contextual").select2("data");
-  let taxonFilters = $("#select-taxonomic").select2("data");
   let ampliconFilters = $("#select-amplicon").select2("data");
 
   // Formatting and adding otu arguments
   let ontologyIds = [];
-  for (let i in taxonFilters) {
-    let taxonIdChain = taxonFilters[i];
-    let idChain = taxonIdChain.id.split(",").join("+");
-    ontologyIds.push(idChain);
-  }
   let url = API_URLS.sampleOtus;
   url += "otu=" + ontologyIds.join("&otu=");
-
-  // Formatting and adding contextual filters to url
-  if (contextFilters.length > 0) {
-    let s = contextFilters
-      .map(param => {
-        let paramEncoded = param.text;
-        paramEncoded = paramEncoded.replace("<", "$lt");
-        paramEncoded = paramEncoded.replace(">", "$gt");
-        paramEncoded = paramEncoded.replace("=", "$eq");
-        return "&q=" + paramEncoded;
-      })
-      .join("");
-    url += s;
-  }
 
   // amplicon filtering
   if (ampliconFilters.length > 0) {
@@ -793,7 +772,9 @@ export const { g, y, tooltip, x } = initPlotChart();
 // Adding functions to elements -----------------------------------------
 window.onload = () => {
   initOperatorSelect();
-  initOtuSelect();
+
+  // initOtuSelect();
+
   initAmpliconSearch();
   initRarityCheckbox();
   initSearchButton();
@@ -824,7 +805,7 @@ let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
 fetch(url).then(response => {
   // response.json().then(initContextSelect);
   response.json().then(jsonData => {
-    initContextSelect(jsonData);
+    // initContextSelect(jsonData);
     // initContextFieldSelect();
 
     let contextSelect = new ContextFieldSelect();
