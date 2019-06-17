@@ -279,7 +279,42 @@ class ContextValueSelect {
     console.log(this.element);
   }
 
-  updateOptions() {}
+  replaceContextValuesOptions() {
+    $("#context-values-select")
+      .empty()
+      .select2({
+        data: newOptions
+      });
+  }
+
+  createSelectOptions() {
+    let newOptions = optionData.map(option => {
+      return {
+        id: option,
+        text: option
+      };
+    });
+    return newOptions;
+  }
+
+  /**
+   * Queries the database for distinct values of the currently selected contextual field then uses them to populate the options list
+   */
+  updateContextValuesSelect() {
+    // updating the value suggestions for a given context field
+    let contextFieldSelect = document.getElementById("context-field-select");
+    // console.log(contextFieldSelect.value);
+    if (contextFieldSelect.value == "password") {
+    }
+    let url = API_URLS.contextualFieldValues + contextFieldSelect.value;
+    console.log("fetching context field distinct values for: " + url);
+    fetch(url).then(response => {
+      response.json().then(json => {
+        let newOptions = createSelectOptions(json.data);
+        replaceContextValuesOptions(newOptions);
+      });
+    });
+  }
 }
 
 class ContextFieldSelect {
