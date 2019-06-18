@@ -121,7 +121,8 @@ class ContextValueSelect {
     $("#context-values-select")
       .empty()
       .select2({
-        data: newOptions
+        data: newOptions,
+        tags: true
       });
   }
 
