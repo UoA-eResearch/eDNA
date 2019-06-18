@@ -648,10 +648,9 @@ const initSubmitOtuButton = () => {
   let addBtn = document.getElementById("add-otu-button");
   console.log(addBtn);
   addBtn.onclick = () => {
-    console.log("add clicked");
+    console.log("Adding otu combination to master query");
     let segmentSelectors = document.getElementsByClassName("taxonomic-select");
-
-    let taxonSegments = [];
+    let taxonTexts = [];
     let taxonIds = [];
     for (let item of segmentSelectors) {
       let select = $("#" + item.id);
@@ -660,12 +659,12 @@ const initSubmitOtuButton = () => {
         taxonIds.push("any");
         continue;
       } else {
-        taxonSegments.push(select.text());
+        taxonTexts.push(select.text());
         taxonIds.push(parseInt(select.val()));
       }
     }
     // join fk combination array using commas
-    let otuName = taxonSegments.join(";");
+    let otuName = taxonTexts.join(";");
     let fkCombination = "otu=" + taxonIds.join("+");
 
     // Set the value, creating a new option if necessary
@@ -680,6 +679,7 @@ const initSubmitOtuButton = () => {
       // Create a DOM Option and pre-select by default
       console.log("creating new option");
       let newOption = new Option(otuName, fkCombination, true, true);
+      console.log(newOption);
       // Append it to the select
       $("#combinationSelect")
         .append(newOption)

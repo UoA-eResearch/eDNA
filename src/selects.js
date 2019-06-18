@@ -32,15 +32,19 @@ const initAllTaxonomicSelects = () => {
           return args.join("&");
         },
         processResults: response => {
+          // empty before repopulating options
+          $("#" + taxonSelect.id).empty();
+
           let suggestions = response.suggestions;
-          let sumText = "";
+          let totalText = "";
           for (let index in suggestions) {
-            // checks if any of the results contain text values.
-            sumText += suggestions[index].text;
+            // checks if any of the results contain any truthy text values.
+            totalText += suggestions[index].text;
           }
-          if (!sumText) {
+          if (!totalText) {
             suggestions = [];
           }
+          console.log(suggestions);
           return {
             results: suggestions
           };
