@@ -766,15 +766,8 @@ const initSubmitSearch2Button = () => {
   };
 };
 
-//Adding d3 visualization
-export const { g, y, tooltip, x } = initPlotChart();
-
-// Adding functions to elements -----------------------------------------
-window.onload = () => {
+const initializeComponents = () => {
   initOperatorSelect();
-
-  // initOtuSelect();
-
   initAmpliconSearch();
   initRarityCheckbox();
   initSearchButton();
@@ -793,24 +786,18 @@ window.onload = () => {
 
   initSubmitContextButton();
 
-  // initContextValuesSelect();
+  let contextFieldSelect = new ContextFieldSelect();
   let contextValueSelect = new ContextValueSelect();
+  contextFieldSelect.onchange = contextValueSelect.updateContextValuesSelect;
 
   initSubmitSearch2Button();
 };
 
-// NOTE: load contextual options up front. Hardcoding some params.
-// possibly separate into a different API later on if we have time or a need.
-let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
-fetch(url).then(response => {
-  // response.json().then(initContextSelect);
-  response.json().then(jsonData => {
-    // initContextSelect(jsonData);
-    // initContextFieldSelect();
+//Adding d3 visualization
+export const { g, y, tooltip, x } = initPlotChart();
 
-    let contextSelect = new ContextFieldSelect();
-  });
-});
-// TODO: fix layer rendering only workng when contextual filter has conditions. Something to do with the backend not returning results when no contextual present.
-
+// Adding functions to elements -----------------------------------------
+window.onload = () => {
+  initializeComponents();
+};
 export { detailLevel, map, GetLayerBySampleContextId };

@@ -170,7 +170,7 @@ class ContextFieldSelect {
   }
 
   /**
-   * Loads the contextual fields from the database,
+   * Sets the handler function for onchange event of the mounted dom element for the contextual field.
    * @param   {[function]}  func  [Desired onchange function]
    */
   set onchange(func) {
