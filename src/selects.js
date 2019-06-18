@@ -85,6 +85,8 @@ class ContextValueSelect {
       .empty()
       .select2({
         data: newOptions,
+        width: "100%",
+        allowClear: true,
         tags: true
       });
   }
