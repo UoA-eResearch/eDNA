@@ -649,7 +649,7 @@ const initClearOtusButton = () => {
  * Get the states of the taxonomic selects, concatenate into one term. Add the new entry to the combination select2, select that new entry.
  */
 const initSubmitOtuButton = () => {
-  let addBtn = document.getElementById("addOtuBtn");
+  let addBtn = document.getElementById("add-otu-button");
   console.log(addBtn);
   addBtn.onclick = () => {
     console.log("add clicked");
@@ -788,7 +788,10 @@ const initializeComponents = () => {
 
   let contextFieldSelect = new ContextFieldSelect();
   let contextValueSelect = new ContextValueSelect();
-  contextFieldSelect.onchange = contextValueSelect.updateContextValuesSelect;
+  contextFieldSelect.onchange = () => {
+    // done like this so the 'this' keyword still references class methods.
+    contextValueSelect.updateContextValuesSelect();
+  };
 
   initSubmitSearch2Button();
 };

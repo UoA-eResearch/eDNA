@@ -66,43 +66,6 @@ const initCombinationSelect = () => {
   });
 };
 
-const replaceContextValuesOptions = newOptions => {
-  $("#context-values-select")
-    .empty()
-    .select2({
-      data: newOptions
-    });
-};
-
-const createSelectOptions = optionData => {
-  let newOptions = optionData.map(option => {
-    return {
-      id: option,
-      text: option
-    };
-  });
-  return newOptions;
-};
-
-/**
- * Queries the database for distinct values of the currently selected contextual field then uses them to populate the options list
- */
-const updateContextValuesSelect = () => {
-  // updating the value suggestions for a given context field
-  let contextFieldSelect = document.getElementById("context-field-select");
-  // console.log(contextFieldSelect.value);
-  if (contextFieldSelect.value == "password") {
-  }
-  let url = API_URLS.contextualFieldValues + contextFieldSelect.value;
-  console.log("fetching context field distinct values for: " + url);
-  fetch(url).then(response => {
-    response.json().then(json => {
-      let newOptions = createSelectOptions(json.data);
-      replaceContextValuesOptions(newOptions);
-    });
-  });
-};
-
 class ContextValueSelect {
   constructor() {
     this.id = "#context-values-select";
@@ -113,11 +76,9 @@ class ContextValueSelect {
       width: "100%",
       tags: true
     });
-    console.log(this.select2);
-    console.log(this.element);
   }
 
-  replaceContextValuesOptions() {
+  replaceContextValuesOptions(newOptions) {
     $("#context-values-select")
       .empty()
       .select2({
@@ -126,7 +87,7 @@ class ContextValueSelect {
       });
   }
 
-  createSelectOptions() {
+  createSelectOptions(optionData) {
     let newOptions = optionData.map(option => {
       return {
         id: option,
@@ -140,17 +101,13 @@ class ContextValueSelect {
    * Queries the database for distinct values of the currently selected contextual field then uses them to populate the options list
    */
   updateContextValuesSelect() {
-    // updating the value suggestions for a given context field
     let contextFieldSelect = document.getElementById("context-field-select");
-    // console.log(contextFieldSelect.value);
-    if (contextFieldSelect.value == "password") {
-    }
     let url = API_URLS.contextualFieldValues + contextFieldSelect.value;
     console.log("fetching context field distinct values for: " + url);
     fetch(url).then(response => {
       response.json().then(json => {
-        let newOptions = createSelectOptions(json.data);
-        replaceContextValuesOptions(newOptions);
+        let newOptions = this.createSelectOptions(json.data);
+        this.replaceContextValuesOptions(newOptions);
       });
     });
   }
@@ -163,7 +120,7 @@ class ContextFieldSelect {
     this.url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
     this.clearOptions();
     this.updateOptions();
-    this.domElement.onchange = updateContextValuesSelect;
+    // this.domElement.onchange = updateContextValuesSelect;
   }
 
   clearOptions() {
