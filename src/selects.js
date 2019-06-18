@@ -1,8 +1,6 @@
 // import s
 import * as $ from "jquery";
 import { API_URLS } from "./constants";
-import { createAggregateUrl } from "./index";
-import { request } from "http";
 
 /**
  * Iterates through the elements that are used as bases for select2 construction
@@ -24,7 +22,7 @@ const initAllTaxonomicSelects = () => {
           taxonSelect.id.replace("Select", "") +
           "/",
         delay: 250,
-        data: function(params) {
+        data: () => {
           let args = [];
           for (let item of taxonSelects) {
             // console.log(item.value);
@@ -33,7 +31,7 @@ const initAllTaxonomicSelects = () => {
           console.log(args.join("&"));
           return args.join("&");
         },
-        processResults: function(response, params) {
+        processResults: response => {
           let suggestions = response.suggestions;
           let sumText = "";
           for (let index in suggestions) {
