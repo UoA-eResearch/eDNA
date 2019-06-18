@@ -309,7 +309,7 @@ function initMap() {
     layers: tileLayer,
     fullscreenControl: true
   }).setView([-41.235726, 172.5118422], 5.75);
-  var bounds = map.getBounds();
+  let bounds = map.getBounds();
   bounds._northEast.lat += 10;
   bounds._northEast.lng += 10;
   bounds._southWest.lat -= 10;
@@ -317,10 +317,6 @@ function initMap() {
   map.setMaxBounds(bounds);
   return map;
 }
-
-//gets the params from the search bar
-var taxonParams = new URLSearchParams(window.location.search);
-var mode = taxonParams.get("mode");
 
 let detailLevel = 60;
 //warrick map additions
