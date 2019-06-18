@@ -539,6 +539,10 @@ leafletGraphControl.addTo(map);
  * Sets up the amplicon filter
  */
 const initAmpliconSearch = () => {
+  let optionList = ["Any", "16S", "18S", "26S", "COI", "ITS"];
+  let optionData = optionList.map(option => {
+    return { text: option, id: option };
+  });
   $("#select-amplicon").select2({
     placeholder: "Select amplicon",
     multiple: true,
@@ -546,32 +550,7 @@ const initAmpliconSearch = () => {
     width: "100%",
     // cache: true,
     tags: true,
-    data: [
-      {
-        text: "Any",
-        id: "Any"
-      },
-      {
-        text: "16S",
-        id: "16S"
-      },
-      {
-        text: "18S",
-        id: "18S"
-      },
-      {
-        text: "26S",
-        id: "26S"
-      },
-      {
-        text: "COI",
-        id: "COI"
-      },
-      {
-        text: "ITS",
-        id: "ITS"
-      }
-    ]
+    data: optionData
   });
   $("#select-amplicon").change(function() {
     createAggregateUrl();

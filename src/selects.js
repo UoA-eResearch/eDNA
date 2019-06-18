@@ -44,7 +44,6 @@ const initAllTaxonomicSelects = () => {
           if (!totalText) {
             suggestions = [];
           }
-          console.log(suggestions);
           return {
             results: suggestions
           };
