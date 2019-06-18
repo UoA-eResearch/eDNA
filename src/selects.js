@@ -126,6 +126,22 @@ class ContextFieldSelect {
     // this.domElement.onchange = updateContextValuesSelect;
   }
 
+  excludeFields(data) {
+    let excludedFields = [
+      "regional_council",
+      "primer_sequence_r",
+      "primer_sequence_f",
+      "vineyard",
+      "amplicon",
+      "host_plant",
+      "iwi_area"
+    ];
+    let filtered = data.filter(contextOption => {
+      return excludedFields.includes(contextOption) ? false : true;
+    });
+    return filtered;
+  }
+
   clearOptions() {
     this.domElement.length = 0;
   }
@@ -154,15 +170,14 @@ class ContextFieldSelect {
     console.log("populating context field options");
     fetch(this.url).then(response => {
       response.json().then(json => {
-        json.data.context_options.map(field => {
+        let filteredOptions = this.excludeFields(json.data.context_options);
+        filteredOptions.map(field => {
           let option = document.createElement("option");
           option.text = field;
           option.value = field;
           this.domElement.add(option);
         });
         this.selectedValue = 0;
-        // console.log(contextFieldSelect.value);
-        // updateContextValuesSelect();
         this.onchange();
       });
     });
