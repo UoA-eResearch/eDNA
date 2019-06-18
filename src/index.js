@@ -327,7 +327,7 @@ let scaleIndicator = L.control.scale().addTo(map);
 let sidebar = L.control
   .sidebar({ container: "sidebar", autopan: true })
   .addTo(map)
-  .open("home");
+  .open("search2");
 
 //instantiating empty layer control layers to be filled later
 let gridRichnessLayerGroup = L.layerGroup();
