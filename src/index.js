@@ -322,30 +322,30 @@ let detailLevel = 60;
 //warrick map additions
 
 //shows the scale of the map
-var scaleIndicator = L.control.scale().addTo(map);
+let scaleIndicator = L.control.scale().addTo(map);
 
-var sidebar = L.control
+let sidebar = L.control
   .sidebar({ container: "sidebar", autopan: true })
   .addTo(map)
   .open("home");
 
 //instantiating empty layer control layers to be filled later
-var gridRichnessLayerGroup = L.layerGroup();
-var gridAbundanceLayerGroup = L.layerGroup();
-var gridSitesLayerGroup = L.layerGroup();
-var heatLayerGroup = L.layerGroup();
+let gridRichnessLayerGroup = L.layerGroup();
+let gridAbundanceLayerGroup = L.layerGroup();
+let gridSitesLayerGroup = L.layerGroup();
+let heatLayerGroup = L.layerGroup();
 map.addLayer(heatLayerGroup);
 
-var baseMaps = {
+let baseMaps = {
   Base: tileLayer
 };
-var overlayLayerGroup = {
+let overlayLayerGroup = {
   "Grid: Abundance": gridAbundanceLayerGroup,
   "Grid: Richness": gridRichnessLayerGroup,
   "Heat: Abundance": heatLayerGroup,
   "Grid: Site Count": gridSitesLayerGroup
 };
-var layerMenuControl = L.control
+let layerMenuControl = L.control
   .layers(baseMaps, overlayLayerGroup, {
     position: "bottomleft",
     hideSingleBase: true,
@@ -679,7 +679,7 @@ const initSubmitOtuButton = () => {
     } else {
       // Create a DOM Option and pre-select by default
       console.log("creating new option");
-      var newOption = new Option(otuName, fkCombination, true, true);
+      let newOption = new Option(otuName, fkCombination, true, true);
       // Append it to the select
       $("#combinationSelect")
         .append(newOption)
@@ -727,7 +727,7 @@ const initSubmitContextButton = () => {
         $("#combinationSelect").val(contextFilterId);
       } else {
         console.log("creating new option");
-        var newOption = new Option(
+        let newOption = new Option(
           contextFilterText,
           contextFilterId,
           true,
