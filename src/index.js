@@ -548,7 +548,6 @@ const initAmpliconSearch = () => {
     multiple: true,
     allowClear: true,
     width: "100%",
-    // cache: true,
     tags: true,
     data: optionData
   });
