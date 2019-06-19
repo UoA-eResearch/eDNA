@@ -13,23 +13,12 @@ function aggregateSampleOtusBySite(sampleOtus) {
     let siteId = sampleOtu.sampleId;
     let otuId = sampleOtu.otuId;
     let abundance = sampleOtu.abundance;
-
     // if site doesn't exist set up blank site and always increment to avoid messy conditionals.
     if (!(siteId in siteAggs)) {
       siteAggs[siteId] = new SiteAggregate();
     }
     let siteAgg = siteAggs[siteId];
-    siteAgg.abundance += abundance;
-    // same default object creation principle applied to the otus sub-object.
-    if (!(otuId in siteAgg.otus)) {
-      siteAgg.otus[otuId] = {
-        abundance: 0,
-        count: 0
-      };
-      siteAgg.richness++;
-      siteAgg.otus[otuId].abundance += abundance;
-      siteAgg.otus[otuId].count++;
-    }
+    siteAgg.tryAddOtu(sampleOtu);
   }
   return siteAggs;
 }
@@ -48,6 +37,17 @@ class SiteAggregate {
     this.richness = 0;
     this.otus = {};
   }
+
+  tryAddOtu(sampleOtu) {
+    this.abundance += sampleOtu.abundance;
+    let otuId = sampleOtu.otuId;
+    if (!(sampleOtu.otuId in this.otus)) {
+      this.richness++;
+      this.otus[otuId] = new SiteAggregateOtu();
+    }
+    let siteAggOtu = this.otus[otuId];
+    siteAggOtu.incrementFromSampleOtu(sampleOtu.abundance);
+  }
 }
 
 // TODO: add adding and validation to the site and otu classes.
@@ -56,6 +56,11 @@ class SiteAggregateOtu {
   constructor() {
     this.abundance = 0;
     this.count = 0;
+  }
+
+  incrementFromSampleOtu(abundance) {
+    this.abundance += abundance;
+    this.richness++;
   }
 }
 

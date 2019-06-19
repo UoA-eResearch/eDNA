@@ -7,7 +7,6 @@ export function renderHeatLayer(siteAggs, heatLayerGroup, map) {
   let heatData = [];
   let maxWeight = 0;
   for (let siteId in siteAggs) {
-    console.log(siteAggs);
     let siteMeta = window.sampleContextLookup[siteId];
     let siteWeight = siteAggs[siteId].abundance;
     if (maxWeight < siteWeight) {
