@@ -1,6 +1,7 @@
 // import s
 import * as $ from "jquery";
 import { API_URLS } from "./constants";
+import { Utility } from "./utility";
 
 /**
  * Iterates through the elements that are used as bases for select2 construction
@@ -37,6 +38,8 @@ const initAllTaxonomicSelects = () => {
 
           let suggestions = response.suggestions;
           let totalText = "";
+          let allFalse = Utility.allFalsey(suggestions);
+          console.log(allFalse);
           for (let index in suggestions) {
             // checks if any of the results contain any truthy text values.
             totalText += suggestions[index].text;
