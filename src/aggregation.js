@@ -8,17 +8,15 @@ function aggregateSampleOtusBySite(sampleOtus) {
   let siteAggs = {};
   let missingOtus = [];
   for (let i in sampleOtus) {
-    let tuple = sampleOtus[i];
-    let otuId = tuple[0];
-    let siteId = tuple[1];
-    let abundance = tuple[2];
+    // NOTE: order of tuple is important.
+    let sampleOtu = new SampleOtu(...sampleOtus[i]);
+    let siteId = sampleOtu.sampleId;
+    let otuId = sampleOtu.otuId;
+    let abundance = sampleOtu.abundance;
+
     // if site doesn't exist set up blank site and always increment to avoid messy conditionals.
     if (!(siteId in siteAggs)) {
-      siteAggs[siteId] = {
-        abundance: 0,
-        richness: 0,
-        otus: {}
-      };
+      siteAggs[siteId] = new SiteAggregate();
     }
     let siteAgg = siteAggs[siteId];
     siteAgg.abundance += abundance;
@@ -34,6 +32,22 @@ function aggregateSampleOtusBySite(sampleOtus) {
     }
   }
   return siteAggs;
+}
+
+class SampleOtu {
+  constructor(otuId, sampleId, abundance) {
+    this.otuId = otuId;
+    this.sampleId = sampleId;
+    this.abundance = abundance;
+  }
+}
+
+class SiteAggregate {
+  constructor() {
+    this.abundance = 0;
+    this.richness = 0;
+    this.otus = {};
+  }
 }
 
 /**
