@@ -700,9 +700,11 @@ const initSubmitContextButton = () => {
         $("#combinationSelect").find("option[value='" + contextFilterId + "']")
           .length
       ) {
-        alert("Filter is already in the filter list");
+        // alert("Filter is already in the filter list");
         console.log("selecting existing option");
+
         $("#combinationSelect").val(contextFilterId);
+        $("#combinationSelect").trigger("change");
       } else {
         console.log("creating new option");
         let newOption = new Option(
