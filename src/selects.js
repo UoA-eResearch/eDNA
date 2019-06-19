@@ -35,16 +35,9 @@ const initAllTaxonomicSelects = () => {
         processResults: response => {
           // empty before repopulating options
           $("#" + taxonSelect.id).empty();
-
           let suggestions = response.suggestions;
-          let totalText = "";
-          let allFalse = Utility.allFalsey(suggestions);
-          console.log(allFalse);
-          for (let index in suggestions) {
-            // checks if any of the results contain any truthy text values.
-            totalText += suggestions[index].text;
-          }
-          if (!totalText) {
+          let allFalsyText = suggestions.every(x => (x.text ? false : true));
+          if (allFalsyText) {
             suggestions = [];
           }
           return {

@@ -12,10 +12,4 @@ const strongHeader = (header, text) => {
   return `<strong>${header}: </strong>${text}<br />`;
 };
 
-class Utility {
-  static allFalsey(arr, fn = Boolean) {
-    arr.every(fn);
-  }
-}
-
 export { strongLine, strongHeader, Utility };
