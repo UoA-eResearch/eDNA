@@ -50,6 +50,15 @@ class SiteAggregate {
   }
 }
 
+// TODO: add adding and validation to the site and otu classes.
+
+class SiteAggregateOtu {
+  constructor() {
+    this.abundance = 0;
+    this.count = 0;
+  }
+}
+
 /**
  * Iterates the site aggregates and sums the values by grid cell coordinates. Returns a dictionary which keys indicate positional offsets.
  * @param {*} siteAggs
