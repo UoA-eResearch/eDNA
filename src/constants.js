@@ -5,27 +5,24 @@ const PRD_BASE_URL = "https://edna.nectar.auckland.ac.nz/edna/api/v1.0/";
 // const activeUrl = PRD_BASE_URL;
 const activeUrl = PRD_BASE_URL;
 
-// const API_URLS = {
-//   // prod
-//   filtered_abundance: PRD_BASE_URL + "abundance?",
-//   filtered_meta: PRD_BASE_URL + "metadata?term=",
-//   ordered_sampleotu: PRD_BASE_URL + "sample_otu_ordered",
-
-//   prod_filter_suggestions: PRD_BASE_URL + "filter-options?",
-
-//   // dev
-//   test_sample_otu_pk: DEV_BASE_URL + "abundance?",
-//   dev_contextual_id: DEV_BASE_URL + "metadata?id=",
-//   filter_suggestions: DEV_BASE_URL + "filter-options?",
-//   otu_code_by_id: DEV_BASE_URL + "otu/?id="
-// };
-
 const API_URLS = {
-  // prod
   sampleOtus: activeUrl + "abundance?",
   metaData: activeUrl + "metadata?term=",
   otuSuggestions: activeUrl + "filter-options?",
-  otu_data_by_id: activeUrl + "otu/?id="
+  otuSegmentedSuggestions: activeUrl + "suggestions/",
+  otuDataById: activeUrl + "otu/?id=",
+
+  // test
+  contextualFieldValues: activeUrl + "context-suggestions/",
+
+  // test
+  kingdoms: activeUrl + "kingdom/",
+  phylum: activeUrl + "phylum/",
+  class: activeUrl + "class/",
+  order: activeUrl + "order/",
+  family: activeUrl + "family/",
+  genus: activeUrl + "genus/",
+  species: activeUrl + "species/"
 };
 
 export { DEV_BASE_URL, PRD_BASE_URL, activeUrl, API_URLS };

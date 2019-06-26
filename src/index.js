@@ -1,14 +1,26 @@
-import * as _ from "lodash";
 import * as L from "leaflet";
 import * as d3 from "d3";
-import * as $ from "jquery";
+import $ from "jquery";
 import "../js/leaflet.heat";
 import "../js/leaflet-slider";
+import "leaflet-sidebar-v2";
 import select2 from "../js/select2.min.js";
 import "../js/L.Control.Range";
 import { updateGraph, initPlotChart, updatePlotCircleColours } from "./plot";
 import { API_URLS } from "./constants";
 import { renderHeatLayer, featureCollectionToLayer } from "./map";
+import {
+  initAllTaxonomicSelects,
+  initOtuSelect,
+  initCombinationSelect,
+  initContextSelect,
+  ContextFieldSelect,
+  ContextValueSelect
+} from "./selects";
+import {
+  aggregateSampleOtusBySite,
+  aggregateSamplesByCell
+} from "./aggregation";
 
 window.circles = [];
 window.contextTags = [];
@@ -19,35 +31,13 @@ window.sampleContextLookup = {};
 /**
  * generates the request URL and calls recalculating data functions when data is received.
  */
-function fetchSampleOtus() {
-  console.log("constructing query from filters");
-  let contextFilters = $("#select-contextual").select2("data");
-  let taxonFilters = $("#select-taxonomic").select2("data");
+export function createAggregateUrl() {
   let ampliconFilters = $("#select-amplicon").select2("data");
 
   // Formatting and adding otu arguments
   let ontologyIds = [];
-  for (let i in taxonFilters) {
-    let taxonIdChain = taxonFilters[i];
-    let idChain = taxonIdChain.id.split(",").join("+");
-    ontologyIds.push(idChain);
-  }
   let url = API_URLS.sampleOtus;
   url += "otu=" + ontologyIds.join("&otu=");
-
-  // Formatting and adding contextual filters to url
-  if (contextFilters.length > 0) {
-    let s = contextFilters
-      .map(param => {
-        let paramEncoded = param.text;
-        paramEncoded = paramEncoded.replace("<", "$lt");
-        paramEncoded = paramEncoded.replace(">", "$gt");
-        paramEncoded = paramEncoded.replace("=", "$eq");
-        return "&q=" + paramEncoded;
-      })
-      .join("");
-    url += s;
-  }
 
   // amplicon filtering
   if (ampliconFilters.length > 0) {
@@ -65,7 +55,8 @@ function fetchSampleOtus() {
     }
   }
 
-  if (document.getElementById("endemic-checkbox").checked) {
+  // test
+  if (document.getElementById("rarity-checkbox").checked) {
     url += "&endemic=true";
   } else {
   }
@@ -74,9 +65,14 @@ function fetchSampleOtus() {
   } else {
     url += "&operator=intersection";
   }
-
   console.log("request url: " + url);
+  requestSampleOtus(url);
+}
 
+/**
+ * Gets sampleOtu data and triggers for recalculations on response
+ */
+const requestSampleOtus = url => {
   // fetch the url
   showLoadingMessage();
   fetch(url).then(response => {
@@ -85,7 +81,7 @@ function fetchSampleOtus() {
       calculateSampleOtuData(responseData);
     });
   });
-}
+};
 
 /**
  * recalculates where data fits on the grid structure without fetching new data from the server.
@@ -95,7 +91,7 @@ function recalculateGridLayer() {
     calculateSampleOtuData(window.previousResults);
   } else {
     // $("#select-taxonomic").trigger("change");
-    fetchSampleOtus();
+    createAggregateUrl();
   }
 }
 
@@ -133,9 +129,12 @@ function calculateSampleOtuData(responseData) {
     let sampleContext = sampleContexts[i];
     window.sampleContextLookup[sampleContext.id] = sampleContext;
   }
-  let siteAggregatedData = aggregateBySite(sampleOtus);
+  let siteAggregatedData = aggregateSampleOtusBySite(sampleOtus);
   renderHeatLayer(siteAggregatedData, heatLayerGroup, map);
-  let cellAggregatedData = aggregateByCell(siteAggregatedData, sampleContexts);
+  let cellAggregatedData = aggregateSamplesByCell(
+    siteAggregatedData,
+    sampleContexts
+  );
   let featureCollection = makeFeatureCollection(cellAggregatedData);
 
   let abundanceLayer = featureCollectionToLayer(
@@ -181,137 +180,6 @@ function addLayerIdToSampleContext(layerGroup) {
   });
 }
 
-/**
- * Iterates the sample otu json response and sums the values by site
- * @param {*} sampleOtus
- */
-function aggregateBySite(sampleOtus) {
-  let siteAggs = {};
-  let missingOtus = [];
-  for (let i in sampleOtus) {
-    let tuple = sampleOtus[i];
-    let otuId = tuple[0];
-    let siteId = tuple[1];
-    let abundance = tuple[2];
-    // if site doesn't exist set up blank site and always increment to avoid messy conditionals.
-    if (!(siteId in siteAggs)) {
-      siteAggs[siteId] = {
-        abundance: 0,
-        richness: 0,
-        otus: {}
-      };
-    }
-    let siteAgg = siteAggs[siteId];
-    siteAgg.abundance += abundance;
-    // same default object creation principle applied to the otus sub-object.
-    if (!(otuId in siteAgg.otus)) {
-      siteAgg.otus[otuId] = {
-        abundance: 0,
-        count: 0
-      };
-      siteAgg.richness++;
-      siteAgg.otus[otuId].abundance += abundance;
-      siteAgg.otus[otuId].count++;
-    }
-  }
-  return siteAggs;
-}
-
-/**
- * Iterates the site aggregates and sums the values by grid cell coordinates. Returns a dictionary which keys indicate positional offsets.
- * @param {*} siteAggs
- * @param {*} sampleContexts
- */
-function aggregateByCell(siteAggs) {
-  // setting up grid parameters
-  makeGrid(detailLevel);
-  // console.log("aggregate by cell");
-  let start = [164.71222, -33.977509];
-  let end = [178.858982, -49.66352];
-  const hardBounds = L.latLngBounds(start, end);
-  const northWest = hardBounds.getNorthWest();
-  const northEast = hardBounds.getNorthEast();
-  const southWest = hardBounds.getSouthWest();
-  // NOTE: alternative way of calculating is incorrectly plotting. some strange offset.
-  // const northWest = L.latLng(start[0], start[1]);
-  // const northEast = L.latLng(start[0], end[1]);
-  // const southWest = L.latLng(end[0], start[1]);
-  const latOffset = (northWest.lat - southWest.lat) / detailLevel;
-  const lngOffset = (northEast.lng - northWest.lng) / detailLevel;
-  // using the params for generating the keys
-  let cellAggs = {};
-  for (let siteId in siteAggs) {
-    let site = siteAggs[siteId];
-    let sampleContext = window.sampleContextLookup[siteId];
-    let x = sampleContext.longitude;
-    let y = sampleContext.latitude;
-    let cellKey = generateCellKey(x, y, start, lngOffset, latOffset);
-    // if doesn't exist, create the cell.
-    if (!(cellKey in cellAggs)) {
-      cellAggs[cellKey] = {
-        abundance: 0,
-        richness: 0,
-        sites: [],
-        otus: {},
-        coordinates: calculateCellCoordinates(
-          cellKey,
-          start,
-          lngOffset,
-          latOffset
-        )
-      };
-    }
-    // Adding values that are allowed to overlap/accumulate.
-    let cell = cellAggs[cellKey];
-    cell.abundance += site.abundance;
-    cell.sites.push(siteId);
-    for (let otuId in site.otus) {
-      let siteOtu = site.otus[otuId];
-      if (!(otuId in cell.otus)) {
-        cell.otus[otuId] = {
-          abundance: 0,
-          count: 0
-        };
-        // alternatively just use the otus keys length and assign to richness.
-        cell.richness++;
-      }
-      let cellOtu = cell.otus[otuId];
-      cellOtu.abundance += siteOtu.abundance;
-      cellOtu.count += siteOtu.count;
-    }
-    for (let key in cellAggs) {
-      let cellAgg = cellAggs[key];
-      cellAgg["siteCount"] = cellAgg.sites.length;
-    }
-  }
-  return cellAggs;
-
-  function calculateCellCoordinates(key, start, latOffset, lngOffset) {
-    // can use the key + grid start to reverse engineer the coordinates
-    let offsets = parseInt(key);
-    let yFactor = Math.floor(offsets / detailLevel);
-    let xFactor = offsets % detailLevel;
-    let cellStartX = start[0] + lngOffset * xFactor;
-    let cellStartY = start[1] - latOffset * yFactor;
-    // order: topleft, topright, bottomright, bottomleft
-    return [
-      [cellStartX, cellStartY],
-      [cellStartX + lngOffset, cellStartY],
-      [cellStartX + lngOffset, cellStartY - latOffset],
-      [cellStartX, cellStartY - latOffset]
-    ];
-  }
-
-  function generateCellKey(x, y, start, latOffset, lngOffset) {
-    let lngDiff = Math.abs(x) - Math.abs(start[0]);
-    let colIndex = Math.floor(lngDiff / lngOffset);
-    let latDiff = Math.abs(y) - Math.abs(start[1]);
-    let rowIndex = Math.floor(latDiff / latOffset);
-    let cellKey = rowIndex * detailLevel + colIndex;
-    return cellKey;
-  }
-}
-
 function makeFeatureCollection(cellAggs) {
   let maxes = calculateMaxes(cellAggs);
   let featureCollection = {
@@ -343,6 +211,10 @@ function makeFeatureCollection(cellAggs) {
   }
   return featureCollection;
 
+  /**
+   * Calculates the maximum values within a cell
+   * @param {*} cellAggs
+   */
   function calculateMaxes(cellAggs) {
     let abundance = 0;
     let richness = 0;
@@ -369,7 +241,6 @@ function makeFeatureCollection(cellAggs) {
 
 function showLoadingMessage() {
   let loadingBanner = document.getElementById("loading-popup");
-  // loadingBanner.classList = "map-popup--visible";
   loadingBanner.classList.remove("map-popup--hidden");
   loadingBanner.classList.add("map-popup--visible");
 }
@@ -378,74 +249,6 @@ function hideLoadingMessage() {
   let loadingBanner = document.getElementById("loading-popup");
   loadingBanner.classList.remove("map-popup--visible");
   loadingBanner.classList.add("map-popup--hidden");
-}
-
-/**
- * Makes grid array for cells. Each cell starts off with only containing coordinates.
- * @param {*} detailLevel
- */
-function makeGrid(detailLevel) {
-  //Hard coded bounds and offsets.
-  const gridStart = [164.71222, -33.977509];
-  const gridEnd = [178.858982, -49.66352];
-
-  const hardBounds = L.latLngBounds(gridStart, gridEnd);
-  let northWest = hardBounds.getNorthWest();
-  let northEast = hardBounds.getNorthEast();
-  let southWest = hardBounds.getSouthWest();
-  const latOffset = (northWest.lat - southWest.lat) / detailLevel;
-  const lngOffset = (northEast.lng - northWest.lng) / detailLevel;
-  // console.log(latOffset, lngOffset);
-  // The bounds method seems to make the rectangle less distorted
-  // const latOffset = (gridStart[1] - gridEnd[1]) / detailLevel;
-  // const lngOffset = (gridEnd[0] - gridStart[0]) / detailLevel;
-
-  let gridCells = [];
-  let cellStart = gridStart;
-  for (let i = 0; i < detailLevel; i++) {
-    for (let j = 0; j < detailLevel; j++) {
-      //create rectangle polygon.
-      const cell = makeCell();
-      gridCells.push(cell);
-      cellStart = incrementLongitude();
-    }
-    cellStart = resetLongitudeDecrementLatitude();
-  }
-
-  let grid = {
-    start: gridStart,
-    lngOffset: lngOffset,
-    latOffset: latOffset,
-    detailLevel: detailLevel,
-    cells: gridCells
-  };
-  return grid;
-
-  function incrementLongitude() {
-    return [cellStart[0] + lngOffset, cellStart[1]];
-  }
-
-  function resetLongitudeDecrementLatitude() {
-    return [cellStart[0] - lngOffset * detailLevel, cellStart[1] - latOffset];
-  }
-
-  function makeCell() {
-    let topLeft = [cellStart[0], cellStart[1]];
-    let topRight = [cellStart[0] + lngOffset, cellStart[1]];
-    let bottomRight = [cellStart[0] + lngOffset, cellStart[1] - latOffset];
-    let bottomLeft = [cellStart[0], cellStart[1] - latOffset];
-    let cell = [topLeft, topRight, bottomRight, bottomLeft];
-    cell = {
-      coordinates: cell,
-      abundance: 0,
-      richness: 0,
-      cellSpecies: {},
-      cellSites: [],
-      hasSamples: false
-    };
-    // console.log(cell.coordinates);
-    return cell;
-  }
 }
 
 /**
@@ -497,15 +300,16 @@ const tileLayer = L.tileLayer(
   }
 );
 
-export const map = initMap();
+const map = initMap();
 function initMap() {
+  // document.body.innerHTML = `<div id="map"></div>`;
   let map = L.map("map", {
     zoomSnap: 0.25,
     zoomDelta: 0.25,
     layers: tileLayer,
     fullscreenControl: true
   }).setView([-41.235726, 172.5118422], 5.75);
-  var bounds = map.getBounds();
+  let bounds = map.getBounds();
   bounds._northEast.lat += 10;
   bounds._northEast.lng += 10;
   bounds._southWest.lat -= 10;
@@ -514,41 +318,34 @@ function initMap() {
   return map;
 }
 
-//Defines how the proj4 function is to convert.
-//in this case proj4 is being set up to convert longlat to cartesian.
-// TODO: coordinate conversion: Change EPSG:2193 to EPSG:4326? To match the bulk convert.
-// proj4.defs(
-//   "EPSG:2193",
-//   "+proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 +x_0=1600000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
-// );
-
-//gets the params from the search bar
-var taxonParams = new URLSearchParams(window.location.search);
-var mode = taxonParams.get("mode");
-
-var detailLevel = 60;
+let detailLevel = 60;
 //warrick map additions
 
 //shows the scale of the map
-var scaleIndicator = L.control.scale().addTo(map);
+let scaleIndicator = L.control.scale().addTo(map);
+
+let sidebar = L.control
+  .sidebar({ container: "sidebar", autopan: true })
+  .addTo(map)
+  .open("search2");
 
 //instantiating empty layer control layers to be filled later
-var gridRichnessLayerGroup = L.layerGroup();
-var gridAbundanceLayerGroup = L.layerGroup();
-var gridSitesLayerGroup = L.layerGroup();
-var heatLayerGroup = L.layerGroup();
+let gridRichnessLayerGroup = L.layerGroup();
+let gridAbundanceLayerGroup = L.layerGroup();
+let gridSitesLayerGroup = L.layerGroup();
+let heatLayerGroup = L.layerGroup();
 map.addLayer(heatLayerGroup);
 
-var baseMaps = {
+let baseMaps = {
   Base: tileLayer
 };
-var overlayLayerGroup = {
+let overlayLayerGroup = {
   "Grid: Abundance": gridAbundanceLayerGroup,
   "Grid: Richness": gridRichnessLayerGroup,
   "Heat: Abundance": heatLayerGroup,
   "Grid: Site Count": gridSitesLayerGroup
 };
-var layerMenuControl = L.control
+let layerMenuControl = L.control
   .layers(baseMaps, overlayLayerGroup, {
     position: "bottomleft",
     hideSingleBase: true,
@@ -561,7 +358,7 @@ var layerMenuControl = L.control
  * Takes in a sample contextual index, iterates through all active and stamped map layers, then returns the last matching layer with leaflet id. Assumes sample contextual contains a leafletId value.
  * @param {integer} id
  */
-export function GetLayerBySampleContextId(id) {
+function GetLayerBySampleContextId(id) {
   let targetLeafletIds = window.sampleContextLookup[id].leafletIds;
   // for now just iterate through all layers. Final layer that matches is returned.
   let targetLayer;
@@ -595,7 +392,6 @@ function initializeDisplayOptionsControls() {
   let gridResSlider = L.control.slider(
     function(value) {
       detailLevel = value;
-      // TODO: directly call fetchSampleOTU data instead of triggering a change.
       recalculateGridLayer();
     },
     {
@@ -739,231 +535,45 @@ leafletGraphControl.onAdd = function() {
 };
 leafletGraphControl.addTo(map);
 
-function initOtuSelect() {
-  let taxonSelect = $("#select-taxonomic").select2({
-    placeholder: "Type to filter by organism classification",
-    multiple: true,
-    allowClear: true,
-    width: "100%",
-    minimumInputLength: 1,
-    // cache: true,
-    tags: true,
-    ajax: {
-      // url: API_URLS.local_filter_options,
-      // url: API_URLS.filter_suggestions,
-      url: API_URLS.otuSuggestions,
-      delay: 250,
-      data: function(params) {
-        // iteratively rebuild the suggestions?
-        console.log("requesting more search suggestions");
-        let query = {
-          q: params.term,
-          page: params.page || 1,
-          page_size: params.page_size || 50
-        };
-        return query;
-      },
-      processResults: function(response, params) {
-        // don't really know why this params page thing is necessary but it is.
-        console.log("updating selection options from request.");
-        params.page = params.page || 1;
-        params.page_size = params.page_size || 50;
-        let data = response.data;
-        let total_results = data.total_results;
-        let index = 0;
-        if (window.otuLookup == null || window.otuLookup === undefined) {
-          window.otuLookup = {};
-        }
-        let taxonOptions = data.taxonomy_options.map(taxon => {
-          // return structure = { pk, otu code, otu pk }
-          let option = {
-            id: taxon[1],
-            text: taxon[0],
-            group: "taxon"
-          };
-          index++;
-          // window.otuLookup[taxon[2]] = taxon[0];
-          if (!window.otuLookup[taxon[2]]) {
-            window.otuLookup[taxon[2]] = {
-              code: taxon[0]
-            };
-          }
-          return option;
-        });
-
-        // making window lookup, not necessary until later really.
-        // dont need to look up a primary key if you already have it.
-        // var taxonLookup = window.otuLookup;
-        // console.log(taxonLookup);
-        // console.log(taxonOptions[0]);
-        let moreResults = params.page * params.page_size < total_results;
-        let groupedOptions = {
-          results: [
-            {
-              text: "Custom",
-              children: window.taxonTags
-            },
-            {
-              text: "Taxonomic",
-              children: taxonOptions
-            }
-          ],
-          pagination: {
-            more: moreResults
-          }
-        };
-        return groupedOptions;
-        // console.log(params.page * params.page_size);
-        // console.log(total_results);
-      }
-    },
-    createTag: function(params) {
-      let term = $.trim(params.term);
-      if (term === "") {
-        return null;
-      }
-      let newTag = {
-        id: term,
-        text: term,
-        newTag: true // add additional parameters
-      };
-      // TODO: just re-add the local tags to the returns options everytime.
-      // TODO: Alternatively, clear the local taxon and meta tags everytime.
-      // window.taxonTags.push(newTag);
-      // console.log(window.local_tags);
-      return newTag;
-    }
-  });
-  taxonSelect.change(function() {
-    fetchSampleOtus();
-  });
-  return taxonSelect;
-}
-
-function initContextSelect(responseData) {
-  let excludedFields = [
-    "regional_council",
-    "primer_sequence_r",
-    "primer_sequence_f",
-    "vineyard",
-    "amplicon",
-    "host_plant",
-    "iwi_area"
-  ];
-  let data = responseData.data.context_options
-    .filter(contextOption => {
-      if (!excludedFields.includes(contextOption)) {
-        return true;
-      } else {
-        return false;
-      }
-    })
-    .map(field => {
-      if (!excludedFields.includes(field)) {
-        return {
-          id: field,
-          text: field
-        };
-      } else {
-        console.log("excluding the field" + field);
-      }
-    });
-  $("#select-contextual").select2({
-    placeholder: "Search by sample contextual metadata",
-    multiple: true,
-    allowClear: true,
-    width: "100%",
-    // cache: true,
-    tags: true,
-    data: data,
-    tokenSeparators: [",", " "],
-    createTag: function(params) {
-      let term = $.trim(params.term);
-      if (term === "") {
-        return null;
-      }
-      let newTag = {
-        id: term,
-        text: term,
-        newTag: true // add additional parameters
-      };
-      // TODO: just re-add the local tags to the returns options everytime.
-      // TODO: Alternatively, clear the local taxon and meta tags everytime.
-      window.contextTags.push(newTag);
-      // console.log(window.local_tags);
-      return newTag;
-    }
-    // insertTag: function(data, tag) {
-    //    wanting to place custom tags at the end.
-    //    data.push(tag);
-    // }
-  });
-  $("#select-contextual").change(function() {
-    fetchSampleOtus();
-  });
-}
-
 /**
  * Sets up the amplicon filter
  */
 const initAmpliconSearch = () => {
+  let optionList = ["Any", "16S", "18S", "26S", "COI", "ITS"];
+  let optionData = optionList.map(option => {
+    return { text: option, id: option };
+  });
   $("#select-amplicon").select2({
     placeholder: "Select amplicon",
     multiple: true,
     allowClear: true,
     width: "100%",
-    // cache: true,
     tags: true,
-    data: [
-      {
-        text: "Any",
-        id: "Any"
-      },
-      {
-        text: "16S",
-        id: "16S"
-      },
-      {
-        text: "18S",
-        id: "18S"
-      },
-      {
-        text: "26S",
-        id: "26S"
-      },
-      {
-        text: "COI",
-        id: "COI"
-      },
-      {
-        text: "ITS",
-        id: "ITS"
-      }
-    ]
+    data: optionData
   });
   $("#select-amplicon").change(function() {
-    fetchSampleOtus();
+    createAggregateUrl();
   });
 };
 
-function initEndemicCheckbox() {
-  let radio = document.getElementById("endemic-checkbox");
+function initRarityCheckbox() {
+  let radio = document.getElementById("rarity-checkbox");
   radio.onchange = function() {
-    fetchSampleOtus();
+    createAggregateUrl();
   };
 }
 
 function initOperatorSelect() {
   let selectOperator = document.getElementById("select-operator");
   selectOperator.onchange = function() {
-    fetchSampleOtus();
+    createAggregateUrl();
   };
 }
 
 function initSearchButton() {
   let submitButton = document.getElementById("search-button");
   submitButton.onclick = function() {
-    fetchSampleOtus();
+    createAggregateUrl();
   };
 }
 
@@ -990,15 +600,152 @@ const initPlotColourSchemeSelect = () => {
   };
 };
 
-//Adding d3 visualization
-export const { g, y, tooltip, x } = initPlotChart();
+const initClearOtusButton = () => {
+  let clearBtn = document.getElementById("selectClearAll");
+  clearBtn.onclick = () => {
+    console.log("clear all clicked");
+    let taxonSelects = document
+      .getElementById("search2")
+      .getElementsByClassName("taxonomic-select");
 
-// Adding functions to elements -----------------------------------------
-window.onload = () => {
+    // iterate through the selects, make their selection null, clear the stored suggestions
+    for (let item of taxonSelects) {
+      $("#" + item.id)
+        .val(null)
+        .trigger("change");
+      let taxonSelect = document.getElementById(item.id);
+      taxonSelect.length = 0;
+    }
+  };
+};
+
+/**
+ * Get the states of the taxonomic selects, concatenate into one term. Add the new entry to the combination select2, select that new entry.
+ */
+const initSubmitOtuButton = () => {
+  let addBtn = document.getElementById("add-otu-button");
+  console.log(addBtn);
+  addBtn.onclick = () => {
+    console.log("Adding otu combination to master query");
+    let segmentSelectors = document.getElementsByClassName("taxonomic-select");
+    let taxonTexts = [];
+    let taxonIds = [];
+    for (let item of segmentSelectors) {
+      let select = $("#" + item.id);
+      if (!select.val()) {
+        // taxonSegments.push("");
+        taxonIds.push("any");
+        continue;
+      } else {
+        taxonTexts.push(select.text());
+        taxonIds.push(parseInt(select.val()));
+      }
+    }
+    // join fk combination array using commas
+    let otuName = taxonTexts.join(";");
+    let fkCombination = "otu=" + taxonIds.join("+");
+
+    // Set the value, creating a new option if necessary
+    if (
+      $("#combinationSelect").find("option[value='" + fkCombination + "']")
+        .length
+    ) {
+      $("#combinationSelect")
+        .val(fkCombination)
+        .trigger("change");
+    } else {
+      // Create a DOM Option and pre-select by default
+      console.log("creating new option");
+      let newOption = new Option(otuName, fkCombination, true, true);
+      console.log(newOption);
+      // Append it to the select
+      $("#combinationSelect")
+        .append(newOption)
+        .trigger("change");
+    }
+
+    // check if joined fk in combination select options
+
+    // if not, add it and select it
+
+    // else, select it
+  };
+};
+
+const initSubmitContextButton = () => {
+  let submitContextBtn = document.getElementById("add-context-btn");
+
+  submitContextBtn.onclick = () => {
+    let contextInput = document.getElementById("context-values-select");
+    if (contextInput.value) {
+      let contextFieldSelect = document.getElementById("context-field-select");
+      let contextOperatorSelect = document.getElementById(
+        "context-operator-select"
+      );
+
+      let contextFilterText =
+        contextFieldSelect.value +
+        contextOperatorSelect.value +
+        contextInput.value;
+
+      let contextFilterId =
+        "q=" +
+        contextFieldSelect.value +
+        "$" +
+        contextOperatorSelect.value +
+        contextInput.value;
+
+      // Set the value, creating a new option if necessary
+      if (
+        $("#combinationSelect").find("option[value='" + contextFilterId + "']")
+          .length
+      ) {
+        // alert("Filter is already in the filter list");
+        console.log("selecting existing option");
+
+        $("#combinationSelect").val(contextFilterId);
+        $("#combinationSelect").trigger("change");
+      } else {
+        console.log("creating new option");
+        let newOption = new Option(
+          contextFilterText,
+          contextFilterId,
+          true,
+          true
+        );
+        // Append it to the select
+        $("#combinationSelect")
+          .append(newOption)
+          .trigger("change");
+      }
+      // WIP: get the values and concatenate then add them to the main query constructor. Could either group them or do something like that
+    } else {
+      console.log("empty input field");
+      alert("Nothing entered in the input field");
+    }
+  };
+};
+
+const initSubmitSearch2Button = () => {
+  let submitSearchButton = document.getElementById("submit-search");
+  submitSearchButton.onclick = () => {
+    let combinedFilters = $("#combinationSelect").select2("data");
+    let params = combinedFilters.map(filter => {
+      return filter.id;
+    });
+    console.log(params);
+    console.log(params.join("&"));
+    let slug = params.join("&");
+    let url = API_URLS.sampleOtus + slug;
+    // console.log(url);
+    requestSampleOtus(url);
+  };
+};
+
+const initializeComponents = () => {
   initOperatorSelect();
-  initOtuSelect();
   initAmpliconSearch();
-  initEndemicCheckbox();
+  initRarityCheckbox();
   initSearchButton();
 
   initTogglePlotButton();
@@ -1007,14 +754,29 @@ window.onload = () => {
 
   initializeDisplayOptionsControls();
   initializeDisplayControlButton();
+
+  initAllTaxonomicSelects();
+  initCombinationSelect();
+  initClearOtusButton();
+  initSubmitOtuButton();
+
+  initSubmitContextButton();
+
+  let contextFieldSelect = new ContextFieldSelect();
+  let contextValueSelect = new ContextValueSelect();
+  contextFieldSelect.onchange = () => {
+    // done like this so the 'this' keyword still references class methods.
+    contextValueSelect.updateContextValuesSelect();
+  };
+
+  initSubmitSearch2Button();
 };
 
-// NOTE: load contextual options up front. Hardcoding some params.
-// possibly separate into a different API later on if we have time or a need.
-let url = API_URLS.otuSuggestions + "q=&page=1&page_size=200";
-fetch(url).then(response => {
-  response.json().then(initContextSelect);
-});
+//Adding d3 visualization
+export const { g, y, tooltip, x } = initPlotChart();
 
-// TODO: fix layer rendering only workng when contextual filter has conditions. Something to do with the backend not returning results when no contextual present.
-// TODO: standardise abundance values from 0-1 or something like that.
+// Adding functions to elements -----------------------------------------
+window.onload = () => {
+  initializeComponents();
+};
+export { detailLevel, map, GetLayerBySampleContextId };

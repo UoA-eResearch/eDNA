@@ -4,6 +4,18 @@ context("Request behaviour", function() {
     cy.get("#numberResults").contains(/^[0-9]+$/);
   });
 
+  describe("taxonomic kingdom select", () => {
+    it("Should suggest fungi when typing in fungi", () => {
+      cy.get(".select2-container:first").click();
+      cy.get(".select2-search__field:first").type("k__fungi");
+      // cy
+      // cy.get('.select2-results__option[data-select2-id="63"]').contains(
+      cy.get('.select2-results__option[data-select2-id="63"]').contains(
+        "k__Fungi"
+      );
+    });
+  });
+
   it("Default settings should return results on initial page load.", function() {
     // cy.visit("/"); // change URL to match your dev URL
     cy.get("#numberResults").contains(/^[0-9]*$/);
@@ -13,23 +25,23 @@ context("Request behaviour", function() {
     // TODO: clear filters before each of these tests
     cy.get("#numberResults").contains(/^[0-9]+$/);
     cy.get("#numberResults").then(numResults => {
-      let unendemicCount = numResults.text();
+      let commonOtuCount = numResults.text();
 
-      cy.get("#endemic-checkbox").click();
+      cy.get("#rarity-checkbox").click();
 
       cy.get("#loading-popup").should("have.class", "map-popup--hidden");
 
       cy.get("#numberResults")
         .invoke("text")
-        .should(endemicCount => {
-          expect(endemicCount).to.be.lessThan(unendemicCount);
+        .should(rareOtuCount => {
+          expect(rareOtuCount).to.be.lessThan(commonOtuCount);
         });
     });
 
     // probably assert or make sure it's set to intersection/AND?
 
     // resetting state
-    cy.get("#endemic-checkbox").click();
+    cy.get("#rarity-checkbox").click();
   });
 
   it("More otu parameters should contain more results", function() {
@@ -59,15 +71,17 @@ context("Request behaviour", function() {
     cy.get(".select2-search__field:first").type("{enter}", { force: true });
 
     cy.get("#numberResults").then(numResults => {
-      let oneParamCount = numResults.text();
+      let oneParamCount = parseInt(numResults.text());
       cy.get("#contextual-wrapper .select2-search__field:first").type(
         "elevation=100 {enter}"
       );
       cy.get("#loading-popup").should("have.class", "map-popup--hidden");
       //   cy.get(".select2-search__field:first").type("{enter}");
+      cy.get("#numberResults").contains(/^[0-9]+$/);
       cy.get("#numberResults")
         .invoke("text")
-        .should(twoParamCount => {
+        .should(numResultsText => {
+          let twoParamCount = parseInt(numResultsText);
           expect(twoParamCount).to.be.lessThan(oneParamCount);
         });
     });
@@ -83,15 +97,17 @@ context("Request behaviour", function() {
 
     cy.get("#numberResults").then(numResults => {
       cy.get("#select-operator").select("or");
-      let oneParamCount = numResults.text();
+      let oneParamCount = parseInt(numResults.text());
       cy.get("#contextual-wrapper .select2-search__field:first").type(
-        "elevation=0 {enter}"
+        "elevation=0 {enter}",
+        { force: true }
       );
       cy.get("#loading-popup").should("have.class", "map-popup--hidden");
       //   cy.get(".select2-search__field:first").type("{enter}");
       cy.get("#numberResults")
         .invoke("text")
-        .should(twoParamCount => {
+        .should(numResultsText => {
+          let twoParamCount = parseInt(numResultsText);
           expect(twoParamCount).to.be.greaterThan(oneParamCount);
         });
     });
@@ -99,7 +115,7 @@ context("Request behaviour", function() {
 
   it("Adding amplicon filter should reduce number of results from unfiltered set", () => {
     cy.get("#numberResults").then(numResults => {
-      let unfilteredCount = numResults.text();
+      let unfilteredCount = parseInt(numResults.text());
 
       cy.get("#amplicon-wrapper .select2-container:first").click();
       cy.get("#amplicon-wrapper .select2-search__field:first").type("its");
@@ -110,7 +126,8 @@ context("Request behaviour", function() {
       //   cy.get(".select2-search__field:first").type("{enter}");
       cy.get("#numberResults")
         .invoke("text")
-        .should(ampliconFilteredCount => {
+        .should(numResultsText => {
+          let ampliconFilteredCount = parseInt(numResultsText);
           expect(ampliconFilteredCount).to.be.lessThan(unfilteredCount);
         });
     });
