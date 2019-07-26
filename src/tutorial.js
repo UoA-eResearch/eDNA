@@ -164,8 +164,16 @@ const quickAdd = (tour, text, element, addPosition) => {
     classes: "example-step-extra-class",
     buttons: [
       {
+        text: "Back",
+        action: tour.back
+      },
+      {
         text: "Next",
         action: tour.next
+      },
+      {
+        text: "End tour",
+        action: tour.cancel
       }
     ]
   });
