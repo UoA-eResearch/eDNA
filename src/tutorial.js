@@ -6,6 +6,7 @@ export const CreateTour = () => {
       classes: "shadow-md bg-purple-dark",
       scrollTo: true
     }
+    // useModalOverlay: true
   });
 
   // "This hub is used for visualising eDNA data is various ways."
@@ -165,6 +166,7 @@ const quickAdd = (tour, text, element, addPosition) => {
     buttons: [
       {
         text: "Back",
+        secondary: true,
         action: tour.back
       },
       {
@@ -173,6 +175,7 @@ const quickAdd = (tour, text, element, addPosition) => {
       },
       {
         text: "End tour",
+        secondary: true,
         action: tour.cancel
       }
     ]
