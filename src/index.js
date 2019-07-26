@@ -22,6 +22,10 @@ import {
   aggregateSamplesByCell
 } from "./aggregation";
 
+import { CreateTour } from "./tutorial";
+
+CreateTour();
+
 window.circles = [];
 window.contextTags = [];
 window.siteAggregates = {};

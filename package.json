@@ -12,6 +12,7 @@
     "lodash": "^4.17.11",
     "nouislider": "^12.1.0",
     "select2": "^4.0.6-rc.1",
+    "shepherd.js": "^3.1.0",
     "style-loader": "^0.23.1",
     "typescript": "^2.9.2"
   },
