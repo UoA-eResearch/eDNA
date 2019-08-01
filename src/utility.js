@@ -12,4 +12,10 @@ const strongHeader = (header, text) => {
   return `<strong>${header}: </strong>${text}<br />`;
 };
 
-export { strongLine, strongHeader, Utility };
+const addClasses = (elem, classes) => {
+  classes.split(" ").forEach(clas => {
+    elem.classList.add(clas);
+  });
+};
+
+export { strongLine, strongHeader, Utility, addClasses };
