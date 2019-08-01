@@ -7,12 +7,7 @@ export const CreateTour = () => {
       classes: "tutorial-theme__btn",
       scrollTo: true
     }
-    // useModalOverlay: true
   });
-
-  // "This hub is used for visualising eDNA data is various ways."
-  // "To search, click on the S2 panel to the left, from here you can search by an organisms taxonomic classification..."
-  // "You can also search by contextual information, that means you can search by properties of the eDNA data itself."
   quickAdd(tour, "Welcome to the eDNA Virtual Hub.", null);
   quickAdd(
     tour,
