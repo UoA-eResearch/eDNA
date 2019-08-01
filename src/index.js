@@ -495,6 +495,7 @@ leafletGraphControl.onAdd = function() {
   // label
   let colorByLabel = document.createElement("label");
   colorByLabel.innerHTML = " Colour by: ";
+  colorByLabel.classList.add("label");
   plotContainer.appendChild(colorByLabel);
 
   // select 1
@@ -521,6 +522,7 @@ leafletGraphControl.onAdd = function() {
   // select 2
   let colorTypeLabel = document.createElement("label");
   colorTypeLabel.innerHTML = " Colour scheme: ";
+  colorTypeLabel.classList.add("label");
   plotContainer.appendChild(colorTypeLabel);
 
   let colourSchemeSelect = document.createElement("select");

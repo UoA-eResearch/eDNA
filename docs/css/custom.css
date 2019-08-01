@@ -168,9 +168,9 @@ text-shadow: 0px 0px 6px rgba(255, 255, 255, 1);
 -moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
 transition: all 0.4s ease 0s;
 }
-label {
+
+.label {
     margin-top: 0.4em;
     font-weight: 600;
     color: #777;
 }
-
