@@ -136,7 +136,7 @@
                 value="true"
               />
               <br />
-              <button id="search-button" class="search__button">Search</button>
+              <button id="search-button" class="button">Search</button>
               <br />
             </div>
           </div>
@@ -243,20 +243,20 @@
             </div>
           </div>
           <button
+            id="add-otu-button"
+            class="search button"
+            title="Add current OTU to your query set."
+            data-cy="add-otu-btn"
+          >
+            Add taxon filter
+          </button>
+          <button
             id="selectClearAll"
-            class="search search__button"
+            class="search button"
             title="Clear current taxonomic selection"
             data-cy="clear-btn"
           >
             Clear
-          </button>
-          <button
-            id="add-otu-button"
-            class="search search_button"
-            title="Add current OTU to your query set."
-            data-cy="add-otu-btn"
-          >
-            Add taxon filters to query
           </button>
 
           <h2 id="contextual-selects">Contextual</h2>
@@ -299,17 +299,17 @@
 
           <button
             id="add-context-btn"
-            class="search search__button"
+            class="search button"
             data-cy="add-context-btn"
           >
-            Add context filters to query
+            Add context filter
           </button>
 
           <button
             id="submit-search"
             title="Request data with all search parameters"
             data-cy="submit-search-btn"
-            class="search search__button btn btn-primary"
+            class="search button button--special"
           >
             Search for OTUs
           </button>
