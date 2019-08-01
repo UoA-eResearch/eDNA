@@ -131,9 +131,21 @@ div.tooltip {
     flex-direction: column;
     justify-content: space-between;
     align-items: stretch;
-    margin: 0.4em;
+    margin: 0.2em;
 }
 
 .tutorial-theme__btn {
     margin: 2em;
 }
+
+/* button {
+color: #fff !important;
+text-transform: uppercase;
+text-decoration: none;
+background: #364a52;
+padding: 0.3em;
+border-radius: 50px;
+display: inline-block;
+border: none;
+transition: all 0.4s ease 0s; */
+/* } */

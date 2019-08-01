@@ -138,17 +138,22 @@
 
         <h2 id="contextual-selects">Contextual</h2>
         <div class="contextual-select-container">
+          <label for="context-field-select">Contextual field
           <select name="contextual field select" id="context-field-select" class="search search__select" data-cy="context-field-select">
             <option value="" disabled selected>Select a contextual field...</option>
           </select>
-          <select name="context operator select" id="context-operator-select" class="search search__select">
-            <option value="gt">greater than</option>
-            <option value="eq">equal to</option>
-            <option value="lt">less than</option>
-          </select>
-          <!-- <input type="value" id="context-input" class="context-query-item" data-cy="context-input"> -->
-          <select name="context values select" id="context-values-select" class="search search__select">
-          </select>
+          </label>
+          <label for="context-operator-select">Filter type
+            <select name="context operator select" id="context-operator-select" class="search search__select">
+              <option value="gt">greater than</option>
+              <option value="eq">equal to</option>
+              <option value="lt">less than</option>
+            </select>
+          </label>
+          <label for="context-values-select">Context field value
+            <select name="context values select" id="context-values-select" class="search search__select">
+            </select>
+          </label>
         </div>
 
         <button id="add-context-btn" class="search search__button" data-cy="add-context-btn">Add context filters to query</button>
