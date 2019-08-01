@@ -21,6 +21,7 @@ import {
   aggregateSampleOtusBySite,
   aggregateSamplesByCell
 } from "./aggregation";
+import { addClasses } from "./utility";
 
 import { CreateTour } from "./tutorial";
 
@@ -455,7 +456,13 @@ function initializeDisplayOptionsControls() {
     );
     displayControlVisibleButton.id = "display-controls-root-button";
     displayControlVisibleButton.innerHTML = "Display Settings";
-    displayControlVisibleButton.className = "info leaflet-control";
+    // displayControlVisibleButton.classList.add("leaflet-control");
+    // displayControlVisibleButton.classList.add("button");
+    // displayControlVisibleButton.classList.add("button--no-margin");
+    addClasses(
+      displayControlVisibleButton,
+      "leaflet-control button button--no-margin"
+    );
     displayControlRoot.appendChild(displayControlVisibleButton);
     return displayControlRoot;
   };
@@ -485,6 +492,7 @@ leafletGraphControl.onAdd = function() {
   let toggleButton = document.createElement("button");
   toggleButton.id = "graph-button";
   toggleButton.innerHTML = "Toggle plot";
+  toggleButton.classList.add("button");
   plotContainer.appendChild(toggleButton);
 
   // label
