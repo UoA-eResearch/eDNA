@@ -1,12 +1,12 @@
 import Shepherd from "shepherd.js";
 
 export const CreateTour = () => {
-  const tour = new Shepherd.Tour({
-    defaultStepOptions: {
-      // classes: "shadow-md bg-purple-dark",
-      classes: "tutorial-theme__btn",
-      scrollTo: true
-    }
+  let tour = new Shepherd.Tour({
+    defaults: {
+      // classes: "shepherd-theme-default"
+      classes: "custom"
+    },
+    useModelOverlay: true
   });
   quickAdd(tour, "Welcome to the eDNA Virtual Hub.", null);
   quickAdd(

@@ -1,61 +1,64 @@
-@import url('https://rsms.me/inter/inter.css');
-html { font-family: 'Inter', sans-serif; }
+@import url("https://rsms.me/inter/inter.css");
+html {
+  font-family: "Inter", sans-serif;
+}
 @supports (font-variation-settings: normal) {
-  html { font-family: 'Inter var', sans-serif; }
+  html {
+    font-family: "Inter var", sans-serif;
+  }
 }
 /* BEM Block__element--modifier. --modifiers occur on blocks */
 
-
 /* Test flexbox css */
 #flex-container-state {
-    -moz-box-align: center;
-    -moz-box-pack: center;
-    -ms-flex-align: center;
-    -ms-flex-pack: center;
-    -webkit-align-items: center;
-    -webkit-box-align: center;
-    -webkit-box-pack: center;
-    -webkit-justify-content: center;
-    align-items: center;
-    bottom: 0;
-    display: -moz-box;
-    display: -ms-flexbox;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: flex;
-    justify-content: center;
-    left: 0;
-    position: fixed;
-    right: 0;
-    top: 0;
-    z-index: 1000;
+  -moz-box-align: center;
+  -moz-box-pack: center;
+  -ms-flex-align: center;
+  -ms-flex-pack: center;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  align-items: center;
+  bottom: 0;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 1000;
 }
 /* test end */
 
 .info {
-    padding: 6px 8px;
-    font: 14px/16px Arial, Helvetica, sans-serif;
-    background: white;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-    border-radius: 5px;
+  padding: 6px 8px;
+  font: 14px/16px Arial, Helvetica, sans-serif;
+  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
 }
 
 .info h4 {
-    margin: 0 0 5px;
-    color: #777;
+  margin: 0 0 5px;
+  color: #777;
 }
 
 .axis path,
 .axis line {
-    fill: none;
-    stroke: #eee;
-    shape-rendering: crispEdges;
+  fill: none;
+  stroke: #eee;
+  shape-rendering: crispEdges;
 }
 
 .axis text {
-    font-family: sans-serif;
-    font-size: 11px;
+  font-family: sans-serif;
+  font-size: 11px;
 }
 
 .chart text {
@@ -66,111 +69,124 @@ html { font-family: 'Inter', sans-serif; }
 }
 
 div.tooltip {
-    position: absolute;
-    text-align: left;
-    padding: 3px;
-    font: 12px sans-serif;
-    background: #eeeeee;
-    border: 0px;
-    border-radius: 4px;
-    pointer-events: none;
+  position: absolute;
+  text-align: left;
+  padding: 3px;
+  font: 12px sans-serif;
+  background: #eeeeee;
+  border: 0px;
+  border-radius: 4px;
+  pointer-events: none;
 }
 
 .svg-container {
-    display: inline-block;
-    position: relative;
-    width: 100%;
-    padding-bottom: 100%; /* aspect ratio */
-    vertical-align: top;
-    overflow: hidden;
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; /* aspect ratio */
+  vertical-align: top;
+  overflow: hidden;
 }
 .svg-content-responsive {
-    display: inline-block;
-    position: absolute;
-    top: 10px;
-    left: 0;
+  display: inline-block;
+  position: absolute;
+  top: 10px;
+  left: 0;
 }
 
 .map-popup--visible {
-    position: fixed;
-    visibility: visible;
-    left: 50%;
-    top: 50%;
-    z-index: 1000;
+  position: fixed;
+  visibility: visible;
+  left: 50%;
+  top: 50%;
+  z-index: 1000;
 }
 
 .map-popup--hidden {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    z-index: -5;
-    visibility: hidden;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: -5;
+  visibility: hidden;
 }
 
 .feather {
-    display: block;
-    margin:auto;
-    text-align: center;
-    /* color: hsla(210, 100%, 100%, 0.9) !important;
+  display: block;
+  margin: auto;
+  text-align: center;
+  /* color: hsla(210, 100%, 100%, 0.9) !important;
     background: hsla(210, 100%, 50%, 0.9) !important;
     outline: solid 0.25rem hsla(210, 100%, 50%, 0.9) !important; */
 }
 
 .select2-dropdown {
-    z-index: 9001;
+  z-index: 9001;
 }
 
 .select-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
 }
 
 .search {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: stretch;
-    margin: 0.2em 0.2em 0.2em 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  margin: 0.2em 0.2em 0.2em 0;
 }
 
 .tutorial-theme__btn {
-    margin: 2em;
+  margin: 2em;
 }
 
-.button {
-color: #fff ;
-text-decoration: none;
-font-weight: 700; 
-background: #3b975a;
-padding: 0.4em;
-border-radius: 0.3em;
-display: inline-block;
-border: none;
-transition: all 0.4s ease 0s; 
-margin: 0.2em;
+.button .shepherd-button {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  background: #3b975a;
+  padding: 0.4em;
+  border-radius: 0.3em;
+  display: inline-block;
+  border: none;
+  transition: all 0.4s ease 0s;
+  margin: 0.2em;
 }
 
 .button--no-margin {
-    /* display: block; */
-    margin: 0em;
+  /* display: block; */
+  margin: 0em;
 }
 
 .button--special {
-    margin-top: 1.5em;
-    display: block;
-    padding: 0.7em 1em;
+  margin-top: 1.5em;
+  display: block;
+  padding: 0.7em 1em;
 }
 
 .button:hover {
-text-shadow: 0px 0px 6px rgba(255, 255, 255, 1);
--webkit-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
--moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
-transition: all 0.4s ease 0s;
+  text-shadow: 0px 0px 6px rgba(255, 255, 255, 1);
+  -webkit-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
+  -moz-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
+  transition: all 0.4s ease 0s;
 }
 
 .label {
-    margin-top: 0.4em;
-    font-weight: 600;
-    color: #777;
+  margin-top: 0.4em;
+  font-weight: 600;
+  color: #777;
+}
+
+.shepherd-button {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  background: #3b975a;
+  padding: 0.4em;
+  border-radius: 0.3em;
+  display: inline-block;
+  border: none;
+  transition: all 0.4s ease 0s;
+  margin: 0.2em;
 }
