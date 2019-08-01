@@ -57,7 +57,7 @@ export const CreateTour = () => {
   addBottom(
     tour,
     "Then select how you want to filter the property by",
-    "#context-field-select"
+    "#context-operator-select"
   );
   addBottom(
     tour,
