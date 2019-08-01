@@ -1,5 +1,10 @@
-
+@import url('https://rsms.me/inter/inter.css');
+html { font-family: 'Inter', sans-serif; }
+@supports (font-variation-settings: normal) {
+  html { font-family: 'Inter var', sans-serif; }
+}
 /* BEM Block__element--modifier. --modifiers occur on blocks */
+
 
 /* Test flexbox css */
 #flex-container-state {
@@ -126,4 +131,9 @@ div.tooltip {
     flex-direction: column;
     justify-content: space-between;
     align-items: stretch;
+    margin: 0.4em;
+}
+
+.tutorial-theme__btn {
+    margin: 2em;
 }

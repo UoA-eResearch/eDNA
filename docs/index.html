@@ -48,7 +48,7 @@
 
       <!-- bottom aligned tabs -->
       <ul role="tablist">
-        <li><a href="https://github.com/nickpeihl/leaflet-sidebar-v2"><svg class="feather"></svg></a></li>
+        <li><a href="https://github.com/UoA-eResearch/eDNA"><svg class="feather"></svg></a></li>
       </ul>
     </div>
 
@@ -87,40 +87,56 @@
       </div>
 
       <div class="leaflet-sidebar-pane" id="search2">
-        <h1>Segmented Search
+        <h1>eDNA Search
           <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
         </h1>
-        <h2 id="taxonomic-search-title">Taxonomic Selects</h2>
-        <div id="taxonomic-search" class="taxon-search">
+        <h2 id="taxonomic-search-title">Taxonomic</h2>
+        <div id="taxonomic-search" class="search search__container">
           <div id="combinationSelectWrapper">
-            <select name="combinationSelect" id="combinationSelect" class="search search__select"></select>
+            <label for="combinationSelect">Active Filters
+              <select name="combinationSelect" id="combinationSelect" class="search search__select"></select>
+            </label>
           </div>
-          <div id="kingdomSelectWrapper">
-            <select name="kingdomSelect" id="kingdomSelect" class="search taxonomic-select" data-cy="kingdomSelect"></select>
+          <div id="kingdomSelectWrapper" class="search search__select">
+            <label for="kingdomSelect">Kingdom
+              <select name="kingdomSelect" id="kingdomSelect" class="search taxonomic-select" data-cy="kingdomSelect"></select>
+            </label>
           </div>
-          <div id="phylumSelectWrapper">
-            <select name="phylumSelect" id="phylumSelect" class="search taxonomic-select"></select>
+          <div id="phylumSelectWrapper" class="search search__select">
+            <label for="phylumSelect">Phylum
+              <select name="phylumSelect" id="phylumSelect" class="search taxonomic-select"></select>
+            </label>
           </div>
-          <div id="classSelectWrapper">
-            <select name="classSelect" id="classSelect" class="search taxonomic-select"></select>
+          <div id="classSelectWrapper" class="search search__select">
+            <label for="classSelect">Class
+              <select name="classSelect" id="classSelect" class="search taxonomic-select"></select>
+            </label>
           </div>
-          <div id="orderSelectWrapper">
+          <div id="orderSelectWrapper" class="search search__select">
+            <label for="orderSelect">Order
             <select name="orderSelect" id="orderSelect" class="search taxonomic-select"></select>
+            </label>
           </div>
-          <div id="familySelectWrapper">
-            <select name="familySelect" id="familySelect" class="search taxonomic-select"></select>
+          <div id="familySelectWrapper" class="search search__select">
+            <label for="familySelect">Family
+              <select name="familySelect" id="familySelect" class="search taxonomic-select"></select>
+            </label>
           </div>
-          <div id="genusSelectWrapper">
-            <select name="genusSelect" id="genusSelect" class="search taxonomic-select"></select>
+          <div id="genusSelectWrapper" class="search search__select">
+            <label for="genusSelect">Genus
+              <select name="genusSelect" id="genusSelect" class="search taxonomic-select"></select>
+            </label>
           </div>
-          <div id="speciesSelectWrapper">
-            <select name="speciesSelect" id="speciesSelect" class="search taxonomic-select"></select>
+          <div id="speciesSelectWrapper" class="search search__select">
+            <label for="speciesSelect">Species
+              <select name="speciesSelect" id="speciesSelect" class="search taxonomic-select"></select>
+            </label>
           </div>
         </div>
-        <button id="selectClearAll" title="Clear current taxonomic selection" data-cy="clear-btn">Clear</button>
-        <button id="add-otu-button" title="Add current OTU to your query set." data-cy="add-otu-btn">Add OTU to query</button>
+        <button id="selectClearAll" class="search search__button" title="Clear current taxonomic selection" data-cy="clear-btn">Clear</button>
+        <button id="add-otu-button" class="search search_button" title="Add current OTU to your query set." data-cy="add-otu-btn">Add taxon filters to query</button>
 
-        <h2 id="contextual-selects">Contextual Selects</h2>
+        <h2 id="contextual-selects">Contextual</h2>
         <div class="contextual-select-container">
           <select name="contextual field select" id="context-field-select" class="search search__select" data-cy="context-field-select">
             <option value="" disabled selected>Select a contextual field...</option>
@@ -135,7 +151,7 @@
           </select>
         </div>
 
-        <button id="add-context-btn" class="search search__button" data-cy="add-context-btn">Add context to query</button>
+        <button id="add-context-btn" class="search search__button" data-cy="add-context-btn">Add context filters to query</button>
 
         <button id="submit-search" title="Request data with all search parameters" data-cy="submit-search-btn" class="search search__button">Search for
           OTUs

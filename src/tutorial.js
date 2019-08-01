@@ -3,7 +3,8 @@ import Shepherd from "shepherd.js";
 export const CreateTour = () => {
   const tour = new Shepherd.Tour({
     defaultStepOptions: {
-      classes: "shadow-md bg-purple-dark",
+      // classes: "shadow-md bg-purple-dark",
+      classes: "tutorial-theme__btn",
       scrollTo: true
     }
     // useModalOverlay: true
