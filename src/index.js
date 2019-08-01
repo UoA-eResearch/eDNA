@@ -456,9 +456,6 @@ function initializeDisplayOptionsControls() {
     );
     displayControlVisibleButton.id = "display-controls-root-button";
     displayControlVisibleButton.innerHTML = "Display Settings";
-    // displayControlVisibleButton.classList.add("leaflet-control");
-    // displayControlVisibleButton.classList.add("button");
-    // displayControlVisibleButton.classList.add("button--no-margin");
     addClasses(
       displayControlVisibleButton,
       "leaflet-control button button--no-margin"
