@@ -139,7 +139,7 @@ div.tooltip {
 }
 
 .button {
-color: #fff !important;
+color: #fff ;
 text-decoration: none;
 font-weight: 700; 
 background: #3b975a;
