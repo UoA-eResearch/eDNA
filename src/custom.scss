@@ -9,6 +9,15 @@ html {
 }
 /* BEM Block__element--modifier. --modifiers occur on blocks */
 
+html,
+body,
+#map {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 /* Test flexbox css */
 #flex-container-state {
   -moz-box-align: center;
@@ -138,7 +147,7 @@ div.tooltip {
   margin: 2em;
 }
 
-.button, 
+.button,
 .shepherd-button {
   color: #fff;
   text-decoration: none;
@@ -162,7 +171,7 @@ div.tooltip {
   padding: 0.7em 1em;
 }
 
-.shepherd-button:hover, 
+.shepherd-button:hover,
 .button:hover {
   text-shadow: 0px 0px 6px rgba(255, 255, 255, 1);
   -webkit-box-shadow: 0px 5px 40px -10px rgba(0, 0, 0, 0.57);
@@ -178,16 +187,16 @@ div.tooltip {
 }
 
 .tippy-tooltip {
-    /* background: #fff; */
-    background: rgb(204, 236, 205);
-    font-weight: 450;
-    color: #222222;
-    border: #fff;
-    font-size: 0.8em;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  /* background: #fff; */
+  background: rgb(204, 236, 205);
+  font-weight: 450;
+  color: #222222;
+  border: #fff;
+  font-size: 0.8em;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
 
 .search__select {
-    border-radius: 0.3em;
-    display: flex;
+  border-radius: 0.3em;
+  display: flex;
 }

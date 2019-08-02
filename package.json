@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Goal of this pilot project is to produce a working example of a visualization system used to geographically display eDNA data from New Zealand. The display is, by default, a scalable grid of NZ, with samples falling into bins based on their latitude/longitude. The bins display as a heat map based on abundance. This will toggle between a sample view (where each sample contributes a count of one to the heat map), and a species view (where the heat map is made by summing abundances of all species). These heat map visualizations can be sub-selected by search functions of the metadata. Ultimately, it should be possible to sub-select any combination of metadata, but for the pilot this can just be some simple examples (e.g. elevation, basic environment type). This may also include some broad taxonomic divisions selectable as clickboxes (e.g. bacteria/archaea/animals/plants/fungi/protists). The species view should have a toggle between normalizing the heat-map to the number of samples from that grid bin, or not.",
   "dependencies": {
-    "css-loader": "^1.0.1",
     "d3": "^5.8.0",
     "file-loader": "^2.0.0",
     "jquery": "^3.3.1",
@@ -13,7 +12,6 @@
     "nouislider": "^12.1.0",
     "select2": "^4.0.6-rc.1",
     "shepherd.js": "^3.1.0",
-    "style-loader": "^0.23.1",
     "typescript": "^2.9.2"
   },
   "devDependencies": {
@@ -25,9 +23,13 @@
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^24.6.0",
     "babel-loader": "^8.0.4",
+    "css-loader": "^1.0.1",
     "cypress": "^3.2.0",
     "jest": "^24.6.0",
     "leaflet-sidebar-v2": "^3.1.1",
+    "node-sass": "^4.12.0",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.23.1",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0",
     "webpack-dev-server": "^3.1.14"
