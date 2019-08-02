@@ -114,9 +114,6 @@ div.tooltip {
   display: block;
   margin: auto;
   text-align: center;
-  /* color: hsla(210, 100%, 100%, 0.9) !important;
-    background: hsla(210, 100%, 50%, 0.9) !important;
-    outline: solid 0.25rem hsla(210, 100%, 50%, 0.9) !important; */
 }
 
 .select2-dropdown {
@@ -156,7 +153,6 @@ div.tooltip {
 }
 
 .button--no-margin {
-  /* display: block; */
   margin: 0em;
 }
 
