@@ -128,7 +128,7 @@ class ContextFieldSelect {
       "primer_sequence_r",
       "primer_sequence_f",
       "vineyard",
-      "amplicon",
+      // "amplicon",
       "host_plant",
       "iwi_area"
     ];
