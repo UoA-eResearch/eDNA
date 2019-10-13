@@ -24,9 +24,9 @@ describe("The plot circles", function() {
     cy.get(".leaflet-control-layers-overlays input:first").click();
     cy.wait(3000);
     cy.get("#_279:first")
-      .should("have.attr", "r", "7")
+      .should("have.attr", "r", "5")
       .trigger("mouseover", { force: true })
-      .should("have.attr", "r", "14");
+      .should("have.attr", "r", "10");
   });
 });
 
