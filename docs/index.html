@@ -135,16 +135,14 @@
 
         <div class="leaflet-sidebar-pane" id="search2">
           <h1>
-            eDNA Search
+            eDNA Search Filters
             <span class="leaflet-sidebar-close"
               ><i class="fa fa-caret-left"></i
             ></span>
           </h1>
-          <h2 id="taxonomic-search-title" class="search search__section-title">Taxonomic</h2>
-          <div id="taxonomic-search" class="search search__container">
             <div id="combinationSelectWrapper">
               <label class="label" for="combinationSelect"
-                >Active Filters
+                >All Active Filters
                 <select
                   name="combinationSelect"
                   id="combinationSelect"
@@ -152,6 +150,8 @@
                 ></select>
               </label>
             </div>
+          <h2 id="taxonomic-search-title" class="search search__section-title">Taxonomic Filter</h2>
+          <div id="taxonomic-search" class="search search__container">
             <div id="kingdomSelectWrapper" class="search search__select">
               <label class="label" for="kingdomSelect"
                 >Kingdom
@@ -241,10 +241,10 @@
             Clear
           </button>
 
-          <h2 id="contextual-selects" class="search search__section-title">Contextual</h2>
+          <h2 id="contextual-selects" class="search search__section-title">Metadata Filter</h2>
           <div class="contextual-select-container">
             <label class="label" for="context-field-select"
-              >Contextual field
+              >Metadata field
               <select
                 name="contextual field select"
                 id="context-field-select"
