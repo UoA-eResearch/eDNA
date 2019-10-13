@@ -2,6 +2,7 @@ import * as L from "leaflet";
 import { API_URLS } from "./constants";
 import * as d3 from "d3";
 import { strongHeader, strongLine } from "./utility";
+import { plotConfig } from "./plot";
 
 export function renderHeatLayer(siteAggs, heatLayerGroup, map) {
   let heatData = [];
@@ -110,13 +111,14 @@ function handleGridLayerClick(e) {
 }
 
 function handleGridLayerMouseOver(e) {
+  // TODO: Should be in plot file.
   let layer = e.target;
   layer.feature.properties.sites.forEach(siteId => {
     let circle = d3.selectAll("#_" + siteId);
     circle
       .transition()
       .duration(250)
-      .attr("r", 14);
+      .attr("r", plotConfig.activeCircleRadius);
   });
 }
 
@@ -126,13 +128,14 @@ function handleGridLayerMouseOver(e) {
  * @return  {void}
  */
 function handleGridLayerMouseOut(e) {
+  // TODO: Should be in plot file.
   let layer = e.target;
   layer.feature.properties.sites.forEach(siteId => {
     let circle = d3.selectAll("#_" + siteId);
     circle
       .transition()
       .duration(250)
-      .attr("r", 7);
+      .attr("r", plotConfig.inactiveCircleRadius);
   });
 }
 

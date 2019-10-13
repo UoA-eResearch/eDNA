@@ -3,6 +3,29 @@ import * as _ from "lodash";
 import { map, g, tooltip, x, y, GetLayerBySampleContextId } from "./index";
 import { strongLine, strongHeader } from "./utility";
 import { highlightLayer, disableHighlightLayer } from "./map";
+import { textChangeRangeIsUnchanged } from "typescript";
+
+let inactiveCircleRadius = 5;
+let activeCircleRadius = 10;
+
+let meanCircleRadius = 13;
+
+let circleScatterWidth = 30;
+
+class CirclePlot {
+  constructor() {
+    this.inactiveCircleRadius = 7;
+    this.activeCircleRadius = 14;
+    this.meanCircleRadius = 17;
+  }
+}
+
+export const plotConfig = {
+  inactiveCircleRadius: 5,
+  activeCircleRadius: 10,
+  meanCircleRadius: 13,
+  circleScatterWidth: 30
+};
 
 function initPlotChart() {
   var margin = { top: 20, right: 30, bottom: 20, left: 150 },
@@ -168,9 +191,12 @@ function updateGraph(siteAggregates) {
         //.attr('cy', y(d.key))
         .attr("cy", function(circle) {
           // * If no jitter wanted then set jitter 0, 0.
-          return y(circle.Metric) + randomRange(10, -10);
+          return (
+            y(circle.Metric) +
+            randomRange(circleScatterWidth / 2, -circleScatterWidth / 2)
+          );
         })
-        .attr("r", 7)
+        .attr("r", inactiveCircleRadius)
         .attr("opacity", 0.3)
         .attr("fill", function(d) {
           // TODO: this is duplicate code to the other coloring stuff
@@ -186,7 +212,7 @@ function updateGraph(siteAggregates) {
           d3.select(this.parentNode.parentNode)
             .selectAll("#" + "_" + d.siteId)
             .transition()
-            .attr("r", 14)
+            .attr("r", activeCircleRadius)
             .duration(250);
           tooltip
             .transition()
@@ -216,7 +242,7 @@ function updateGraph(siteAggregates) {
           d3.select(this.parentNode.parentNode)
             .selectAll("#" + "_" + d.siteId)
             .transition()
-            .attr("r", 7)
+            .attr("r", inactiveCircleRadius)
             .duration(250);
           tooltip
             .transition()
@@ -253,7 +279,7 @@ function updateGraph(siteAggregates) {
         .append("circle")
         .attr("class", "enter-mean")
         .attr("cy", y(d.key))
-        .attr("r", 15)
+        .attr("r", meanCircleRadius)
         .style("stroke", "grey")
         .style("stroke-width", 2)
         .style("fill", "none")
@@ -460,5 +486,6 @@ export {
   updateGraph,
   initPlotChart,
   getActivePlotMetric,
-  updatePlotCircleColours
+  updatePlotCircleColours,
+  CirclePlot
 };
