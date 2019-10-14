@@ -22,6 +22,8 @@ class CirclePlot {
 
 export const plotConfig = {
   inactiveCircleRadius: 5,
+  inactiveOpacity: 0.3,
+  activeOpacity: 0.9,
   activeCircleRadius: 10,
   meanCircleRadius: 13,
   circleScatterWidth: 30
@@ -196,8 +198,8 @@ function updateGraph(siteAggregates) {
             randomRange(circleScatterWidth / 2, -circleScatterWidth / 2)
           );
         })
-        .attr("r", inactiveCircleRadius)
-        .attr("opacity", 0.3)
+        .attr("r", plotConfig.inactiveCircleRadius)
+        .attr("opacity", plotConfig.inactiveOpacity)
         .attr("fill", function(d) {
           // TODO: this is duplicate code to the other coloring stuff
           let fillColour;
@@ -212,11 +214,11 @@ function updateGraph(siteAggregates) {
           d3.select(this.parentNode.parentNode)
             .selectAll("#" + "_" + d.siteId)
             .transition()
-            .attr("r", activeCircleRadius)
+            .attr("r", plotConfig.activeCircleRadius)
             .duration(250);
           tooltip
             .transition()
-            .style("opacity", 0.9)
+            .style("opacity", plotConfig.activeOpacity)
             .duration(250);
 
           tooltip
@@ -230,7 +232,7 @@ function updateGraph(siteAggregates) {
             )
             .style("left", d3.event.pageX + "px")
             .style("top", d3.event.pageY - 10 + "px")
-            .style("opacity", 0.9)
+            .style("opacity", plotConfig.activeOpacity)
             .style("z-index", 1000);
 
           let layer = GetLayerBySampleContextId(d.siteId);
@@ -242,7 +244,7 @@ function updateGraph(siteAggregates) {
           d3.select(this.parentNode.parentNode)
             .selectAll("#" + "_" + d.siteId)
             .transition()
-            .attr("r", inactiveCircleRadius)
+            .attr("r", plotConfig.inactiveCircleRadius)
             .duration(250);
           tooltip
             .transition()
