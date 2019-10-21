@@ -1,6 +1,13 @@
 import { exportAllDeclaration } from "@babel/types";
 import { isContext } from "vm";
 
+// TODO: Add tests for shepherd tutorial - requires adding data-cy classes to buttons for targeting.
+// describe("Shepherd tour ends correctly", function () {
+//   it("Ends when requested", function () {
+//     cy.visit("/"); 
+//   })
+// })
+
 describe("The toggle button", function() {
   it("successfully toggles chart", function() {
     cy.visit("/"); // change URL to match your dev URL
@@ -108,7 +115,7 @@ describe("Grid layer + Circle Plot Interaction", function() {
 
   it("Grid cell hover should expand related plot circles", function() {
     // cy.get(".leaflet-control-layers-overlays input:first").click();
-    cy.get("#graph-button").click();
+    cy.get("#graph-button").click({ force: true });
     cy.get(".leaflet-interactive:first").trigger("mouseover", { force: true });
     cy.wait(300);
     cy.get('circle[r="14"]');
@@ -140,9 +147,9 @@ context("Segmented OTU selects", () => {
 
   beforeEach(() => {
     cy.visit("/");
-    cy.get('a[data-cy="search-tab"]').click();
-    // cy.get('a[data-cy="search-tab"]').click();
-    // cy.get('.leaflet-sidebar-tabs a[data-cy="search-tab]"').click();
+    cy.get('a[data-cy="sidebar-tab-search"]').click();
+    // cy.get('a[data-cy="sidebar-tab-search"]').click();
+    // cy.get('.leaflet-sidebar-tabs a[data-cy="sidebar-tab-search"').click();
   });
 
   it("otu segmented selects working", () => {
@@ -235,11 +242,11 @@ context("Segmented OTU selects", () => {
 describe("Contextual query builder", () => {
   before(() => {
     cy.visit("/");
-    cy.get('a[data-cy="search-tab"]').click();
+    cy.get('a[data-cy="sidebar-tab-search"]').click();
   });
 
   it("Should create new contextual filter and add it to the filter list.", () => {
-    cy.get('select[data-cy="context-field-select"').select("elevation");
+    cy.get('select[data-cy="context-field-select"').select("elevation", {force: true});
     cy.get('input[data-cy="context-input"]').type("100");
     cy.get('button[data-cy="add-context-btn"]').click();
     cy.get("#combinationSelectWrapper").contains("elevationgt100");

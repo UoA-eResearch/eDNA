@@ -1,7 +1,6 @@
-// import s
 import * as $ from "jquery";
+import "../js/select2.min.js";
 import { API_URLS } from "./constants";
-import { Utility } from "./utility";
 
 /**
  * Iterates through the elements that are used as bases for select2 construction

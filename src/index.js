@@ -1,11 +1,9 @@
 import "./custom.scss";
 import * as L from "leaflet";
-import * as d3 from "d3";
 import $ from "jquery";
 import "../js/leaflet.heat";
 import "../js/leaflet-slider";
 import "leaflet-sidebar-v2";
-import select2 from "../js/select2.min.js";
 import "../js/L.Control.Range";
 import { updateGraph, initPlotChart, updatePlotCircleColours } from "./plot";
 import { API_URLS } from "./constants";
@@ -21,10 +19,7 @@ import {
   aggregateSamplesByCell
 } from "./aggregation";
 import { addClasses } from "./utility";
-
 import { CreateTour } from "./tutorial";
-
-CreateTour();
 
 window.circles = [];
 window.contextTags = [];
@@ -787,6 +782,7 @@ export const { g, y, tooltip, x } = initPlotChart();
 
 // Adding functions to elements -----------------------------------------
 window.onload = () => {
+  CreateTour();
   initializeComponents();
 };
 export { detailLevel, map, GetLayerBySampleContextId };
