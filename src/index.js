@@ -12,9 +12,7 @@ import { API_URLS } from "./constants";
 import { renderHeatLayer, featureCollectionToLayer } from "./map";
 import {
   initAllTaxonomicSelects,
-  initOtuSelect,
   initCombinationSelect,
-  initContextSelect,
   ContextFieldSelect,
   ContextValueSelect
 } from "./selects";

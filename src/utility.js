@@ -25,4 +25,4 @@ const addClasses = (elem, classes) => {
   });
 };
 
-export { strongLine, strongHeader, Utility, addClasses };
+export { strongLine, strongHeader, addClasses };
