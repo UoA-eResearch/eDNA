@@ -148,6 +148,13 @@ function handleGridLayerMouseOut(e) {
   });
 }
 
+  declare global {
+    interface Window {
+      otuLookup: any;
+      sampleContextLookup: any;
+    }
+  }
+
 /**
  * Finds the otu ids for which there is no name text from a layer, requests the text, returns the popup content
  * @param {grid layer rectangle} layer
@@ -245,6 +252,6 @@ function disableHighlightLayer(layer) {
   //console.log(properties);
   layer.setStyle({
     weight: 1,
-    opacity: getOutlineOpacity(properties.hasSamples)
+    opacity: getOutlineOpacity()
   });
 }
