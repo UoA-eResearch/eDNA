@@ -141,23 +141,23 @@ export const CreateTour = () => {
   tour.start();
 };
 
-const addTop = (tour, text, element) => {
-  quickAdd(tour, text, element, "top");
+const addTop = (tour, text, elementId: string) => {
+  quickAdd(tour, text, elementId, "top");
 };
 
-const addBottom = (tour, text, element) => {
-  quickAdd(tour, text, element, "bottom");
+const addBottom = (tour, text, elementId: string) => {
+  quickAdd(tour, text, elementId, "bottom");
 };
 
-const addRight = (tour, text: string, element) => {
-  quickAdd(tour, text, element, "right");
+const addRight = (tour, text: string, elementId: string) => {
+  quickAdd(tour, text, elementId, "right");
 };
 
-const quickAdd = (tour, text:string, element, addPosition='bottom') => {
+const quickAdd = (tour, text:string, elementId: string, addPosition='bottom') => {
   tour.addStep("example-step", {
     text: text,
     attachTo: {
-      element: element,
+      element: elementId,
       on: "bottom"
     },
     classes: "example-step-extra-class",

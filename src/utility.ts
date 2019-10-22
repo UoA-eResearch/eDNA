@@ -1,7 +1,7 @@
 /**
  * Simple helper to wrap contents in strong tags followed by a line break.
  */
-const strongLine = (s: string) => {
+const strongLine = (s: string): string => {
   return `<strong>${s}</strong><br />`;
 };
 
@@ -10,7 +10,7 @@ const strongLine = (s: string) => {
  * @param {*} header Header text
  * @param {*} text Regular text
  */
-const strongHeader = (header:string, text: string) => {
+const strongHeader = (header:string, text: string): string => {
   return `<strong>${header}: </strong>${text}<br />`;
 };
 
@@ -19,7 +19,7 @@ const strongHeader = (header:string, text: string) => {
  * @param {*} elem Dom element
  * @param {*} classes String of classes to add delimited with spaces
  */
-const addClasses = (elem, classes: string) => {
+const addClasses= (elem: Element, classes: string) : void => {
   classes.split(" ").forEach(clas => {
     elem.classList.add(clas);
   });

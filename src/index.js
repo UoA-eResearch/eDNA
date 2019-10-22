@@ -129,7 +129,7 @@ function calculateSampleOtuData(responseData) {
     window.sampleContextLookup[sampleContext.id] = sampleContext;
   }
   let siteAggregatedData = aggregateSampleOtusBySite(sampleOtus);
-  renderHeatLayer(siteAggregatedData, heatLayerGroup, map);
+  renderHeatLayer(siteAggregatedData, heatLayerGroup, window.sampleContextLookup);
   let cellAggregatedData = aggregateSamplesByCell(
     siteAggregatedData,
     sampleContexts

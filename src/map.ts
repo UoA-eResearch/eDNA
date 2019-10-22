@@ -4,11 +4,20 @@ import * as d3 from "d3";
 import { strongHeader, strongLine } from "./utility";
 import { plotConfig } from "./plot";
 
-export function renderHeatLayer(siteAggs, heatLayerGroup, map) {
+export {
+  renderHeatLayer,
+  highlightLayer,
+  featureCollectionToLayer,
+  getOutlineOpacity,
+  disableHighlightLayer,
+
+}
+
+function renderHeatLayer(siteAggs, heatLayerGroup, sampleContextLookup) {
   let heatData = [];
   let maxWeight = 0;
   for (let siteId in siteAggs) {
-    let siteMeta = window.sampleContextLookup[siteId];
+    let siteMeta = sampleContextLookup[siteId];
     let siteWeight = siteAggs[siteId].abundance;
     if (maxWeight < siteWeight) {
       maxWeight = siteWeight;
@@ -26,7 +35,7 @@ export function renderHeatLayer(siteAggs, heatLayerGroup, map) {
   return heatLayer;
 }
 
-export function highlightLayer(layer) {
+function highlightLayer(layer) {
   layer.setStyle({
     weight: 5,
     opacity: 0.9
@@ -36,7 +45,7 @@ export function highlightLayer(layer) {
   }
 }
 
-export function featureCollectionToLayer(
+function featureCollectionToLayer(
   featureCollection,
   property,
   layerGroup
@@ -222,7 +231,7 @@ function makePopupContent(properties, jsonResponse = null) {
 /**
  * centralised place to store value
  */
-export function getOutlineOpacity() {
+function getOutlineOpacity(): number {
   return 0.15;
 }
 
@@ -231,7 +240,7 @@ export function getOutlineOpacity() {
  * Values are hardcoded due to geojson.reset() not working as planned.
  * @param {*} layer
  */
-export function disableHighlightLayer(layer) {
+function disableHighlightLayer(layer) {
   var properties = layer.feature.properties;
   //console.log(properties);
   layer.setStyle({

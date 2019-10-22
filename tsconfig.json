@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./docs/js/",
+    "lib": ["dom"],
     "noImplicitAny": false,
     "module": "es6",
     "moduleResolution": "node",
