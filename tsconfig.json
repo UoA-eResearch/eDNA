@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "outDir": "./docs/js/",
+    "noImplicitAny": false,
+    "module": "es6",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "target": "es5",
+    "jsx": "react",
+    "allowJs": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
