@@ -11,6 +11,9 @@ module.exports = {
     filename: "main.js",
     path: path.resolve(__dirname, "docs")
   },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
+  },
   module: {
     rules: [
       {
@@ -21,6 +24,12 @@ module.exports = {
       {
         test: /\.css$/,
         use: ["style-loader", "css-loader"]
+      },
+
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: '/node_modules/'
       }
     ]
   }
