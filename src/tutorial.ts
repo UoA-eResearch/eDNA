@@ -149,11 +149,11 @@ const addBottom = (tour, text, element) => {
   quickAdd(tour, text, element, "bottom");
 };
 
-const addRight = (tour, text: String, element:String) => {
+const addRight = (tour, text: string, element) => {
   quickAdd(tour, text, element, "right");
 };
 
-const quickAdd = (tour, text:String, element, addPosition='bottom') => {
+const quickAdd = (tour, text:string, element, addPosition='bottom') => {
   tour.addStep("example-step", {
     text: text,
     attachTo: {
