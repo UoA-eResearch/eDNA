@@ -148,12 +148,12 @@ function handleGridLayerMouseOut(e) {
   });
 }
 
-  declare global {
-    interface Window {
-      otuLookup: any;
-      sampleContextLookup: any;
-    }
-  }
+  // declare global {
+  //   interface Window {
+  //     otuLookup: any;
+  //     sampleContextLookup: any;
+  //   }
+  // }
 
 /**
  * Finds the otu ids for which there is no name text from a layer, requests the text, returns the popup content
