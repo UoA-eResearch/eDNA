@@ -166,19 +166,25 @@
         </button>
 
 
-            <div id="rarity">
-              Rare organisms only
-              <input id="rarity-checkbox" type="checkbox" name="endemic only" value="true" />
-            </div>
+        <h2 id="additional-selects" class="search search__section-title">Additional Filters</h2>
+        <div id="rarity-checkbox-container">
+          <label class="label" for="rarity-checkbox">Rare organisms</label>
+          <input id="rarity-checkbox" type="checkbox" name="endemic only" value="true" />
+        </div>
 
+        <div class="operator-wrapper">
+          <label class="label" for="select-operator">Filter operator</label>
           <select id="select-operator" class="search">
             <option value="or">OR</option>
             <option value="and" selected="selected">AND</option>
           </select>
-          <div id="amplicon-wrapper" class="search">
-            <select id="select-amplicon" multiple="multiple"> </select>
-            <br />
-          </div>
+        </div>
+
+        <div id="amplicon-wrapper" class="search">
+          Amplicon
+          <select id="select-amplicon" multiple="multiple"> </select>
+          <br />
+        </div>
 
         <button id="submit-search" title="Request data with all search parameters" data-cy="submit-search-btn"
           class="search button button--special">
