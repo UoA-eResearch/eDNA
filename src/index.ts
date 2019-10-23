@@ -513,14 +513,9 @@ leafletGraphControl.onAdd = function() {
     { value: "biome_t2", text: "Biome Tier 2" },
     { value: "environmental_feature_t2", text: "Environmental Feature Tier 2" }
   ];
-
   metaOptions.forEach(option => {
-    let optionElement = document.createElement("option");
-    optionElement.value = option.value;
-    optionElement.innerHTML = option.text;
-    colorBySelect.appendChild(optionElement);
+    colorBySelect.options.add(new Option(option.text, option.value));
   });
-
   colorByLabel.appendChild(colorBySelect);
 
   // select 2
@@ -536,14 +531,9 @@ leafletGraphControl.onAdd = function() {
     { value: "sequential", text: "Sequential" },
     { value: "diverging", text: "Diverging" }
   ];
-
   colorSchemeOptions.forEach(option => {
-    let optionElement = document.createElement("option");
-    optionElement.value = option.value;
-    optionElement.innerHTML = option.text;
-    colourSchemeSelect.appendChild(optionElement);
+    colourSchemeSelect.options.add(new Option(option.text, option.value));
   });
-
   colorTypeLabel.appendChild(colourSchemeSelect);
 
   return plotContainer;
@@ -691,12 +681,12 @@ const initSubmitContextButton = () => {
   let submitContextBtn = document.getElementById("add-context-btn");
 
   submitContextBtn.onclick = () => {
-    let contextInput = document.getElementById("context-values-select");
+    let contextInput = document.getElementById("context-values-select") as HTMLInputElement;
     if (contextInput.value) {
-      let contextFieldSelect = document.getElementById("context-field-select");
+      let contextFieldSelect = document.getElementById("context-field-select") as HTMLInputElement;
       let contextOperatorSelect = document.getElementById(
         "context-operator-select"
-      );
+      ) as HTMLInputElement;
 
       let contextFilterText =
         contextFieldSelect.value +
@@ -715,9 +705,7 @@ const initSubmitContextButton = () => {
         $("#combinationSelect").find("option[value='" + contextFilterId + "']")
           .length
       ) {
-        // alert("Filter is already in the filter list");
         console.log("selecting existing option");
-
         $("#combinationSelect").val(contextFilterId);
         $("#combinationSelect").trigger("change");
       } else {
@@ -733,10 +721,8 @@ const initSubmitContextButton = () => {
           .append(newOption)
           .trigger("change");
       }
-      // WIP: get the values and concatenate then add them to the main query constructor. Could either group them or do something like that
     } else {
-      console.log("empty input field");
-      alert("Nothing entered in the input field");
+      console.log("Empty context input field");
     }
   };
 };
