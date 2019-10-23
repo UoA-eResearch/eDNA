@@ -68,14 +68,6 @@
           <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
         </h1>
         <div class="search" id="filterWrapper">
-          <select id="select-operator" class="search">
-            <option value="or">OR</option>
-            <option value="and" selected="selected">AND</option>
-          </select>
-          <div id="amplicon-wrapper" class="search">
-            <select id="select-amplicon" multiple="multiple"> </select>
-            <br />
-          </div>
           <div class="search">
             <br />
             <button id="search-button" class="button">Search</button>
@@ -178,6 +170,15 @@
               Rare organisms only
               <input id="rarity-checkbox" type="checkbox" name="endemic only" value="true" />
             </div>
+
+          <select id="select-operator" class="search">
+            <option value="or">OR</option>
+            <option value="and" selected="selected">AND</option>
+          </select>
+          <div id="amplicon-wrapper" class="search">
+            <select id="select-amplicon" multiple="multiple"> </select>
+            <br />
+          </div>
 
         <button id="submit-search" title="Request data with all search parameters" data-cy="submit-search-btn"
           class="search button button--special">
