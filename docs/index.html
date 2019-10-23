@@ -1,316 +1,203 @@
 <html>
-  <head>
-    <title>eDNA Virtual Hub</title>
-    <meta
-      name="description"
-      content="An interactive map of eDNA recorded in New Zealand"
-    />
-    <link rel="stylesheet" href="./css/leaflet-slider.css" />
-    <link rel="stylesheet" href="./css/L.Control.Range.css" />
-    <link rel="stylesheet" href="./css/leaflet.css" />
-    <link rel="stylesheet" href="./css/leaflet.fullscreen.css" />
-    <link rel="stylesheet" href="./css/select2.min.css" />
-    <link rel="stylesheet" href="./css/leaflet-sidebar.min.css" />
 
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
+<head>
+  <title>eDNA Virtual Hub</title>
+  <meta name="description" content="An interactive map of eDNA recorded in New Zealand" />
+  <link rel="stylesheet" href="./css/leaflet-slider.css" />
+  <link rel="stylesheet" href="./css/L.Control.Range.css" />
+  <link rel="stylesheet" href="./css/leaflet.css" />
+  <link rel="stylesheet" href="./css/leaflet.fullscreen.css" />
+  <link rel="stylesheet" href="./css/select2.min.css" />
+  <link rel="stylesheet" href="./css/leaflet-sidebar.min.css" />
 
-      gtag("config", "UA-77710107-5");
-    </script>
-  </head>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+    gtag("js", new Date());
 
-  <body>
-    <div id="sidebar" class="leaflet-sidebar collapsed">
-      <!-- nav tabs -->
-      <div class="leaflet-sidebar-tabs">
-        <!-- top aligned tabs -->
-        <ul role="tablist">
-          <li id="autopan">
-            <a href="#autopan" data-cy="sidebar-tab-menu" role="tab"
-              ><svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="feather feather-menu sidebar__icon"
-              >
-                <path d="M3 12h18M3 6h18M3 18h18" /></svg
-            ></a>
-          </li>
-          <li id="search-tab">
-            <a class="sidebar__link" href="#search2" data-cy="sidebar-tab-search" role="tab"
-              ><svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="feather feather-search sidebar__icon"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" /></svg
-            ></a>
-          </li>
-          <li>
-            <a href="#home" role="tab">Info</a>
-          </li>
-        </ul>
+    gtag("config", "UA-77710107-5");
+  </script>
+</head>
 
-        <!-- bottom aligned tabs -->
-        <ul role="tablist">
-          <li>
-            <a class="sidebar__link" href="https://github.com/UoA-eResearch/eDNA"
-              ><svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="feather feather-github sidebar__icon"
-              >
-                <path
-                  d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
-                ></path></svg
-            ></a>
-          </li>
-        </ul>
-      </div>
+<body>
+  <div id="sidebar" class="leaflet-sidebar collapsed">
+    <!-- nav tabs -->
+    <div class="leaflet-sidebar-tabs">
+      <!-- top aligned tabs -->
+      <ul role="tablist">
+        <li id="autopan">
+          <a href="#autopan" data-cy="sidebar-tab-menu" role="tab"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+              height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" class="feather feather-menu sidebar__icon">
+              <path d="M3 12h18M3 6h18M3 18h18" /></svg></a>
+        </li>
+        <li id="search-tab">
+          <a class="sidebar__link" href="#search2" data-cy="sidebar-tab-search" role="tab"><svg
+              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="feather feather-search sidebar__icon">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" /></svg></a>
+        </li>
+        <li>
+          <a href="#home" role="tab">Info</a>
+        </li>
+      </ul>
 
-      <!-- panel content -->
-      <div class="leaflet-sidebar-content">
-        <div class="leaflet-sidebar-pane" id="home">
-          <h1 class="leaflet-sidebar-header">
-            Search Filters
-            <span class="leaflet-sidebar-close"
-              ><i class="fa fa-caret-left"></i
-            ></span>
-          </h1>
-          <div class="search" id="filterWrapper">
-            <select id="select-operator" class="search">
-              <option value="or">OR</option>
-              <option value="and" selected="selected">AND</option>
-            </select>
-            <div id="amplicon-wrapper" class="search">
-              <select id="select-amplicon" multiple="multiple"> </select>
-              <br />
-            </div>
-            <div class="search">
-              Rare organisms only
-              <input
-                id="rarity-checkbox"
-                type="checkbox"
-                name="endemic only"
-                value="true"
-              />
-              <br />
-              <button id="search-button" class="button">Search</button>
-              <br />
-            </div>
+      <!-- bottom aligned tabs -->
+      <ul role="tablist">
+        <li>
+          <a class="sidebar__link" href="https://github.com/UoA-eResearch/eDNA"><svg xmlns="http://www.w3.org/2000/svg"
+              width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" class="feather feather-github sidebar__icon">
+              <path
+                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+              </path>
+            </svg></a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- panel content -->
+    <div class="leaflet-sidebar-content">
+      <div class="leaflet-sidebar-pane" id="home">
+        <h1 class="leaflet-sidebar-header">
+          Search Filters
+          <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+        </h1>
+        <div class="search" id="filterWrapper">
+          <select id="select-operator" class="search">
+            <option value="or">OR</option>
+            <option value="and" selected="selected">AND</option>
+          </select>
+          <div id="amplicon-wrapper" class="search">
+            <select id="select-amplicon" multiple="multiple"> </select>
+            <br />
+          </div>
+          <div class="search">
+            <br />
+            <button id="search-button" class="button">Search</button>
+            <br />
           </div>
         </div>
+      </div>
 
-        <div class="leaflet-sidebar-pane" id="autopan">
-          <h1 class="leaflet-sidebar-header">
-            Circle Plot
-            <span class="leaflet-sidebar-close"
-              ><i class="fa fa-caret-left"></i
-            ></span>
-          </h1>
-        </div>
+      <div class="leaflet-sidebar-pane" id="autopan">
+        <h1 class="leaflet-sidebar-header">
+          Circle Plot
+          <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+        </h1>
+      </div>
 
-        <div class="leaflet-sidebar-pane" id="search2">
-          <h1>
-            eDNA Search Filters
-            <span class="leaflet-sidebar-close"
-              ><i class="fa fa-caret-left"></i
-            ></span>
-          </h1>
-          <div id="taxonomic-search" class="search search__container">
-            <div id="combinationSelectWrapper">
-              <label class="label" for="combinationSelect"
-                >All Active Filters
-                <select
-                  name="combinationSelect"
-                  id="combinationSelect"
-                  class="search search__select"
-                ></select>
-              </label>
-            </div>
+      <div class="leaflet-sidebar-pane" id="search2">
+        <h1>
+          eDNA Search Filters
+          <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+        </h1>
+        <div id="taxonomic-search" class="search search__container">
+          <div id="combinationSelectWrapper">
+            <label class="label" for="combinationSelect">All Active Filters
+              <select name="combinationSelect" id="combinationSelect" class="search search__select"></select>
+            </label>
+          </div>
           <h2 id="taxonomic-search-title" class="search search__section-title">Taxonomic Filter</h2>
-            <div id="kingdomSelectWrapper" class="search search__select">
-              <label class="label" for="kingdomSelect"
-                >Kingdom
-                <select
-                  name="kingdomSelect"
-                  id="kingdomSelect"
-                  class="search taxonomic-select"
-                  data-cy="kingdomSelect"
-                ></select>
-              </label>
-            </div>
-            <div id="phylumSelectWrapper" class="search search__select">
-              <label class="label" for="phylumSelect"
-                >Phylum
-                <select
-                  name="phylumSelect"
-                  id="phylumSelect"
-                  class="search taxonomic-select"
-                ></select>
-              </label>
-            </div>
-            <div id="classSelectWrapper" class="search search__select">
-              <label class="label" for="classSelect"
-                >Class
-                <select
-                  name="classSelect"
-                  id="classSelect"
-                  class="search taxonomic-select"
-                ></select>
-              </label>
-            </div>
-            <div id="orderSelectWrapper" class="search search__select">
-              <label class="label" for="orderSelect"
-                >Order
-                <select
-                  name="orderSelect"
-                  id="orderSelect"
-                  class="search taxonomic-select"
-                ></select>
-              </label>
-            </div>
-            <div id="familySelectWrapper" class="search search__select">
-              <label class="label" for="familySelect"
-                >Family
-                <select
-                  name="familySelect"
-                  id="familySelect"
-                  class="search taxonomic-select"
-                ></select>
-              </label>
-            </div>
-            <div id="genusSelectWrapper" class="search search__select">
-              <label class="label" for="genusSelect"
-                >Genus
-                <select
-                  name="genusSelect"
-                  id="genusSelect"
-                  class="search taxonomic-select"
-                ></select>
-              </label>
-            </div>
-            <div id="speciesSelectWrapper" class="search search__select">
-              <label class="label" for="speciesSelect"
-                >Species
-                <select
-                  name="speciesSelect"
-                  id="speciesSelect"
-                  class="search taxonomic-select"
-                ></select>
-              </label>
-            </div>
-          </div>
-          <button
-            id="add-otu-button"
-            class="search button"
-            title="Add current OTU to your query set."
-            data-cy="add-otu-btn"
-          >
-            Add taxon filter
-          </button>
-          <button
-            id="selectClearAll"
-            class="search button"
-            title="Clear current taxonomic selection"
-            data-cy="clear-btn"
-          >
-            Clear
-          </button>
-
-          <h2 id="contextual-selects" class="search search__section-title">Metadata Filter</h2>
-          <div class="contextual-select-container">
-            <label class="label" for="context-field-select"
-              >Metadata field
-              <select
-                name="contextual field select"
-                id="context-field-select"
-                class="search search__select"
-                data-cy="context-field-select"
-              >
-                <option value="" disabled selected
-                  >Select a contextual field...</option
-                >
-              </select>
-            </label>
-            <label class="label" for="context-operator-select"
-              >Filter type
-              <select
-                name="context operator select"
-                id="context-operator-select"
-                class="search search__select"
-              >
-                <option value="gt">greater than</option>
-                <option value="eq">equal to</option>
-                <option value="lt">less than</option>
-              </select>
-            </label>
-            <label class="label" for="context-values-select"
-              >Context field value
-              <select
-                name="context values select"
-                id="context-values-select"
-                class="search search__select"
-              >
-              </select>
+          <div id="kingdomSelectWrapper" class="search search__select">
+            <label class="label" for="kingdomSelect">Kingdom
+              <select name="kingdomSelect" id="kingdomSelect" class="search taxonomic-select"
+                data-cy="kingdomSelect"></select>
             </label>
           </div>
+          <div id="phylumSelectWrapper" class="search search__select">
+            <label class="label" for="phylumSelect">Phylum
+              <select name="phylumSelect" id="phylumSelect" class="search taxonomic-select"></select>
+            </label>
+          </div>
+          <div id="classSelectWrapper" class="search search__select">
+            <label class="label" for="classSelect">Class
+              <select name="classSelect" id="classSelect" class="search taxonomic-select"></select>
+            </label>
+          </div>
+          <div id="orderSelectWrapper" class="search search__select">
+            <label class="label" for="orderSelect">Order
+              <select name="orderSelect" id="orderSelect" class="search taxonomic-select"></select>
+            </label>
+          </div>
+          <div id="familySelectWrapper" class="search search__select">
+            <label class="label" for="familySelect">Family
+              <select name="familySelect" id="familySelect" class="search taxonomic-select"></select>
+            </label>
+          </div>
+          <div id="genusSelectWrapper" class="search search__select">
+            <label class="label" for="genusSelect">Genus
+              <select name="genusSelect" id="genusSelect" class="search taxonomic-select"></select>
+            </label>
+          </div>
+          <div id="speciesSelectWrapper" class="search search__select">
+            <label class="label" for="speciesSelect">Species
+              <select name="speciesSelect" id="speciesSelect" class="search taxonomic-select"></select>
+            </label>
+          </div>
+        </div>
+        <button id="add-otu-button" class="search button" title="Add current OTU to your query set."
+          data-cy="add-otu-btn">
+          Add taxon filter
+        </button>
+        <button id="selectClearAll" class="search button" title="Clear current taxonomic selection" data-cy="clear-btn">
+          Clear
+        </button>
 
-          <button
-            id="add-context-btn"
-            class="search button"
-            data-cy="add-context-btn"
-          >
-            Add context filter
-          </button>
-
-          <button
-            id="submit-search"
-            title="Request data with all search parameters"
-            data-cy="submit-search-btn"
-            class="search button button--special"
-          >
-            Search for OTUs
-          </button>
-          <span id="numberResults" class="search search__span"></span> points
+        <h2 id="contextual-selects" class="search search__section-title">Metadata Filter</h2>
+        <div class="contextual-select-container">
+          <label class="label" for="context-field-select">Metadata field
+            <select name="contextual field select" id="context-field-select" class="search search__select"
+              data-cy="context-field-select">
+              <option value="" disabled selected>Select a contextual field...</option>
+            </select>
+          </label>
+          <label class="label" for="context-operator-select">Filter type
+            <select name="context operator select" id="context-operator-select" class="search search__select">
+              <option value="gt">greater than</option>
+              <option value="eq">equal to</option>
+              <option value="lt">less than</option>
+            </select>
+          </label>
+          <label class="label" for="context-values-select">Context field value
+            <select name="context values select" id="context-values-select" class="search search__select">
+            </select>
+          </label>
         </div>
 
-        <div class="leaflet-sidebar-pane" id="messages">
-          <h1 class="leaflet-sidebar-header">
-            Messages<span class="leaflet-sidebar-close"
-              ><i class="fa fa-caret-left"></i
-            ></span>
-          </h1>
-        </div>
+        <button id="add-context-btn" class="search button" data-cy="add-context-btn">
+          Add context filter
+        </button>
+
+
+            <div id="rarity">
+              Rare organisms only
+              <input id="rarity-checkbox" type="checkbox" name="endemic only" value="true" />
+            </div>
+
+        <button id="submit-search" title="Request data with all search parameters" data-cy="submit-search-btn"
+          class="search button button--special">
+          Search for OTUs
+        </button>
+        <span id="numberResults" class="search search__span"></span> points
+      </div>
+
+      <div class="leaflet-sidebar-pane" id="messages">
+        <h1 class="leaflet-sidebar-header">
+          Messages<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+        </h1>
       </div>
     </div>
-    <div id="map" class="map"></div>
-    <div id="loading-popup" class="map-popup--hidden info">
-      <h2>Loading...</h2>
-    </div>
-    <script src="main.js"></script>
-  </body>
+  </div>
+  <div id="map" class="map"></div>
+  <div id="loading-popup" class="map-popup--hidden info">
+    <h2>Loading...</h2>
+  </div>
+  <script src="main.js"></script>
+</body>
+
 </html>
