@@ -215,6 +215,15 @@ div>.leaflet-sidebar-tabs>ul>li>a {
   // justify-content: center;
 }
 
-.leaflet-sidebar-close svg {
+.sidebar-close__svg {
   display: flex;
+}
+
+.leaflet-sidebar-header {
+  background-color: $primary-green;
+}
+
+// override leaflet styling
+.leaflet-sidebar-tabs > ul > li.sidebar-tab.active {
+  background-color: $primary-green;
 }
