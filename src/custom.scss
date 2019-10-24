@@ -203,3 +203,13 @@ div>.leaflet-sidebar-tabs>ul>li>a {
   width: 100%;
   height: 100%;
 }
+
+.leaflet-sidebar-close {
+  display: flex;
+  align-items: center;
+  // justify-content: center;
+}
+
+.leaflet-sidebar-close svg {
+  display: flex;
+}
