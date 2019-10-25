@@ -92,7 +92,7 @@
         <div id="taxonomic-search" class="search search__container">
 
           <div id="combinationSelectWrapper" class="search">
-            <label class="label search__label" for="combinationSelect">All Active Filters
+            <label class="label search__label" for="combinationSelect"><abbr title="All the filters that will be used for the next search request">All Active Filters</abbr>
               <select name="combinationSelect" id="combinationSelect" class="search search__select"></select>
             </label>
           </div>
@@ -171,12 +171,12 @@
 
         <h2 id="additional-selects" class="search search__section-title">Additional Filters</h2>
         <div id="rarity-checkbox-container">
-          <label class="label" for="rarity-checkbox">Rare organisms</label>
+          <label class="label" for="rarity-checkbox"><abbr title="Only show organisms in less than 1% of the sites">Rare organisms</abbr></label>
           <input id="rarity-checkbox" type="checkbox" name="endemic only" value="true" />
         </div>
 
         <div class="operator-wrapper">
-          <label class="label" for="select-operator">Filter operator</label>
+          <label class="label" for="select-operator"><abbr title="How to apply multiple filters together">Filter operator</abbr></label>
           <select id="select-operator" class="search">
             <option value="or">OR</option>
             <option value="and" selected="selected">AND</option>
@@ -184,7 +184,7 @@
         </div>
 
         <div id="amplicon-wrapper" class="search">
-          Amplicon
+          <abbr title="The amplicon used for the sample">Amplicon</abbr>
           <select id="select-amplicon" multiple="multiple"> </select>
           <br />
         </div>
