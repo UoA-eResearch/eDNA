@@ -228,6 +228,7 @@ div>.leaflet-sidebar-tabs>ul>li>a {
   background-color: $primary-green;
 }
 
-abbr[title] {
-  text-decoration: none;
-}
+// For removing tool tip underlines (the abbr tag)
+// abbr[title] {
+//   text-decoration: none;
+// }
