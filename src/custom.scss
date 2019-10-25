@@ -227,3 +227,7 @@ div>.leaflet-sidebar-tabs>ul>li>a {
 .leaflet-sidebar-tabs > ul > li.sidebar-tab.active {
   background-color: $primary-green;
 }
+
+abbr[title] {
+  text-decoration: none;
+}
