@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
   mode: "development",
-  entry: "./src/index.ts",
+  entry: "./src/index.tsx",
   devtool: "inline-source-map",
   devServer: {
     contentBase: "./docs"

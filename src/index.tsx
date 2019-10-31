@@ -21,6 +21,9 @@ import {
 import { addClasses } from "./utility";
 import { CreateTour } from "./tutorial";
 
+import * as React from "react";
+import * as ReactDOM from 'react-dom';
+
 declare global {
   interface Window {
     otuLookup: any;
@@ -37,6 +40,12 @@ window.contextTags = [];
 window.siteAggregates = {};
 window.otuLookup = {};
 window.sampleContextLookup = {};
+
+let idk = <h1>test jsx</h1>;
+ReactDOM.render(idk, document.getElementById("taxonomic-search-title"));
+
+ReactDOM.render(idk, document.getElementById("contextual-selects"));
+
 
 /**
  * generates the request URL and calls recalculating data functions when data is received.
