@@ -74,12 +74,14 @@ export function createAggregateUrl() {
     }
   }
 
-  // test
-  if (document.getElementById("rarity-checkbox").checked) {
+  // TODO: could use cleaning.
+  let rarityCheckbox = document.getElementById("rarity-checkbox") as HTMLInputElement;
+  if (rarityCheckbox.checked) {
     url += "&endemic=true";
   } else {
   }
-  if (document.getElementById("select-operator").value == "or") {
+  const selectOperator = document.getElementById("select-operator") as HTMLInputElement;
+  if (selectOperator.value == "or") {
     url += "&operator=union";
   } else {
     url += "&operator=intersection";
@@ -434,8 +436,8 @@ function initializeDisplayOptionsControls() {
   });
   gridResInput.onAdd = map => {
     let _div = L.DomUtil.create("div", "info");
-    _div.innerHTML =
-      '<label for="grid-input">Grid Resolution: </label><input id="grid-input" placeholder="Type value" type="number" />';
+    let gridResolutionJsx = <label htmlFor="grid-input">Grid Resolution: <input id="grid-input" placeholder="Type value"  type="number"/></label>
+    ReactDOM.render(gridResolutionJsx, _div);
     _div.onchange = event => {
       let value = event.srcElement.value;
       handleGridResInputChange(value, gridResSlider);
