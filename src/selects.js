@@ -10,7 +10,8 @@ const initAllTaxonomicSelects = () => {
 
   for (let taxonSelect of taxonSelects) {
     // TODO: create wrapper with cy-data attribute for testing as select2 creates element as sibling not child.
-    $("#" + taxonSelect.id).select2({
+    let taxonIdSelector = "#" + taxonSelect.id;
+    $(taxonIdSelector).select2({
       placeholder: taxonSelect.id,
       allowClear: true,
       width: "100%",
@@ -24,12 +25,20 @@ const initAllTaxonomicSelects = () => {
         delay: 250,
         data: () => {
           let args = [];
+          // iterating through taxon selects, adding them as url params
           for (let item of taxonSelects) {
             // console.log(item.value);
             args.push(item.id.replace("Select", "=") + item.value);
           }
-          console.log(args.join("&"));
-          return args.join("&");
+          let requestUrl = args.join("&");
+          
+          let selectContainers = document.getElementsByClassName("select2-search--dropdown");
+          let text = selectContainers[0].childNodes[0].value;
+
+          // adding if text in the search to filter on back end
+          text ? requestUrl += "&text=" + text : false;
+          console.log(requestUrl);
+          return requestUrl;
         },
         processResults: response => {
           // empty before repopulating options

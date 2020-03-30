@@ -511,7 +511,8 @@ leafletGraphControl.onAdd = function() {
     { value: "longitude", text: "Longitude" },
     { value: "latitude", text: "Latitude" },
     { value: "biome_t2", text: "Biome Tier 2" },
-    { value: "environmental_feature_t2", text: "Environmental Feature Tier 2" }
+    { value: "environmental_feature_t2", text: "Environmental Feature Tier 2" },
+    { value: "soil_type", text: "Soil Classification" }
   ];
   metaOptions.forEach(option => {
     colorBySelect.options.add(new Option(option.text, option.value));
