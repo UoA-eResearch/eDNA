@@ -102,6 +102,7 @@ function updateGraph(siteAggregates) {
   let colourRange = createContinuousColorRange(siteAggregates);
   assignBiomeColors(siteAggregates);
   assignRandomCategoricalColor("environmental_feature_t2");
+  assignRandomCategoricalColor("soil_type");
 
   updatePlotCircleColours();
 
@@ -375,6 +376,10 @@ function assignBiomeColors() {
   }
 }
 
+/**
+ * Assigns colours to attribute. One colour per distinct value
+ * @param {*} attr 
+ */
 function assignRandomCategoricalColor(attr) {
   // add property to sample contexts
   // just making sure no duplicates
@@ -469,6 +474,7 @@ function updatePlotCircleColours() {
     .attr("fill", function(d) {
       // TODO: this is duplicate code to when circles are first assigned colours, could be refactored
       let siteMeta = window.sampleContextLookup[d.siteId];
+      console.log(siteMeta);
       if (metric + "_colour" in siteMeta) {
         return d3.color(siteMeta[metric + "_colour"]);
       } else {
