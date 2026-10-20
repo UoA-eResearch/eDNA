@@ -5,6 +5,7 @@ import "../js/leaflet.heat";
 import "../js/leaflet-slider";
 import "leaflet-sidebar-v2";
 import "../js/L.Control.Range";
+import "../js/leaflet-maplibre-gl";
 import { updateGraph, initPlotChart, updatePlotCircleColours } from "./plot";
 import { API_URLS } from "./constants";
 import { renderHeatLayer, featureCollectionToLayer } from "./map";
@@ -298,16 +299,10 @@ function calculateSiteMetrics(siteAggregates) {
 }
 
 //generating the map
-const tileLayer = L.tileLayer(
-  "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
-  {
-    attribution:
-      '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-    subdomains: "abcd",
-    maxZoom: 19,
-    minZoom: 5.75
-  }
-);
+// OpenFreeMap vector basemap (free, no API key): https://openfreemap.org
+const tileLayer = L.maplibreGL({
+  style: "https://tiles.openfreemap.org/styles/positron"
+});
 
 const map = initMap();
 function initMap() {
@@ -315,6 +310,8 @@ function initMap() {
   let map = L.map("map", {
     zoomSnap: 0.25,
     zoomDelta: 0.25,
+    minZoom: 5.75,
+    maxZoom: 19,
     layers: tileLayer,
     fullscreenControl: true
   }).setView([-41.235726, 172.5118422], 5.75);

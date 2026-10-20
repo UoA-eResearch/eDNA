@@ -14,6 +14,10 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
+  externals: {
+    // loaded from a CDN in docs/index.html
+    "maplibre-gl": "maplibregl"
+  },
   module: {
     rules: [
       {
